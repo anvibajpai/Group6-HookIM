@@ -20,11 +20,9 @@ class CreateAccountViewController: UIViewController {
     let genders = ["Male", "Female", "Other"]
     var selectedGender: String?
 
-    //private var genderPicker: UIPickerView!
-
     override func viewDidLoad() {
         super.viewDidLoad()
-//        setupGenderPicker()
+        setupPasswordToggle(for: passwordTextField)
         let actions = genders.map { gender in
            UIAction(title: gender) { _ in
                self.selectedGender = gender
@@ -36,27 +34,6 @@ class CreateAccountViewController: UIViewController {
        genderButton.menu = UIMenu(title: "Select Gender", children: actions)
        genderButton.showsMenuAsPrimaryAction = true
     }
-
-//    func setupGenderPicker() {
-//        genderPicker = UIPickerView()
-//        genderPicker.delegate = self
-//        genderPicker.dataSource = self
-//    }
-
-//    @IBAction func genderButtonTapped(_ sender: Any) {
-//        print("gender tapped")
-//        let alert = UIAlertController(title: "Select Gender", message: nil, preferredStyle: .actionSheet)
-//
-//        for gender in genders {
-//            alert.addAction(UIAlertAction(title: gender, style: .default, handler: { _ in
-//                self.selectedGender = gender
-//                self.genderButton.setTitle(gender, for: .normal)
-//            }))
-//        }
-//
-//        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
-//        present(alert, animated: true)
-//    }
     
     @IBAction func nextButtonTapped(_ sender: Any) {
         print("next")
@@ -68,6 +45,16 @@ class CreateAccountViewController: UIViewController {
             showAlert(title: "Missing Fields", message: "Please complete all fields.")
             return
         }
+        
+        // email has to be ut associated
+        let validDomains = ["utexas.edu", "my.utexas.edu"]
+        let emailDomain = email.split(separator: "@").last?.lowercased() ?? ""
+        
+        guard validDomains.contains(where: { emailDomain == $0 }) else {
+            showAlert(title: "Invalid Email", message: "Please use your UTexas email address (e.g., name@utexas.edu).")
+            return
+        }
+        
         // Save a partial user to pass to next screen
         let user = User(firstName: first,
                         lastName: last,
@@ -87,8 +74,21 @@ class CreateAccountViewController: UIViewController {
         controller.addAction(UIAlertAction(title: "OK", style: .default))
         present(controller, animated: true)
     }
-    //  UIPickerView Delegates (not used currently)
-//    func numberOfComponents(in pickerView: UIPickerView) -> Int { 1 }
-//    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int { genders.count }
-//    func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? { genders[row] }
+    
+    @objc func togglePasswordVisibility(_ sender: UIButton) {
+        guard let textField = sender.superview as? UITextField ?? sender.superview?.superview as? UITextField else { return }
+        textField.isSecureTextEntry.toggle()
+        let imageName = textField.isSecureTextEntry ? "eye.slash" : "eye"
+        sender.setImage(UIImage(systemName: imageName), for: .normal)
+    }
+    
+    func setupPasswordToggle(for textField: UITextField) {
+        let toggleButton = UIButton(type: .custom)
+        toggleButton.setImage(UIImage(systemName: "eye.slash"), for: .normal)
+        toggleButton.tintColor = .gray
+        toggleButton.frame = CGRect(x: 0, y: 0, width: 30, height: 30)
+        toggleButton.addTarget(self, action: #selector(togglePasswordVisibility(_:)), for: .touchUpInside)
+        textField.rightView = toggleButton
+        textField.rightViewMode = .always
+    }
 }
