@@ -17,7 +17,7 @@ class SportsSelectionViewController: UIViewController {
     @IBOutlet weak var coedButton: UIButton!
 
     var user: User!  // User object passed from previous screen
-    private var allSports = ["Basketball", "Soccer", "Volleyball", "Softball", "Tennis", "Ultimate"]
+    private var allSports = ["Basketball", "Soccer", "Volleyball", "Softball", "Tennis", "Ultimate", "Pickleball"]
     private var selectedSports = Set<String>()
     private var selectedDivision: String?
 
@@ -31,11 +31,21 @@ class SportsSelectionViewController: UIViewController {
         loadExistingUserData()
         updateDivisionButtons()
     }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        tableView.contentInsetAdjustmentBehavior = .automatic
+        tableView.setNeedsLayout()
+        tableView.layoutIfNeeded()
+    }
 
     private func setupTable() {
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "sportCell")
         tableView.dataSource = self
         tableView.delegate = self
+        
+        tableView.isScrollEnabled = true
+        tableView.alwaysBounceVertical = true
     }
 
     private func loadExistingUserData() {
