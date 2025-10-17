@@ -22,6 +22,7 @@ class CreateAccountViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        navigationItem.title = "Hook 'IM"
         setupPasswordToggle(for: passwordTextField)
         let actions = genders.map { gender in
            UIAction(title: gender) { _ in
@@ -65,10 +66,9 @@ class CreateAccountViewController: UIViewController {
                         interestedSports: [],
                         division: nil,
                         isFreeAgent: false)
-        performSegue(withIdentifier: "uploadImageSegue", sender: nil)
+        performSegue(withIdentifier: "uploadImageSegue", sender: user)
     }
         
-
     func showAlert(title: String, message: String, actions: [UIAlertAction]? = nil) {
         let controller = UIAlertController(title: title, message: message, preferredStyle: .alert)
         controller.addAction(UIAlertAction(title: "OK", style: .default))
@@ -90,5 +90,13 @@ class CreateAccountViewController: UIViewController {
         toggleButton.addTarget(self, action: #selector(togglePasswordVisibility(_:)), for: .touchUpInside)
         textField.rightView = toggleButton
         textField.rightViewMode = .always
+    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "uploadImageSegue",
+           let destinationVC = segue.destination as? UploadImageViewController,
+           let user = sender as? User {
+            destinationVC.user = user
+        }
     }
 }
