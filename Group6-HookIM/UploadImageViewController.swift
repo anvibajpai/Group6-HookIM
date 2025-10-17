@@ -16,14 +16,15 @@ class UploadImageViewController: UIViewController, UIImagePickerControllerDelega
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        setupUI()
-        loadExistingImageIfAny()
-    }
-
-    private func setupUI() {
+        
+        navigationItem.title = "Profile Set-Up"
+        navigationItem.backButtonTitle = ""
+        
         imageView.contentMode = .scaleAspectFill
         imageView.layer.cornerRadius = 10
         imageView.clipsToBounds = true
+        
+        loadExistingImageIfAny()
     }
 
     private func loadExistingImageIfAny() {
@@ -47,7 +48,15 @@ class UploadImageViewController: UIViewController, UIImagePickerControllerDelega
     
     @IBAction func nextTapped(_ sender: Any) {
         UserManager.shared.save(user)
-        performSegue(withIdentifier: "selectSportsSegue", sender: nil)
+        performSegue(withIdentifier: "selectSportsSegue", sender: user)
+    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "selectSportsSegue",
+           let destinationVC = segue.destination as? SportsSelectionViewController,
+           let user = sender as? User {
+            destinationVC.user = user
+        }
     }
 
     private func openImagePicker(sourceType: UIImagePickerController.SourceType) {
