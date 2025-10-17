@@ -121,6 +121,7 @@
                     <connections>
                         <outlet property="emailTextField" destination="w5E-uf-3kv" id="ICw-lp-1TM"/>
                         <outlet property="passwordTextField" destination="1Kp-qf-IO2" id="W9p-TP-4Vf"/>
+                        <segue destination="bPN-Hk-SLH" kind="show" identifier="loginSegue" id="g3i-kz-Ga6"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
@@ -295,6 +296,22 @@
             </objects>
             <point key="canvasLocation" x="55.725190839694655" y="-2.1126760563380285"/>
         </scene>
+        <!--Dashboard View Controller-->
+        <scene sceneID="m5t-DZ-vya">
+            <objects>
+                <viewController id="bPN-Hk-SLH" customClass="DashboardViewController" customModule="Group6_HookIM" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="di3-CS-ZVy">
+                        <rect key="frame" x="0.0" y="0.0" width="402" height="874"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <viewLayoutGuide key="safeArea" id="eIx-H9-z0a"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                    </view>
+                    <navigationItem key="navigationItem" id="II5-PL-USK"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="1JR-gR-3TU" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="4" y="826"/>
+        </scene>
         <!--Upload Image View Controller-->
         <scene sceneID="XYq-3p-lp4">
             <objects>
@@ -458,9 +475,6 @@
                             <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="WEP-Hh-BRd">
                                 <rect key="frame" x="328" y="550.66666666666663" width="51" height="30.333333333333371"/>
                                 <color key="onTintColor" red="0.74901960779999999" green="0.3411764706" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
-                                <connections>
-                                    <action selector="freeAgentToggled:" destination="M0d-0Z-EWZ" eventType="valueChanged" id="AAW-bW-UJF"/>
-                                </connections>
                             </switch>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="FVc-BH-utU">
                                 <rect key="frame" x="25" y="615.66666666666663" width="100" height="51.333333333333371"/>
@@ -564,6 +578,7 @@
                         <outlet property="menButton" destination="FVc-BH-utU" id="tI6-PW-nud"/>
                         <outlet property="tableView" destination="3Dz-XB-lY8" id="NTL-u6-ouE"/>
                         <outlet property="womenButton" destination="Av2-sz-k0w" id="3Cv-CG-n7e"/>
+                        <segue destination="bPN-Hk-SLH" kind="show" identifier="finishCreateAccountSegue" id="CAu-vb-Ang"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="rvW-mm-yG2" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
@@ -571,6 +586,9 @@
             <point key="canvasLocation" x="3529.8507462686566" y="-5.4919908466819214"/>
         </scene>
     </scenes>
+    <inferredMetricsTieBreakers>
+        <segue reference="CAu-vb-Ang"/>
+    </inferredMetricsTieBreakers>
     <resources>
         <image name="background.png" width="402" height="874"/>
         <image name="longhorn icon.png" width="138" height="138"/>

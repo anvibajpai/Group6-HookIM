@@ -12,8 +12,24 @@ class ViewController: UIViewController {
     @IBOutlet weak var emailTextField: UITextField!
     @IBOutlet weak var passwordTextField: UITextField!
     
+    let fakeUser = User(
+        firstName: "Fake",
+        lastName: "User",
+        gender: "Other",
+        email: "fake@utexas.edu",
+        password: "pw",
+        profileImageData: nil,
+        interestedSports: ["Soccer", "Basketball"],
+        division: "Womens",
+        isFreeAgent: true
+    )
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        // Save the fake user for testing
+        UserManager.shared.save(fakeUser)
+        
         setupPasswordToggle(for: passwordTextField)
         emailTextField.text = ""
         passwordTextField.text = ""
@@ -37,14 +53,21 @@ class ViewController: UIViewController {
             return
         }
             
-        if email == "fake@utexas.edu" && pw == "pw" {
-                //add segue to Dashboard,add prepare function to pass user credentials
-                print("login good")
-            } else {
-                showAlert(title: "Invalid Credentials", message: "No matching user found. Try creating an account.")
-            }
+        if email == fakeUser.email && pw == fakeUser.password {
+            performSegue(withIdentifier: "loginSegue", sender: fakeUser)
+            print("login good")
+        } else {
+            showAlert(title: "Invalid Credentials", message: "No matching user found. Try creating an account.")
+        }
     }
     
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "loginSegue",
+           let destinationVC = segue.destination as? DashboardViewController,
+           let user = sender as? User {
+            destinationVC.user = user
+        }
+    }
     
     @IBAction func signUpTapped(_ sender: Any) {
         performSegue(withIdentifier: "createAccountSegue", sender: nil)

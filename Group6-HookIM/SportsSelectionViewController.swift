@@ -89,7 +89,15 @@ class SportsSelectionViewController: UIViewController {
         // Save user
         UserManager.shared.save(user)
 
-        // SEGUE to dashboard and pass user in prepare
+        performSegue(withIdentifier: "finishCreateAccountSegue", sender: user)
+    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "finishCreateAccountSegue",
+           let destinationVC = segue.destination as? DashboardViewController,
+           let user = sender as? User {
+            destinationVC.user = user
+        }
     }
 
     private func showAlert(title: String, message: String) {
