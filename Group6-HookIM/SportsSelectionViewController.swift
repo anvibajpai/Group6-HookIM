@@ -7,6 +7,8 @@
 
 import UIKit
 
+/// View controller responsible for selecting user sports and division.
+/// Handles Free Agent toggle, gender/division validation, and passes selected data to the dashboard.
 class SportsSelectionViewController: UIViewController {
     
     
@@ -28,7 +30,6 @@ class SportsSelectionViewController: UIViewController {
         navigationItem.backButtonTitle = ""
         
         setupTable()
-        loadExistingUserData()
         updateDivisionButtons()
     }
     
@@ -39,6 +40,7 @@ class SportsSelectionViewController: UIViewController {
         tableView.layoutIfNeeded()
     }
 
+    /// Configures the table view
     private func setupTable() {
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "sportCell")
         tableView.dataSource = self
@@ -48,34 +50,48 @@ class SportsSelectionViewController: UIViewController {
         tableView.alwaysBounceVertical = true
     }
 
-    private func loadExistingUserData() {
-        selectedSports = Set(user.interestedSports)
-        selectedDivision = user.division
-        freeAgentSwitch.isOn = user.isFreeAgent
-    }
-
+    /// Triggered when "Men's" button is tapped
     @IBAction func menTapped(_ sender: Any) {
         selectedDivision = "Men's"
         updateDivisionButtons()
     }
 
+    /// Triggered when "Women's" button is tapped
     @IBAction func womenTapped(_ sender: Any) {
         selectedDivision = "Women's"
         updateDivisionButtons()
     }
 
+    /// Triggered when "Co-ed" button is tapped
     @IBAction func coedTapped(_ sender: Any) {
         selectedDivision = "Co-Ed"
         updateDivisionButtons()
     }
 
+    /// Updates the division buttons' appearance based on selection
     private func updateDivisionButtons() {
-        let mapping = ["Men's": menButton, "Women's": womenButton, "Co-Ed": coedButton]
-        for (key, button) in mapping {
-            button?.alpha = (selectedDivision == key) ? 1.0 : 0.5
+        let buttons: [(UIButton, String)] = [
+            (menButton, "Men's"),
+            (womenButton, "Women's"),
+            (coedButton, "Co-Ed")
+        ]
+        
+        for (button, division) in buttons {
+            if division == selectedDivision {
+                button.backgroundColor = .systemIndigo
+                button.setTitleColor(.white, for: .normal)
+            } else {
+                button.backgroundColor = .white
+                button.setTitleColor(.black, for: .normal)
+            }
+               
+            button.layer.cornerRadius = button.frame.height / 2
+            button.layer.masksToBounds = true
+            button.layer.borderWidth = 1
         }
     }
 
+    /// Triggered when "Finish" button is tapped. Validates selections and saves user
     @IBAction func finishTapped(_ sender: Any) {
         user.interestedSports = Array(selectedSports)
         user.division = selectedDivision
@@ -85,6 +101,13 @@ class SportsSelectionViewController: UIViewController {
             showAlert(title: "Profile Incomplete", message: "You turned Free Agent ON — please select at least one sport and a division before finishing.")
             return
         }
+        
+        if let selected = selectedDivision {
+            if (selected == "Men's" && user.gender.lowercased() == "female") ||
+               (selected == "Women's" && user.gender.lowercased() == "male") {
+                showAlert(title: "Division Mismatch", message: "The selected division does not match your gender. Please select an appropriate division.")
+            }
+        }
 
         // Save user
         UserManager.shared.save(user)
@@ -92,6 +115,7 @@ class SportsSelectionViewController: UIViewController {
         performSegue(withIdentifier: "finishCreateAccountSegue", sender: user)
     }
     
+    /// Prepares data before navigating to DashboardViewController
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "finishCreateAccountSegue",
            let destinationVC = segue.destination as? DashboardViewController,
@@ -99,7 +123,8 @@ class SportsSelectionViewController: UIViewController {
             destinationVC.user = user
         }
     }
-
+    
+    /// Displays an alert with a title and message
     private func showAlert(title: String, message: String) {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default))
@@ -109,8 +134,12 @@ class SportsSelectionViewController: UIViewController {
 
 // UITableView
 extension SportsSelectionViewController: UITableViewDataSource, UITableViewDelegate {
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int { allSports.count }
+    /// Returns the number of sports
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        allSports.count
+    }
 
+    /// Configures each cell with sport name and checkmark if selected
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let sport = allSports[indexPath.row]
         let cell = tableView.dequeueReusableCell(withIdentifier: "sportCell", for: indexPath)
@@ -119,6 +148,7 @@ extension SportsSelectionViewController: UITableViewDataSource, UITableViewDeleg
         return cell
     }
 
+    /// Handles selecting or deselecting a sport
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let sport = allSports[indexPath.row]
         if selectedSports.contains(sport) { selectedSports.remove(sport) } else { selectedSports.insert(sport) }

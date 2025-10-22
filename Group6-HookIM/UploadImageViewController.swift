@@ -7,6 +7,8 @@
 
 import UIKit
 
+/// View controller responsible for uploading or capturing a profile image.
+/// Handles image selection from camera or photo library and passes the image along with the user object.
 class UploadImageViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
 
     @IBOutlet weak var imageView: UIImageView!
@@ -20,6 +22,7 @@ class UploadImageViewController: UIViewController, UIImagePickerControllerDelega
         navigationItem.title = "Profile Set-Up"
         navigationItem.backButtonTitle = ""
         
+        // Set image view appearance
         imageView.contentMode = .scaleAspectFill
         imageView.layer.cornerRadius = 10
         imageView.clipsToBounds = true
@@ -27,6 +30,7 @@ class UploadImageViewController: UIViewController, UIImagePickerControllerDelega
         loadExistingImageIfAny()
     }
 
+    /// Loads existing profile image if it has been selected before (if user has pressed the back button from the next screen)
     private func loadExistingImageIfAny() {
         if let data = user.profileImageData,
            let img = UIImage(data: data) {
@@ -36,21 +40,24 @@ class UploadImageViewController: UIViewController, UIImagePickerControllerDelega
         }
     }
     
-    
+    /// Triggered when the "Take Picture" button is tapped
     @IBAction func takePictureTapped(_ sender: Any) {
         openImagePicker(sourceType: .camera)
     }
     
+    /// Triggered when the "Choose From Gallery" button is tapped
     @IBAction func chooseFromGallery(_ sender: Any) {
         openImagePicker(sourceType: .photoLibrary)
     }
     
-    
+    /// Triggered when the "Next" button is tapped
+    /// Saves the user with updated image and proceeds to sports selection
     @IBAction func nextTapped(_ sender: Any) {
         UserManager.shared.save(user)
         performSegue(withIdentifier: "selectSportsSegue", sender: user)
     }
     
+    /// Prepares data before navigating to the next view controller
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "selectSportsSegue",
            let destinationVC = segue.destination as? SportsSelectionViewController,
@@ -59,6 +66,7 @@ class UploadImageViewController: UIViewController, UIImagePickerControllerDelega
         }
     }
 
+    /// Presents the image picker with specified source type (camera or photo library)
     private func openImagePicker(sourceType: UIImagePickerController.SourceType) {
         if sourceType == .camera && !UIImagePickerController.isSourceTypeAvailable(.camera) {
             showAlert(title: "Camera Unavailable", message: "Camera is not available on this device.")
@@ -76,6 +84,7 @@ class UploadImageViewController: UIViewController, UIImagePickerControllerDelega
         present(picker, animated: true)
     }
 
+    /// Called when the user selects an image
     func imagePickerController(_ picker: UIImagePickerController,
                                didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
         defer { picker.dismiss(animated: true) }
@@ -93,10 +102,12 @@ class UploadImageViewController: UIViewController, UIImagePickerControllerDelega
         user.profileImageData = selectedImage.jpegData(compressionQuality: 0.8)
     }
 
+    /// Called when the user cancels image selection
     func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
         picker.dismiss(animated: true)
     }
 
+    /// Displays an alert with a title and message
     private func showAlert(title: String, message: String) {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default))
