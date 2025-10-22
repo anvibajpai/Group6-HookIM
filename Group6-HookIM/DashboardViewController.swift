@@ -135,9 +135,9 @@ final class TeamCardCell: UICollectionViewCell {
 
 // MARK: - Dashboard VC
 class DashboardViewController: UIViewController {
-
+    
     var user: User!  // Provided by previous screen
-
+    
     // Data (replace with your real models/service)
     private let games: [Game] = [
         .init(team: "Arch and Friends", opponent: "The Bevo Buddies", location: "Whittaker Fields", time: "October 8th, 7PM"),
@@ -149,36 +149,36 @@ class DashboardViewController: UIViewController {
         .init(title: "Arch and Friends", subtitle: "Men's Flag Football", record: "3W - 2L", divisionStanding: "3rd in Division", nextGame: "Oct 8th, 7PM vs The Bevo Buddies"),
         .init(title: "Arch & Friends (2)", subtitle: "Men's 6v6", record: "3W - 2L", divisionStanding: "2nd in Division", nextGame: "Oct 8th, 7PM")
     ]
-
+    
     // Views
     private let scrollView = UIScrollView()
     private let contentStack = UIStackView()
-
+    
     private let header = UIView()
     private let greetLabel = UILabel()
     private let bellButton = UIButton(type: .system)
     private let rightLogo = UIImageView()
-
+    
     private let upcomingContainer = UIView()
     private let upcomingTitle = UILabel()
     private let upcomingCard = UIView()
     private let pillHeaderRow = UIStackView()
     private let gameRowsStack = UIStackView()
-
+    
     private let teamsTitle = UILabel()
     private var teamsCollection: UICollectionView!
-
+    
     private let recentTitle = UILabel()
     private let recentLabel = UILabel()
-
+    
     private let tabBarView = UIView()
     private let tabButtons: [UIButton] = (0..<5).map { _ in UIButton(type: .system) }
     private let selectedDotViews: [UIView] = (0..<5).map { _ in UIView() }
-    private var selectedTab: Int = 2
-
+    private var selectedTab: Int = 0
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
         // Debug print user
         print("First name: \(user.firstName)")
         print("Last name: \(user.lastName)")
@@ -187,57 +187,58 @@ class DashboardViewController: UIViewController {
         print("Division: \(user.division ?? "none")")
         print("Free Agent: \(user.isFreeAgent)")
         print("Interested Sports: \(user.interestedSports.isEmpty ? "none" : user.interestedSports.joined(separator: ", "))")
-
+        
         buildUI()
         layoutUI()
         populateData()
     }
-
+    
     // MARK: - Build
     private func buildUI() {
         view.backgroundColor = .nearBlack
         navigationController?.setNavigationBarHidden(true, animated: false)
-
+        
         // Scroll area
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(scrollView)
-
+        
         contentStack.axis = .vertical
         contentStack.spacing = 20
         contentStack.translatesAutoresizingMaskIntoConstraints = false
         scrollView.addSubview(contentStack)
-
+        
         // Header (orange)
         header.backgroundColor = .warmOrange
         header.translatesAutoresizingMaskIntoConstraints = false
         header.heightAnchor.constraint(equalToConstant: 120).isActive = true
-
+        
         bellButton.setImage(UIImage(systemName: "bell"), for: .normal)
         bellButton.tintColor = .white
         bellButton.backgroundColor = UIColor(white: 0, alpha: 0.2)
         bellButton.layer.cornerRadius = 10
         bellButton.translatesAutoresizingMaskIntoConstraints = false
-
+        bellButton.addTarget(self, action: #selector(didTapNotifications), for: .touchUpInside)
+        
         greetLabel.textColor = .white
         greetLabel.font = .boldSystemFont(ofSize: 20)
         greetLabel.translatesAutoresizingMaskIntoConstraints = false
-
+        
         rightLogo.image = UIImage(systemName: "tortoise.fill") // replace with your asset logo
         rightLogo.tintColor = .white
         rightLogo.contentMode = .scaleAspectFit
         rightLogo.translatesAutoresizingMaskIntoConstraints = false
-
+        
         header.addSubview(bellButton)
         header.addSubview(greetLabel)
         header.addSubview(rightLogo)
         contentStack.addArrangedSubview(header)
-
+        
         // Upcoming Games
         let upWrap = UIView(); upWrap.translatesAutoresizingMaskIntoConstraints = false
         upcomingTitle.text = "Upcoming Games"
         upcomingTitle.textColor = .white
         upcomingTitle.font = .boldSystemFont(ofSize: 17)
-
+        
         upcomingCard.backgroundColor = .cardBG
         upcomingCard.layer.cornerRadius = 14
         upcomingCard.layer.shadowOpacity = 0.15
@@ -245,109 +246,109 @@ class DashboardViewController: UIViewController {
         upcomingCard.layer.shadowRadius = 4
         upcomingCard.layer.shadowOffset = CGSize(width: 0, height: 2)
         upcomingCard.translatesAutoresizingMaskIntoConstraints = false
-
+        
         // Pills header
         pillHeaderRow.axis = .horizontal
         pillHeaderRow.alignment = .fill
         pillHeaderRow.distribution = .fillEqually
         pillHeaderRow.spacing = 8
         pillHeaderRow.translatesAutoresizingMaskIntoConstraints = false
-
+        
         // Rows stack
         gameRowsStack.axis = .vertical
         gameRowsStack.spacing = 8
         gameRowsStack.translatesAutoresizingMaskIntoConstraints = false
-
+        
         upcomingCard.addSubview(pillHeaderRow)
         upcomingCard.addSubview(gameRowsStack)
-
+        
         upWrap.addSubview(upcomingTitle)
         upWrap.addSubview(upcomingCard)
         contentStack.addArrangedSubview(upWrap)
-
+        
         // My Teams (horizontal collection)
         teamsTitle.text = "My Teams"
         teamsTitle.textColor = .white
         teamsTitle.font = .boldSystemFont(ofSize: 17)
-
+        
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
         layout.minimumLineSpacing = 14
         layout.itemSize = CGSize(width: 240, height: 200)
-
+        
         teamsCollection = UICollectionView(frame: .zero, collectionViewLayout: layout)
         teamsCollection.translatesAutoresizingMaskIntoConstraints = false
         teamsCollection.backgroundColor = .clear
         teamsCollection.showsHorizontalScrollIndicator = false
         teamsCollection.register(TeamCardCell.self, forCellWithReuseIdentifier: TeamCardCell.reuseID)
         teamsCollection.dataSource = self
-
+        
         let teamsWrap = UIStackView(arrangedSubviews: [teamsTitle, teamsCollection])
         teamsWrap.axis = .vertical
         teamsWrap.spacing = 12
         teamsWrap.translatesAutoresizingMaskIntoConstraints = false
         contentStack.addArrangedSubview(teamsWrap)
-
+        
         // Recent Activity
         recentTitle.text = "Recent Activity"
         recentTitle.textColor = .white
         recentTitle.font = .boldSystemFont(ofSize: 17)
-
+        
         recentLabel.textColor = UIColor.white.withAlphaComponent(0.85)
         recentLabel.numberOfLines = 0
         recentLabel.font = .systemFont(ofSize: 14)
         recentLabel.text = "You and the [Team Name] beat [Opponent Name] [Score]!"
-
+        
         let recentWrap = UIStackView(arrangedSubviews: [recentTitle, recentLabel])
         recentWrap.axis = .vertical
         recentWrap.spacing = 8
         recentWrap.translatesAutoresizingMaskIntoConstraints = false
         contentStack.addArrangedSubview(recentWrap)
-
+        
         // Spacer for tab bar
         let spacer = UIView()
         spacer.translatesAutoresizingMaskIntoConstraints = false
         spacer.heightAnchor.constraint(equalToConstant: 70).isActive = true
         contentStack.addArrangedSubview(spacer)
-
+        
         // Bottom Tab Bar
         tabBarView.backgroundColor = .warmOrange
         tabBarView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(tabBarView)
-
+        
         let symbols = ["house.fill", "person.3.fill", "calendar", "rosette", "person.crop.circle"]
         let stack = UIStackView()
         stack.axis = .horizontal
         stack.spacing = 0
         stack.distribution = .equalSpacing
         stack.translatesAutoresizingMaskIntoConstraints = false
-
+        
         tabBarView.addSubview(stack)
-
+        
         for i in 0..<5 {
             let v = UIStackView()
             v.axis = .vertical
             v.alignment = .center
             v.spacing = 4
             v.translatesAutoresizingMaskIntoConstraints = false
-
+            
             selectedDotViews[i].backgroundColor = .white
             selectedDotViews[i].layer.cornerRadius = 3
             selectedDotViews[i].translatesAutoresizingMaskIntoConstraints = false
             selectedDotViews[i].heightAnchor.constraint(equalToConstant: 6).isActive = true
             selectedDotViews[i].widthAnchor.constraint(equalToConstant: 6).isActive = true
             selectedDotViews[i].alpha = (i == selectedTab) ? 1 : 0
-
+            
             tabButtons[i].setImage(UIImage(systemName: symbols[i]), for: .normal)
             tabButtons[i].tintColor = .white
             tabButtons[i].tag = i
             tabButtons[i].addTarget(self, action: #selector(tabTapped(_:)), for: .touchUpInside)
-
+            
             v.addArrangedSubview(selectedDotViews[i])
             v.addArrangedSubview(tabButtons[i])
             stack.addArrangedSubview(v)
         }
-
+        
         // Constraints for tab bar inner stack
         NSLayoutConstraint.activate([
             stack.leadingAnchor.constraint(equalTo: tabBarView.leadingAnchor, constant: 28),
@@ -356,7 +357,7 @@ class DashboardViewController: UIViewController {
             stack.bottomAnchor.constraint(equalTo: tabBarView.bottomAnchor, constant: -10)
         ])
     }
-
+    
     // MARK: - Layout
     private func layoutUI() {
         NSLayoutConstraint.activate([
@@ -364,79 +365,79 @@ class DashboardViewController: UIViewController {
             scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-
+            
             contentStack.topAnchor.constraint(equalTo: scrollView.topAnchor, constant: 10),
             contentStack.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: 18),
             contentStack.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor, constant: -18),
             contentStack.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
             contentStack.widthAnchor.constraint(equalTo: scrollView.widthAnchor, constant: -36),
-
+            
             // Header subviews
             bellButton.leadingAnchor.constraint(equalTo: header.leadingAnchor, constant: 12),
             bellButton.centerYAnchor.constraint(equalTo: header.centerYAnchor),
             bellButton.widthAnchor.constraint(equalToConstant: 44),
             bellButton.heightAnchor.constraint(equalToConstant: 44),
-
+            
             greetLabel.centerXAnchor.constraint(equalTo: header.centerXAnchor),
             greetLabel.centerYAnchor.constraint(equalTo: header.centerYAnchor),
-
+            
             rightLogo.trailingAnchor.constraint(equalTo: header.trailingAnchor, constant: -16),
             rightLogo.centerYAnchor.constraint(equalTo: header.centerYAnchor),
             rightLogo.widthAnchor.constraint(equalToConstant: 36),
             rightLogo.heightAnchor.constraint(equalToConstant: 36),
-
+            
             // Upcoming wrap pieces
             upcomingTitle.topAnchor.constraint(equalTo: (contentStack.arrangedSubviews[1]).topAnchor),
             upcomingTitle.leadingAnchor.constraint(equalTo: contentStack.leadingAnchor),
-
+            
             upcomingCard.topAnchor.constraint(equalTo: upcomingTitle.bottomAnchor, constant: 8),
             upcomingCard.leadingAnchor.constraint(equalTo: contentStack.leadingAnchor),
             upcomingCard.trailingAnchor.constraint(equalTo: contentStack.trailingAnchor),
-
+            
             pillHeaderRow.topAnchor.constraint(equalTo: upcomingCard.topAnchor, constant: 12),
             pillHeaderRow.leadingAnchor.constraint(equalTo: upcomingCard.leadingAnchor, constant: 12),
             pillHeaderRow.trailingAnchor.constraint(equalTo: upcomingCard.trailingAnchor, constant: -12),
-
+            
             gameRowsStack.topAnchor.constraint(equalTo: pillHeaderRow.bottomAnchor, constant: 10),
             gameRowsStack.leadingAnchor.constraint(equalTo: upcomingCard.leadingAnchor, constant: 10),
             gameRowsStack.trailingAnchor.constraint(equalTo: upcomingCard.trailingAnchor, constant: -10),
             gameRowsStack.bottomAnchor.constraint(equalTo: upcomingCard.bottomAnchor, constant: -12),
-
+            
             // Teams collection height
             teamsCollection.heightAnchor.constraint(equalToConstant: 200),
-
+            
             // Tab bar
             tabBarView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tabBarView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             tabBarView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
         ])
     }
-
+    
     // MARK: - Populate
     private func populateData() {
         greetLabel.text = "Hi, \(user.firstName)!"
-
+        
         // Header pill labels
         ["Team","Opponent","Location","Time"].forEach { title in
             pillHeaderRow.addArrangedSubview(makeHeaderPill(title))
         }
-
+        
         // Rows
         games.forEach { g in
             let row = UIStackView()
             row.axis = .horizontal
             row.spacing = 8
             row.distribution = .fillEqually
-
+            
             row.addArrangedSubview(makeRowPill(g.team))
             row.addArrangedSubview(makeRowPill(g.opponent))
             row.addArrangedSubview(makeRowPill(g.location))
             row.addArrangedSubview(makeRowPill(g.time))
-
+            
             gameRowsStack.addArrangedSubview(row)
         }
     }
-
+    
     // MARK: - Builders
     private func makeHeaderPill(_ text: String) -> UIView {
         let l = UILabel()
@@ -461,14 +462,14 @@ class DashboardViewController: UIViewController {
         ])
         return bg
     }
-
+    
     private func makeRowPill(_ text: String) -> UIView {
         let l = UILabel()
         l.text = text
         l.font = .systemFont(ofSize: 13)
         l.textColor = .black
         l.numberOfLines = 2
-
+        
         let bg = UIView()
         bg.backgroundColor = .white
         bg.layer.cornerRadius = 8
@@ -486,13 +487,52 @@ class DashboardViewController: UIViewController {
         ])
         return bg
     }
-
+    
     // MARK: - Actions
+    
     @objc private func tabTapped(_ sender: UIButton) {
-        selectedDotViews[selectedTab].alpha = 0
-        selectedTab = sender.tag
-        selectedDotViews[selectedTab].alpha = 1
-        // TODO: hook up real navigation if needed
+        let newTab = sender.tag
+
+        // do nothing
+        if newTab == 0 {
+            selectedDotViews[selectedTab].alpha = 0
+            selectedTab = 0
+            selectedDotViews[selectedTab].alpha = 1
+            return
+        }
+
+        if newTab == 2 { // schedule
+            let scheduleVC = ScheduleViewController()
+            let navController = UINavigationController(rootViewController: scheduleVC)
+            navController.modalPresentationStyle = .fullScreen
+
+            // show schedule
+            present(navController, animated: true) {
+                // reset dashboard back to "Home" so that home shows up on dismissak
+                self.selectedDotViews[newTab].alpha = 0
+                self.selectedTab = 0
+                self.selectedDotViews[self.selectedTab].alpha = 1
+            }
+        } else {
+            // temp for adding other tabs
+            print("Tapped tab index \(newTab)")
+        }
+    }
+    
+//    @objc private func tabTapped(_ sender: UIButton) {
+//        selectedDotViews[selectedTab].alpha = 0
+//        selectedTab = sender.tag
+//        selectedDotViews[selectedTab].alpha = 1
+//        // TODO: hook up real navigation if needed
+//    }
+    
+    // MARK: - Actions
+
+    @objc private func didTapNotifications() {
+        let requestsVC = RequestsViewController()
+        let navController = UINavigationController(rootViewController: requestsVC)
+        // modal presentation = slides up from the bottom
+        present(navController, animated: true)
     }
 }
 
