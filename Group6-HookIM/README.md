@@ -2,22 +2,19 @@
 
 ## Contributions
 **Anvi Bajpai (25%)**
-- Created and set up project and github
-- Created user class to store user data.
-- Splash Page, Login screen
-- Create account screen
-- Upload image screen, with new keys in Info.plist for permissions (NSCameraUsageDescription & NSPhotoLibraryUsageDescription). Uses photos and avf foundations packages.
-- Sports, free agent, and division screens
-- Segue to Dashboard VC and pass user data to main page after login or account creation
+- Created and set up the project and linked it to GitHub.
+- Implemented a User class to store user data.
+- Built the Splash Page and Login Screen.
+- Developed the Create Account screen.
+- Created the Upload Image screen, including new Info.plist keys for permissions (NSCameraUsageDescription & NSPhotoLibraryUsageDescription) and integrated Photos and AVFoundation frameworks.
+- Built the Sports Selection, Free Agent, and Division screen.
+- Set up segues to the Dashboard ViewController, passing user data to the main page after login or account creation.
 
 **Ismael Ahmed (25%)**
--
 
 **Arnav Chopra (25%)**
--
 
 **Shriya Danam (25%)**
--
 
 ## Deviations
 - Decided not to have an "Already have an account? Login in" button since the back button allows users to navigate back to login screen
