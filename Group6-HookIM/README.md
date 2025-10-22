@@ -6,7 +6,7 @@
 - Created user class to store user data.
 - Splash Page, Login screen
 - Create account screen
-- Upload image screen
+- Upload image screen, with new keys in Info.plist for permissions (NSCameraUsageDescription & NSPhotoLibraryUsageDescription). Uses photos and avf foundations packages.
 - Sports, free agent, and division screens
 - Segue to Dashboard VC and pass user data to main page after login or account creation
 
