@@ -9,6 +9,7 @@
 - Created the Upload Image screen, including new Info.plist keys for permissions (NSCameraUsageDescription & NSPhotoLibraryUsageDescription) and integrated Photos and AVFoundation frameworks.
 - Built the Sports Selection, Free Agent, and Division screen.
 - Set up segues to the Dashboard ViewController, passing user data to the main page after login or account creation.
+- Created the standings page with fake data for now.
 
 **Ismael Ahmed (25%)**
 
