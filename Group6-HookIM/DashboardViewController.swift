@@ -9,130 +9,130 @@ import UIKit
 //
 //
 //// MARK: - Simple Models
-//struct Game {
-//    let team: String
-//    let opponent: String
-//    let location: String
-//    let time: String
-//}
-//
-//struct TeamCard {
-//    let title: String
-//    let subtitle: String
-//    let record: String
-//    let divisionStanding: String
-//    let nextGame: String
-//}
+struct Game {
+    let team: String
+    let opponent: String
+    let location: String
+    let time: String
+}
+
+struct TeamCard {
+    let title: String
+    let subtitle: String
+    let record: String
+    let divisionStanding: String
+    let nextGame: String
+}
 //
 //// MARK: - Color Helpers
-//extension UIColor {
-//    static let warmOrange = UIColor(red: 170/255, green: 82/255, blue: 30/255, alpha: 1)
-//    static let nearBlack   = UIColor(white: 0.06, alpha: 1)
-//    static let cardBG      = UIColor(white: 0.95, alpha: 1)
-//    static let softGray    = UIColor(white: 0.85, alpha: 1)
-//}
+extension UIColor {
+    static let warmOrange = UIColor(red: 170/255, green: 82/255, blue: 30/255, alpha: 1)
+    static let nearBlack   = UIColor(white: 0.06, alpha: 1)
+    static let cardBG      = UIColor(white: 0.95, alpha: 1)
+    static let softGray    = UIColor(white: 0.85, alpha: 1)
+}
 //
 //// MARK: - Team Card Cell
-//final class TeamCardCell: UICollectionViewCell {
-//    static let reuseID = "TeamCardCell"
-//
-//    let container = UIView()
-//    let titleLabel = UILabel()
-//    let subtitleLabel = UILabel()
-//    let recordLabel = UILabel()
-//    let standingLabel = UILabel()
-//    let nextGameTitle = UILabel()
-//    let nextGameLabel = UILabel()
-//    let button = UIButton(type: .system)
-//
-//    override init(frame: CGRect) {
-//        super.init(frame: frame)
-//        contentView.backgroundColor = .clear
-//        build()
-//    }
-//
-//    required init?(coder: NSCoder) { fatalError() }
-//
-//    private func build() {
-//        container.backgroundColor = .white
-//        container.layer.cornerRadius = 12
-//        container.layer.shadowColor = UIColor.black.cgColor
-//        container.layer.shadowOpacity = 0.15
-//        container.layer.shadowRadius = 4
-//        container.layer.shadowOffset = CGSize(width: 0, height: 2)
-//
-//        [titleLabel, subtitleLabel, recordLabel, standingLabel, nextGameTitle, nextGameLabel, button].forEach {
-//            $0.translatesAutoresizingMaskIntoConstraints = false
-//            container.addSubview($0)
-//        }
-//        contentView.addSubview(container)
-//        container.translatesAutoresizingMaskIntoConstraints = false
-//
-//        titleLabel.font = .systemFont(ofSize: 16, weight: .semibold)
-//        titleLabel.numberOfLines = 2
-//        subtitleLabel.font = .systemFont(ofSize: 12)
-//        subtitleLabel.textColor = .gray
-//
-//        recordLabel.font = .systemFont(ofSize: 20, weight: .bold)
-//        standingLabel.font = .systemFont(ofSize: 10)
-//        standingLabel.textColor = .gray
-//
-//        nextGameTitle.font = .systemFont(ofSize: 12)
-//        nextGameTitle.textColor = .gray
-//        nextGameTitle.text = "Next Game"
-//
-//        nextGameLabel.font = .systemFont(ofSize: 11, weight: .regular)
-//        nextGameLabel.numberOfLines = 2
-//
-//        button.setTitle("View Team", for: .normal)
-//        button.setTitleColor(.white, for: .normal)
-//        button.backgroundColor = .warmOrange
-//        button.layer.cornerRadius = 8
-//        button.titleLabel?.font = .systemFont(ofSize: 12, weight: .semibold)
-//
-//        NSLayoutConstraint.activate([
-//            container.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-//            container.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-//            container.topAnchor.constraint(equalTo: contentView.topAnchor),
-//            container.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
-//
-//            titleLabel.topAnchor.constraint(equalTo: container.topAnchor, constant: 12),
-//            titleLabel.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 12),
-//            titleLabel.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -12),
-//
-//            subtitleLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 4),
-//            subtitleLabel.leadingAnchor.constraint(equalTo: titleLabel.leadingAnchor),
-//            subtitleLabel.trailingAnchor.constraint(equalTo: titleLabel.trailingAnchor),
-//
-//            recordLabel.topAnchor.constraint(equalTo: subtitleLabel.bottomAnchor, constant: 12),
-//            recordLabel.leadingAnchor.constraint(equalTo: titleLabel.leadingAnchor),
-//
-//            standingLabel.leadingAnchor.constraint(equalTo: recordLabel.leadingAnchor),
-//            standingLabel.topAnchor.constraint(equalTo: recordLabel.bottomAnchor, constant: 2),
-//
-//            nextGameTitle.topAnchor.constraint(equalTo: standingLabel.bottomAnchor, constant: 12),
-//            nextGameTitle.leadingAnchor.constraint(equalTo: titleLabel.leadingAnchor),
-//
-//            nextGameLabel.topAnchor.constraint(equalTo: nextGameTitle.bottomAnchor, constant: 4),
-//            nextGameLabel.leadingAnchor.constraint(equalTo: titleLabel.leadingAnchor),
-//            nextGameLabel.trailingAnchor.constraint(equalTo: titleLabel.trailingAnchor),
-//
-//            button.heightAnchor.constraint(equalToConstant: 36),
-//            button.leadingAnchor.constraint(equalTo: titleLabel.leadingAnchor),
-//            button.trailingAnchor.constraint(equalTo: titleLabel.trailingAnchor),
-//            button.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -12)
-//        ])
-//    }
-//
-//    func configure(_ m: TeamCard) {
-//        titleLabel.text = m.title
-//        subtitleLabel.text = m.subtitle
-//        recordLabel.text = m.record
-//        standingLabel.text = m.divisionStanding
-//        nextGameLabel.text = m.nextGame
-//    }
-//}
-//
+final class TeamCardCell: UICollectionViewCell {
+    static let reuseID = "TeamCardCell"
+
+    let container = UIView()
+    let titleLabel = UILabel()
+    let subtitleLabel = UILabel()
+    let recordLabel = UILabel()
+    let standingLabel = UILabel()
+    let nextGameTitle = UILabel()
+    let nextGameLabel = UILabel()
+    let button = UIButton(type: .system)
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        contentView.backgroundColor = .clear
+        build()
+    }
+
+    required init?(coder: NSCoder) { fatalError() }
+
+    private func build() {
+        container.backgroundColor = .white
+        container.layer.cornerRadius = 12
+        container.layer.shadowColor = UIColor.black.cgColor
+        container.layer.shadowOpacity = 0.15
+        container.layer.shadowRadius = 4
+        container.layer.shadowOffset = CGSize(width: 0, height: 2)
+
+        [titleLabel, subtitleLabel, recordLabel, standingLabel, nextGameTitle, nextGameLabel, button].forEach {
+            $0.translatesAutoresizingMaskIntoConstraints = false
+            container.addSubview($0)
+        }
+        contentView.addSubview(container)
+        container.translatesAutoresizingMaskIntoConstraints = false
+
+        titleLabel.font = .systemFont(ofSize: 16, weight: .semibold)
+        titleLabel.numberOfLines = 2
+        subtitleLabel.font = .systemFont(ofSize: 12)
+        subtitleLabel.textColor = .gray
+
+        recordLabel.font = .systemFont(ofSize: 20, weight: .bold)
+        standingLabel.font = .systemFont(ofSize: 10)
+        standingLabel.textColor = .gray
+
+        nextGameTitle.font = .systemFont(ofSize: 12)
+        nextGameTitle.textColor = .gray
+        nextGameTitle.text = "Next Game"
+
+        nextGameLabel.font = .systemFont(ofSize: 11, weight: .regular)
+        nextGameLabel.numberOfLines = 2
+
+        button.setTitle("View Team", for: .normal)
+        button.setTitleColor(.white, for: .normal)
+        button.backgroundColor = .warmOrange
+        button.layer.cornerRadius = 8
+        button.titleLabel?.font = .systemFont(ofSize: 12, weight: .semibold)
+
+        NSLayoutConstraint.activate([
+            container.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            container.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            container.topAnchor.constraint(equalTo: contentView.topAnchor),
+            container.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
+
+            titleLabel.topAnchor.constraint(equalTo: container.topAnchor, constant: 12),
+            titleLabel.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 12),
+            titleLabel.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -12),
+
+            subtitleLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 4),
+            subtitleLabel.leadingAnchor.constraint(equalTo: titleLabel.leadingAnchor),
+            subtitleLabel.trailingAnchor.constraint(equalTo: titleLabel.trailingAnchor),
+
+            recordLabel.topAnchor.constraint(equalTo: subtitleLabel.bottomAnchor, constant: 12),
+            recordLabel.leadingAnchor.constraint(equalTo: titleLabel.leadingAnchor),
+
+            standingLabel.leadingAnchor.constraint(equalTo: recordLabel.leadingAnchor),
+            standingLabel.topAnchor.constraint(equalTo: recordLabel.bottomAnchor, constant: 2),
+
+            nextGameTitle.topAnchor.constraint(equalTo: standingLabel.bottomAnchor, constant: 12),
+            nextGameTitle.leadingAnchor.constraint(equalTo: titleLabel.leadingAnchor),
+
+            nextGameLabel.topAnchor.constraint(equalTo: nextGameTitle.bottomAnchor, constant: 4),
+            nextGameLabel.leadingAnchor.constraint(equalTo: titleLabel.leadingAnchor),
+            nextGameLabel.trailingAnchor.constraint(equalTo: titleLabel.trailingAnchor),
+
+            button.heightAnchor.constraint(equalToConstant: 36),
+            button.leadingAnchor.constraint(equalTo: titleLabel.leadingAnchor),
+            button.trailingAnchor.constraint(equalTo: titleLabel.trailingAnchor),
+            button.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -12)
+        ])
+    }
+
+    func configure(_ m: TeamCard) {
+        titleLabel.text = m.title
+        subtitleLabel.text = m.subtitle
+        recordLabel.text = m.record
+        standingLabel.text = m.divisionStanding
+        nextGameLabel.text = m.nextGame
+    }
+}
+
 //// MARK: - Dashboard VC
 //class DashboardViewController: UIViewController {
 //
@@ -569,7 +569,7 @@ class DashboardViewController: UIViewController {
     
     // MARK: - Build
     private func buildUI() {
-        view.backgroundColor = .nearBlack
+        view.backgroundColor = .black
         navigationController?.setNavigationBarHidden(true, animated: false)
         
         // Scroll area
@@ -582,7 +582,7 @@ class DashboardViewController: UIViewController {
         scrollView.addSubview(contentStack)
         
         // Header (orange)
-        header.backgroundColor = .warmOrange
+        header.backgroundColor = .orange
         header.translatesAutoresizingMaskIntoConstraints = false
         header.heightAnchor.constraint(equalToConstant: 120).isActive = true
         
@@ -953,4 +953,4 @@ extension DashboardViewController: UICollectionViewDataSource {
     }
     */
 
-}
+
