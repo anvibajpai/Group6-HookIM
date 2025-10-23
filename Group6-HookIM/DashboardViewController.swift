@@ -491,9 +491,13 @@ class DashboardViewController: UIViewController {
         return bg
     }
     
-    // MARK: - Actions
+    private func instantiateFromMainStoryboard(withIdentifier id: String) -> UIViewController {
+        // Assumes your storyboard file is named "Main.storyboard"
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        return storyboard.instantiateViewController(withIdentifier: id)
+    }
     
-    // --- THIS IS YOUR CHANGE (Combined Actions) ---
+    // MARK: - Actions
     @objc private func didTapNotifications() {
         let requestsVC = RequestsViewController()
         let navController = UINavigationController(rootViewController: requestsVC)
@@ -503,31 +507,53 @@ class DashboardViewController: UIViewController {
     
     @objc private func tabTapped(_ sender: UIButton) {
         let newTab = sender.tag
-
-        // do nothing
+        
+        // home tab. only works from home for now
         if newTab == 0 {
             selectedDotViews[selectedTab].alpha = 0
-            selectedTab = 0
+            selectedTab = newTab
             selectedDotViews[selectedTab].alpha = 1
             return
         }
-
-        if newTab == 2 { // schedule
+        
+        let vcToPush: UIViewController
+        
+        switch newTab {
+        case 1: // Teams
+            guard let teamVC = instantiateFromMainStoryboard(withIdentifier: "CaptainTeamViewController") as? CaptainTeamViewController else { return }
+            vcToPush = teamVC
+            
+        case 2: // Schedule
             let scheduleVC = ScheduleViewController()
+                    
             let navController = UINavigationController(rootViewController: scheduleVC)
             navController.modalPresentationStyle = .fullScreen
-
-            // show schedule
+            
             present(navController, animated: true) {
-                // reset dashboard back to "Home" so that home shows up on dismissak
                 self.selectedDotViews[newTab].alpha = 0
                 self.selectedTab = 0
                 self.selectedDotViews[self.selectedTab].alpha = 1
             }
-        } else {
-            // temp for adding other tabs
-            print("Tapped tab index \(newTab)")
+            // exit for special case
+            return
+            
+        case 3: // Standings
+            guard let standingsVC = instantiateFromMainStoryboard(withIdentifier: "StandingsViewController") as? StandingsViewController else { return }
+            vcToPush = standingsVC
+            
+        case 4: // Profile (placeholder)
+            let placeholderVC = UIViewController()
+            placeholderVC.view.backgroundColor = .systemBackground
+            placeholderVC.title = "Profile"
+            vcToPush = placeholderVC
+            
+        default:
+            // Should never happen
+            return
         }
+        
+        // show new screen
+        navigationController?.pushViewController(vcToPush, animated: true)
     }
 }
 
