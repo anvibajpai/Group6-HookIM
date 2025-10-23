@@ -533,6 +533,9 @@
                                         <color key="tintColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         <state key="normal" title="Button"/>
                                         <buttonConfiguration key="configuration" style="plain" image="person.3" catalog="system"/>
+                                        <connections>
+                                            <segue destination="kbF-LA-jHL" kind="show" id="rGv-JD-g0T"/>
+                                        </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="zWM-Lq-jXT">
                                         <rect key="frame" x="159" y="27" width="85" height="46"/>
@@ -819,6 +822,7 @@
                         <viewLayoutGuide key="safeArea" id="lgM-p6-m5B"/>
                         <color key="backgroundColor" red="0.2823529541" green="0.27450981740000002" blue="0.27450981740000002" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                     </view>
+                    <navigationItem key="navigationItem" id="vey-a6-x6Q"/>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="75S-Oe-Rkj" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
