@@ -8,9 +8,10 @@
 import UIKit
 
 final class RosterCell: UITableViewCell {
+    
     @IBOutlet weak var nameLabel: UILabel!
     @IBOutlet weak var addButton: UIButton!
-
+    
     var onPlus: (() -> Void)?
 
     @IBAction func plusTapped(_ sender: UIButton) { onPlus?() }
@@ -64,7 +65,7 @@ extension CaptainTeamViewController: UITableViewDataSource, UITableViewDelegate 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "RosterCell", for: indexPath) as! RosterCell
         let player = team.roster[indexPath.row]
-        cell.nameLabel.text = player.name
+        cell.nameLabel.text = "Jane Doe"
         cell.onPlus = { [weak self] in
             guard let self else { return }
             // demo action for the small "+" inside each row
