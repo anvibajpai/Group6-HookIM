@@ -6,7 +6,12 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		CE93D3442EA9DEFB00642603 /* EditRecordViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE93D3432EA9DEFB00642603 /* EditRecordViewController.swift */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
+		CE93D3432EA9DEFB00642603 /* EditRecordViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditRecordViewController.swift; sourceTree = "<group>"; };
 		DA09F1FF2EA058B000E8B2B5 /* Group6-HookIM.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Group6-HookIM.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -45,6 +50,7 @@
 		DA09F1F62EA058B000E8B2B5 = {
 			isa = PBXGroup;
 			children = (
+				CE93D3432EA9DEFB00642603 /* EditRecordViewController.swift */,
 				DA09F2012EA058B000E8B2B5 /* Group6-HookIM */,
 				DA09F2002EA058B000E8B2B5 /* Products */,
 			);
@@ -132,6 +138,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CE93D3442EA9DEFB00642603 /* EditRecordViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

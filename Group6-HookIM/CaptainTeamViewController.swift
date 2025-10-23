@@ -19,6 +19,9 @@ final class RosterCell: UITableViewCell {
 
 
 class CaptainTeamViewController: UIViewController {
+    @IBOutlet weak var winsLabel: UILabel!
+    
+    @IBOutlet weak var lossLabel: UILabel!
     
     struct Player { let name: String }
     struct Team {
@@ -29,6 +32,15 @@ class CaptainTeamViewController: UIViewController {
         var wins: Int
         var losses: Int
     }
+    
+    var wins = 3
+    var losses = 2
+    
+    
+    func updateLabels() {
+            winsLabel.text = "\(wins)"
+            lossLabel.text = "\(losses)"
+        }
     
     @IBOutlet weak var teamNameSelector: UIButton!
     @IBOutlet weak var rosterTableView: UITableView!
@@ -54,6 +66,22 @@ class CaptainTeamViewController: UIViewController {
         rosterTableView.delegate   = self
         rosterTableView.tableFooterView = UIView()
     }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+            if segue.identifier == "editRecordSegue" {
+                if let destinationVC = segue.destination as? EditRecordViewController {
+                    destinationVC.wins = wins
+                    destinationVC.losses = losses
+                    
+                    // Setup callback
+                    destinationVC.onSave = { [weak self] updatedWins, updatedLosses in
+                        self?.wins = updatedWins
+                        self?.losses = updatedLosses
+                        self?.updateLabels()
+                    }
+                }
+            }
+        }
 }
 
 extension CaptainTeamViewController: UITableViewDataSource, UITableViewDelegate {
