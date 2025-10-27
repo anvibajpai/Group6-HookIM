@@ -23,7 +23,7 @@ class ViewController: UIViewController {
         password: "pw",
         profileImageData: nil,
         interestedSports: ["Soccer", "Basketball"],
-        division: "Womens",
+        division: "Women's",
         isFreeAgent: true
     )
     

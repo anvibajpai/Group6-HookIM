@@ -1697,7 +1697,7 @@
                                     <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 </state>
                                 <connections>
-                                    <action selector="menTapped:" destination="j0d-3y-T7D" eventType="touchUpInside" id="GoW-mZ-wal"/>
+                                    <action selector="menTapped:" destination="j0d-3y-T7D" eventType="touchUpInside" id="fcg-dC-Fdx"/>
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="249" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="HZk-qz-oJu">
@@ -1718,7 +1718,7 @@
                                     <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 </state>
                                 <connections>
-                                    <action selector="womenTapped:" destination="j0d-3y-T7D" eventType="touchUpInside" id="KO4-8g-Sqw"/>
+                                    <action selector="womenTapped:" destination="j0d-3y-T7D" eventType="touchUpInside" id="bXs-6H-SLj"/>
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="weq-Xd-BF9">
@@ -1737,7 +1737,7 @@
                                     <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 </state>
                                 <connections>
-                                    <action selector="coedTapped:" destination="j0d-3y-T7D" eventType="touchUpInside" id="VRC-UG-XDo"/>
+                                    <action selector="coedTapped:" destination="j0d-3y-T7D" eventType="touchUpInside" id="HSa-WS-4wJ"/>
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="4fA-uS-cad">
@@ -1750,7 +1750,7 @@
                                     <color key="baseBackgroundColor" red="0.74901960779999999" green="0.3411764706" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 </buttonConfiguration>
                                 <connections>
-                                    <action selector="finishTapped:" destination="j0d-3y-T7D" eventType="touchUpInside" id="hIo-jr-6sA"/>
+                                    <action selector="saveTapped:" destination="j0d-3y-T7D" eventType="touchUpInside" id="P6C-fj-wHj"/>
                                 </connections>
                             </button>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="wtI-OR-wDs">
@@ -1834,9 +1834,6 @@
                                 <state key="normal" title="Selected Sports">
                                     <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 </state>
-                                <connections>
-                                    <action selector="genderButtonTapped:" destination="t81-Bf-oZY" eventType="touchUpInside" id="Rrk-uI-kOw"/>
-                                </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="248" showsMenuAsPrimaryAction="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="CDZ-ml-bez">
                                 <rect key="frame" x="247" y="371" width="139" height="40"/>
@@ -1855,14 +1852,29 @@
                                 <state key="normal" title="Gender">
                                     <color key="titleColor" white="0.66666666669999997" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 </state>
-                                <connections>
-                                    <action selector="genderButtonTapped:" destination="t81-Bf-oZY" eventType="touchUpInside" id="oLy-SA-QV5"/>
-                                </connections>
                             </button>
                             <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="glt-P0-MZs">
                                 <rect key="frame" x="329" y="539" width="51" height="31"/>
                                 <color key="onTintColor" red="0.74901960779999999" green="0.3411764706" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                             </switch>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="VgC-G0-VGm">
+                                <rect key="frame" x="30" y="342" width="100" height="28"/>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="filled">
+                                    <attributedString key="attributedTitle">
+                                        <fragment content="Change Photo">
+                                            <attributes>
+                                                <font key="NSFont" size="12" name="Helvetica"/>
+                                                <font key="NSOriginalFont" size="12" name="Helvetica"/>
+                                                <paragraphStyle key="NSParagraphStyle" alignment="center" lineBreakMode="wordWrapping" baseWritingDirection="natural" tighteningFactorForTruncation="0.0"/>
+                                            </attributes>
+                                        </fragment>
+                                    </attributedString>
+                                </buttonConfiguration>
+                                <connections>
+                                    <action selector="changePhotoTapped:" destination="j0d-3y-T7D" eventType="touchUpInside" id="Z7s-bg-r9Q"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="uCB-li-nn1"/>
                         <color key="backgroundColor" red="0.28235294119999998" green="0.27450980390000002" blue="0.27450980390000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
@@ -1878,6 +1890,7 @@
                             <constraint firstItem="nTq-h3-Aun" firstAttribute="top" secondItem="Cgh-VE-a5g" secondAttribute="top" constant="226" id="A2D-qE-Lcq"/>
                             <constraint firstItem="CDZ-ml-bez" firstAttribute="leading" secondItem="Gfb-Ab-uVy" secondAttribute="trailing" constant="-2" id="Aaz-mc-jMi"/>
                             <constraint firstItem="cGu-yY-Zav" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="uCB-li-nn1" secondAttribute="leading" id="Am9-0P-tLy"/>
+                            <constraint firstItem="cGu-yY-Zav" firstAttribute="top" secondItem="VgC-G0-VGm" secondAttribute="bottom" constant="75" id="DRB-Gq-AKi"/>
                             <constraint firstItem="Axe-4n-k88" firstAttribute="top" secondItem="cGu-yY-Zav" secondAttribute="bottom" constant="11" id="FTR-d3-6QH"/>
                             <constraint firstItem="Bjd-Dt-EF0" firstAttribute="top" secondItem="uCB-li-nn1" secondAttribute="top" constant="15" id="Its-sI-rOu"/>
                             <constraint firstItem="UVG-gY-Xbe" firstAttribute="top" secondItem="Axe-4n-k88" secondAttribute="bottom" constant="8.3333333333332575" id="JWk-nu-mqq"/>
@@ -1886,9 +1899,10 @@
                             <constraint firstItem="HZk-qz-oJu" firstAttribute="top" secondItem="1LN-kv-fYo" secondAttribute="top" id="Ks1-Ic-tbq"/>
                             <constraint firstItem="bg0-2d-pbU" firstAttribute="leading" secondItem="Cgh-VE-a5g" secondAttribute="leadingMargin" constant="-29" id="Lql-8D-N95"/>
                             <constraint firstItem="t8u-9w-BhC" firstAttribute="leading" secondItem="BaF-To-g8h" secondAttribute="leading" id="Lsd-hT-cCK"/>
-                            <constraint firstItem="HZk-qz-oJu" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="1LN-kv-fYo" secondAttribute="trailing" symbolic="YES" id="MdK-u4-gfL"/>
+                            <constraint firstItem="HZk-qz-oJu" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="1LN-kv-fYo" secondAttribute="trailing" constant="8" symbolic="YES" id="MdK-u4-gfL"/>
                             <constraint firstItem="7fM-i9-9vm" firstAttribute="top" secondItem="6Sk-Jx-OQR" secondAttribute="bottom" constant="8" id="Mmj-ze-XdB"/>
                             <constraint firstItem="wtI-OR-wDs" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="cGu-yY-Zav" secondAttribute="leading" id="NJM-0w-vaV"/>
+                            <constraint firstItem="VgC-G0-VGm" firstAttribute="leading" secondItem="uCB-li-nn1" secondAttribute="leading" constant="30" id="Ni6-2p-KgZ"/>
                             <constraint firstItem="wtI-OR-wDs" firstAttribute="leading" secondItem="cGu-yY-Zav" secondAttribute="leading" id="OPG-0a-GwC"/>
                             <constraint firstItem="Bjd-Dt-EF0" firstAttribute="centerX" secondItem="Cgh-VE-a5g" secondAttribute="centerX" id="Ofk-gi-E7c"/>
                             <constraint firstItem="HZk-qz-oJu" firstAttribute="baseline" secondItem="1LN-kv-fYo" secondAttribute="baseline" id="Oym-O3-KtK"/>
@@ -1901,8 +1915,10 @@
                             <constraint firstItem="CDZ-ml-bez" firstAttribute="bottom" secondItem="Gfb-Ab-uVy" secondAttribute="bottom" id="Vze-af-EKj"/>
                             <constraint firstItem="HZk-qz-oJu" firstAttribute="centerX" secondItem="Gfb-Ab-uVy" secondAttribute="centerX" id="Wfz-HT-mQT"/>
                             <constraint firstItem="UVG-gY-Xbe" firstAttribute="leading" secondItem="uCB-li-nn1" secondAttribute="leading" constant="25" id="XFq-Gh-L4X"/>
+                            <constraint firstItem="VgC-G0-VGm" firstAttribute="centerX" secondItem="nTq-h3-Aun" secondAttribute="centerX" id="XLH-fT-sIK"/>
                             <constraint firstItem="7fM-i9-9vm" firstAttribute="leading" secondItem="BaF-To-g8h" secondAttribute="leading" id="YGi-IL-TEV"/>
                             <constraint firstItem="6Sk-Jx-OQR" firstAttribute="trailing" secondItem="BaF-To-g8h" secondAttribute="trailing" id="Ywu-fT-ec4"/>
+                            <constraint firstItem="VgC-G0-VGm" firstAttribute="top" secondItem="nTq-h3-Aun" secondAttribute="bottom" constant="5" id="ZKj-hD-Huk"/>
                             <constraint firstItem="HZk-qz-oJu" firstAttribute="centerX" secondItem="t8u-9w-BhC" secondAttribute="centerX" id="Zdc-LA-3hz"/>
                             <constraint firstItem="glt-P0-MZs" firstAttribute="trailing" secondItem="weq-Xd-BF9" secondAttribute="trailing" id="ap2-O6-BAq"/>
                             <constraint firstItem="glt-P0-MZs" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="UVG-gY-Xbe" secondAttribute="trailing" constant="8" symbolic="YES" id="aqr-Ti-WgP"/>
@@ -1934,10 +1950,15 @@
                     </view>
                     <navigationItem key="navigationItem" id="KCI-cy-9NA"/>
                     <connections>
-                        <outlet property="coedButton" destination="weq-Xd-BF9" id="BjB-as-CtP"/>
-                        <outlet property="freeAgentSwitch" destination="glt-P0-MZs" id="fv4-eH-3cM"/>
-                        <outlet property="menButton" destination="1LN-kv-fYo" id="zBf-Qt-i59"/>
-                        <outlet property="womenButton" destination="HZk-qz-oJu" id="pPZ-02-jbF"/>
+                        <outlet property="coedButton" destination="weq-Xd-BF9" id="Ms8-kL-hjc"/>
+                        <outlet property="emaillabel" destination="BaF-To-g8h" id="wm9-tW-5PM"/>
+                        <outlet property="freeAgentSwitch" destination="glt-P0-MZs" id="hBB-6m-aZE"/>
+                        <outlet property="genderButton" destination="CDZ-ml-bez" id="aJq-ZX-Bm8"/>
+                        <outlet property="mensButton" destination="1LN-kv-fYo" id="EOl-9k-EHc"/>
+                        <outlet property="nameTextField" destination="6Sk-Jx-OQR" id="Etx-er-GI7"/>
+                        <outlet property="profileImageView" destination="nTq-h3-Aun" id="wth-ff-cdE"/>
+                        <outlet property="sportsButton" destination="cGu-yY-Zav" id="KJk-Jc-KPf"/>
+                        <outlet property="womensButton" destination="HZk-qz-oJu" id="lVu-Fd-527"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="jOA-eZ-cLE" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
@@ -1946,7 +1967,7 @@
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="CAu-vb-Ang"/>
+        <segue reference="g3i-kz-Ga6"/>
     </inferredMetricsTieBreakers>
     <color key="tintColor" red="0.61176472900000001" green="0.38823530080000002" blue="0.1607843041" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
     <resources>
