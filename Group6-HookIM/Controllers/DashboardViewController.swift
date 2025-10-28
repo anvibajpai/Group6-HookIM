@@ -7,22 +7,6 @@
 
 import UIKit
 
-// MARK: - Simple Models
-struct Game {
-    let team: String
-    let opponent: String
-    let location: String
-    let time: String
-}
-
-struct TeamCard {
-    let title: String
-    let subtitle: String
-    let record: String
-    let divisionStanding: String
-    let nextGame: String
-}
-
 // MARK: - Color Helpers
 extension UIColor {
     static let warmOrange = UIColor(red: 170/255, green: 82/255, blue: 30/255, alpha: 1)
@@ -31,106 +15,7 @@ extension UIColor {
     static let softGray    = UIColor(white: 0.85, alpha: 1)
 }
 
-// MARK: - Team Card Cell
-final class TeamCardCell: UICollectionViewCell {
-    static let reuseID = "TeamCardCell"
-
-    let container = UIView()
-    let titleLabel = UILabel()
-    let subtitleLabel = UILabel()
-    let recordLabel = UILabel()
-    let standingLabel = UILabel()
-    let nextGameTitle = UILabel()
-    let nextGameLabel = UILabel()
-    let button = UIButton(type: .system)
-
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        contentView.backgroundColor = .clear
-        build()
-    }
-
-    required init?(coder: NSCoder) { fatalError() }
-
-    private func build() {
-        container.backgroundColor = .white
-        container.layer.cornerRadius = 12
-        container.layer.shadowColor = UIColor.black.cgColor
-        container.layer.shadowOpacity = 0.15
-        container.layer.shadowRadius = 4
-        container.layer.shadowOffset = CGSize(width: 0, height: 2)
-
-        [titleLabel, subtitleLabel, recordLabel, standingLabel, nextGameTitle, nextGameLabel, button].forEach {
-            $0.translatesAutoresizingMaskIntoConstraints = false
-            container.addSubview($0)
-        }
-        contentView.addSubview(container)
-        container.translatesAutoresizingMaskIntoConstraints = false
-
-        titleLabel.font = .systemFont(ofSize: 16, weight: .semibold)
-        titleLabel.numberOfLines = 2
-        subtitleLabel.font = .systemFont(ofSize: 12)
-        subtitleLabel.textColor = .gray
-
-        recordLabel.font = .systemFont(ofSize: 20, weight: .bold)
-        standingLabel.font = .systemFont(ofSize: 10)
-        standingLabel.textColor = .gray
-
-        nextGameTitle.font = .systemFont(ofSize: 12)
-        nextGameTitle.textColor = .gray
-        nextGameTitle.text = "Next Game"
-
-        nextGameLabel.font = .systemFont(ofSize: 11, weight: .regular)
-        nextGameLabel.numberOfLines = 2
-
-        button.setTitle("View Team", for: .normal)
-        button.setTitleColor(.white, for: .normal)
-        button.backgroundColor = .warmOrange
-        button.layer.cornerRadius = 8
-        button.titleLabel?.font = .systemFont(ofSize: 12, weight: .semibold)
-
-        NSLayoutConstraint.activate([
-            container.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-            container.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-            container.topAnchor.constraint(equalTo: contentView.topAnchor),
-            container.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
-
-            titleLabel.topAnchor.constraint(equalTo: container.topAnchor, constant: 12),
-            titleLabel.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 12),
-            titleLabel.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -12),
-
-            subtitleLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 4),
-            subtitleLabel.leadingAnchor.constraint(equalTo: titleLabel.leadingAnchor),
-            subtitleLabel.trailingAnchor.constraint(equalTo: titleLabel.trailingAnchor),
-
-            recordLabel.topAnchor.constraint(equalTo: subtitleLabel.bottomAnchor, constant: 12),
-            recordLabel.leadingAnchor.constraint(equalTo: titleLabel.leadingAnchor),
-
-            standingLabel.leadingAnchor.constraint(equalTo: recordLabel.leadingAnchor),
-            standingLabel.topAnchor.constraint(equalTo: recordLabel.bottomAnchor, constant: 2),
-
-            nextGameTitle.topAnchor.constraint(equalTo: standingLabel.bottomAnchor, constant: 12),
-            nextGameTitle.leadingAnchor.constraint(equalTo: titleLabel.leadingAnchor),
-
-            nextGameLabel.topAnchor.constraint(equalTo: nextGameTitle.bottomAnchor, constant: 4),
-            nextGameLabel.leadingAnchor.constraint(equalTo: titleLabel.leadingAnchor),
-            nextGameLabel.trailingAnchor.constraint(equalTo: titleLabel.trailingAnchor),
-
-            button.heightAnchor.constraint(equalToConstant: 36),
-            button.leadingAnchor.constraint(equalTo: titleLabel.leadingAnchor),
-            button.trailingAnchor.constraint(equalTo: titleLabel.trailingAnchor),
-            button.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -12)
-        ])
-    }
-
-    func configure(_ m: TeamCard) {
-        titleLabel.text = m.title
-        subtitleLabel.text = m.subtitle
-        recordLabel.text = m.record
-        standingLabel.text = m.divisionStanding
-        nextGameLabel.text = m.nextGame
-    }
-}
+// MARK: - Team Card Cell (using external TeamCardCell class)
 
 
 // MARK: - Dashboard VC
@@ -138,20 +23,51 @@ class DashboardViewController: UIViewController {
     
     var user: User!  // Provided by previous screen
     
-    // Data (replace with your real models/service)
-    private let games: [Game] = [
-        .init(team: "Arch and Friends", opponent: "The Bevo Buddies", location: "Whittaker Fields", time: "October 8th, 7PM"),
-        .init(team: "The Dodge Fathers", opponent: "Spike it", location: "Gregory Gym", time: "October 12th, 6PM"),
-        .init(team: "The Dodge Fathers", opponent: "Batman", location: "Belmont Hall", time: "October 7th, 6PM")
-    ]
-    private let teams: [TeamCard] = [
-        .init(title: "The Dodge Fathers", subtitle: "Co-ed Dodgeball", record: "5W - 2L", divisionStanding: "3rd in Division", nextGame: "Today, 6PM vs Batman"),
-        .init(title: "Arch and Friends", subtitle: "Men's Flag Football", record: "3W - 2L", divisionStanding: "3rd in Division", nextGame: "Oct 8th, 7PM vs The Bevo Buddies"),
-        .init(title: "Arch & Friends (2)", subtitle: "Men's 6v6", record: "3W - 2L", divisionStanding: "2nd in Division", nextGame: "Oct 8th, 7PM")
-    ]
+    // MARK: - Outlets
+    @IBOutlet weak var activityLabel: UILabel!
+    @IBOutlet weak var bottomTabBar: UITabBar!
+    @IBOutlet weak var contentView: UIView!
+    @IBOutlet weak var greetingLabel: UILabel!
+    @IBOutlet weak var headerContainer: UIView!
+    @IBOutlet weak var logoImageView: UIImageView!
+    @IBOutlet weak var myTeamsTitle: UILabel!
+    @IBOutlet weak var notificationButton: UIButton!
+    @IBOutlet weak var recentActivityTitle: UILabel!
+    @IBOutlet weak var scrollView: UIScrollView!
+    @IBOutlet weak var teamsCollection: UICollectionView!
+    @IBOutlet weak var upcomingGamesCard: UIView!
+    @IBOutlet weak var upcomingGamesTitle: UILabel!
+    @IBOutlet weak var upcomingTable: UITableView!
+    
+    // MARK: - Properties
+    private var upcomingGames: [Game] = []
+    private var myTeams: [DashboardTeam] = []
+    private var recentActivity: Activity?
+    
+    // Helper function to format date with ordinal suffix
+    private func formatDateWithOrdinal(_ date: Date) -> String {
+        let calendar = Calendar.current
+        let day = calendar.component(.day, from: date)
+        let monthFormatter = DateFormatter()
+        monthFormatter.dateFormat = "MMMM"
+        let month = monthFormatter.string(from: date)
+        
+        let hourFormatter = DateFormatter()
+        hourFormatter.dateFormat = "ha"
+        let time = hourFormatter.string(from: date)
+        
+        let ordinalSuffix: String
+        switch day {
+        case 1, 21, 31: ordinalSuffix = "st"
+        case 2, 22: ordinalSuffix = "nd"
+        case 3, 23: ordinalSuffix = "rd"
+        default: ordinalSuffix = "th"
+        }
+        
+        return "\(month) \(day)\(ordinalSuffix), \(time)"
+    }
     
     // Views
-    private let scrollView = UIScrollView()
     private let contentStack = UIStackView()
     
     private let header = UIView()
@@ -162,11 +78,8 @@ class DashboardViewController: UIViewController {
     private let upcomingContainer = UIView()
     private let upcomingTitle = UILabel()
     private let upcomingCard = UIView()
-    private let pillHeaderRow = UIStackView()
-    private let gameRowsStack = UIStackView()
     
     private let teamsTitle = UILabel()
-    private var teamsCollection: UICollectionView!
     
     private let recentTitle = UILabel()
     private let recentLabel = UILabel()
@@ -190,9 +103,31 @@ class DashboardViewController: UIViewController {
         print("Free Agent: \(user.isFreeAgent)")
         print("Interested Sports: \(user.interestedSports.isEmpty ? "none" : user.interestedSports.joined(separator: ", "))")
         
+        loadMockData()
         buildUI()
         layoutUI()
         populateData()
+        
+        // Debug: Check if outlets are connected
+        print("upcomingGamesTitle: \(upcomingGamesTitle)")
+        print("myTeamsTitle: \(myTeamsTitle)")
+        print("recentActivityTitle: \(recentActivityTitle)")
+        print("upcomingTable: \(upcomingTable)")
+        print("teamsCollection: \(teamsCollection)")
+        print("activityLabel: \(activityLabel)")
+    }
+    
+    // MARK: - Actions
+    @IBAction func notificationButtonTapped(_ sender: UIButton) {
+        print("Notification button tapped")
+        // TODO: Implement notification functionality
+    }
+    
+    private func loadMockData() {
+        let mockData = MockDataGenerator.generateMockData()
+        upcomingGames = mockData.upcomingGames
+        myTeams = mockData.teams
+        recentActivity = mockData.activity
     }
     
     // MARK: - Build
@@ -200,6 +135,36 @@ class DashboardViewController: UIViewController {
         view.backgroundColor = .nearBlack
         navigationController?.setNavigationBarHidden(true, animated: false)
         
+        // Ensure content view is visible
+        contentView.backgroundColor = UIColor.clear
+        
+        // Set up table view and collection view data sources
+        upcomingTable.dataSource = self
+        upcomingTable.delegate = self
+        upcomingTable.register(UpcomingGameCell.self, forCellReuseIdentifier: "UpcomingGameCellID")
+        upcomingTable.separatorStyle = .none
+        upcomingTable.backgroundColor = .clear
+        
+        teamsCollection.dataSource = self
+        teamsCollection.register(TeamCardCell.self, forCellWithReuseIdentifier: "TeamCardCellID")
+        teamsCollection.backgroundColor = .clear
+        teamsCollection.showsHorizontalScrollIndicator = false
+        
+        // Ensure section titles are visible
+        upcomingGamesTitle.textColor = .white
+        myTeamsTitle.textColor = .white
+        recentActivityTitle.textColor = .white
+        activityLabel.textColor = .white
+        
+        // Debug: Check if elements are visible
+        print("upcomingGamesTitle.isHidden: \(upcomingGamesTitle.isHidden)")
+        print("myTeamsTitle.isHidden: \(myTeamsTitle.isHidden)")
+        print("recentActivityTitle.isHidden: \(recentActivityTitle.isHidden)")
+        print("upcomingTable.isHidden: \(upcomingTable.isHidden)")
+        print("teamsCollection.isHidden: \(teamsCollection.isHidden)")
+        
+        // Comment out programmatic UI creation since we're using storyboard
+        /*
         // Scroll area
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(scrollView)
@@ -250,20 +215,16 @@ class DashboardViewController: UIViewController {
         upcomingCard.layer.shadowOffset = CGSize(width: 0, height: 2)
         upcomingCard.translatesAutoresizingMaskIntoConstraints = false
         
-        // Pills header
-        pillHeaderRow.axis = .horizontal
-        pillHeaderRow.alignment = .fill
-        pillHeaderRow.distribution = .fillEqually
-        pillHeaderRow.spacing = 8
-        pillHeaderRow.translatesAutoresizingMaskIntoConstraints = false
+        // Configure table view
+        upcomingTable.translatesAutoresizingMaskIntoConstraints = false
+        upcomingTable.dataSource = self
+        upcomingTable.delegate = self
+        upcomingTable.isScrollEnabled = false
+        upcomingTable.backgroundColor = .clear
+        upcomingTable.separatorStyle = .none
+        upcomingTable.register(UpcomingGameCell.self, forCellReuseIdentifier: "UpcomingGameCellID")
         
-        // Rows stack
-        gameRowsStack.axis = .vertical
-        gameRowsStack.spacing = 8
-        gameRowsStack.translatesAutoresizingMaskIntoConstraints = false
-        
-        upcomingCard.addSubview(pillHeaderRow)
-        upcomingCard.addSubview(gameRowsStack)
+        upcomingCard.addSubview(upcomingTable)
         
         upWrap.addSubview(upcomingTitle)
         upWrap.addSubview(upcomingCard)
@@ -283,7 +244,7 @@ class DashboardViewController: UIViewController {
         teamsCollection.translatesAutoresizingMaskIntoConstraints = false
         teamsCollection.backgroundColor = .clear
         teamsCollection.showsHorizontalScrollIndicator = false
-        teamsCollection.register(TeamCardCell.self, forCellWithReuseIdentifier: TeamCardCell.reuseID)
+        teamsCollection.register(TeamCardCell.self, forCellWithReuseIdentifier: "TeamCardCellID")
         teamsCollection.dataSource = self
         
         let teamsWrap = UIStackView(arrangedSubviews: [teamsTitle, teamsCollection])
@@ -300,7 +261,7 @@ class DashboardViewController: UIViewController {
         recentLabel.textColor = UIColor.white.withAlphaComponent(0.85)
         recentLabel.numberOfLines = 0
         recentLabel.font = .systemFont(ofSize: 14)
-        recentLabel.text = "You and the [Team Name] beat [Opponent Name] [Score]!"
+        recentLabel.text = recentActivity?.text ?? "No recent activity"
         
         let recentWrap = UIStackView(arrangedSubviews: [recentTitle, recentLabel])
         recentWrap.axis = .vertical
@@ -359,10 +320,13 @@ class DashboardViewController: UIViewController {
             stack.topAnchor.constraint(equalTo: tabBarView.topAnchor, constant: 6),
             stack.bottomAnchor.constraint(equalTo: tabBarView.bottomAnchor, constant: -10)
         ])
+        */
     }
     
     // MARK: - Layout
     private func layoutUI() {
+        // Comment out programmatic layout since we're using storyboard constraints
+        /*
         NSLayoutConstraint.activate([
             scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -396,15 +360,12 @@ class DashboardViewController: UIViewController {
             upcomingCard.topAnchor.constraint(equalTo: upcomingTitle.bottomAnchor, constant: 8),
             upcomingCard.leadingAnchor.constraint(equalTo: contentStack.leadingAnchor),
             upcomingCard.trailingAnchor.constraint(equalTo: contentStack.trailingAnchor),
+            upcomingCard.heightAnchor.constraint(equalToConstant: 200),
             
-            pillHeaderRow.topAnchor.constraint(equalTo: upcomingCard.topAnchor, constant: 12),
-            pillHeaderRow.leadingAnchor.constraint(equalTo: upcomingCard.leadingAnchor, constant: 12),
-            pillHeaderRow.trailingAnchor.constraint(equalTo: upcomingCard.trailingAnchor, constant: -12),
-            
-            gameRowsStack.topAnchor.constraint(equalTo: pillHeaderRow.bottomAnchor, constant: 10),
-            gameRowsStack.leadingAnchor.constraint(equalTo: upcomingCard.leadingAnchor, constant: 10),
-            gameRowsStack.trailingAnchor.constraint(equalTo: upcomingCard.trailingAnchor, constant: -10),
-            gameRowsStack.bottomAnchor.constraint(equalTo: upcomingCard.bottomAnchor, constant: -12),
+            upcomingTable.topAnchor.constraint(equalTo: upcomingCard.topAnchor, constant: 10),
+            upcomingTable.leadingAnchor.constraint(equalTo: upcomingCard.leadingAnchor, constant: 10),
+            upcomingTable.trailingAnchor.constraint(equalTo: upcomingCard.trailingAnchor, constant: -10),
+            upcomingTable.bottomAnchor.constraint(equalTo: upcomingCard.bottomAnchor, constant: -10),
             
             // Teams collection height
             teamsCollection.heightAnchor.constraint(equalToConstant: 200),
@@ -414,81 +375,26 @@ class DashboardViewController: UIViewController {
             tabBarView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             tabBarView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
         ])
+        */
     }
     
     // MARK: - Populate
     private func populateData() {
-        greetLabel.text = "Hi, \(user.firstName)!"
+        greetingLabel.text = "Hi, \(user.firstName)!"
         
-        // Header pill labels
-        ["Team","Opponent","Location","Time"].forEach { title in
-            pillHeaderRow.addArrangedSubview(makeHeaderPill(title))
-        }
+        // Debug: Check data
+        print("upcomingGames count: \(upcomingGames.count)")
+        print("myTeams count: \(myTeams.count)")
+        print("recentActivity: \(recentActivity?.text ?? "nil")")
         
-        // Rows
-        games.forEach { g in
-            let row = UIStackView()
-            row.axis = .horizontal
-            row.spacing = 8
-            row.distribution = .fillEqually
-            
-            row.addArrangedSubview(makeRowPill(g.team))
-            row.addArrangedSubview(makeRowPill(g.opponent))
-            row.addArrangedSubview(makeRowPill(g.location))
-            row.addArrangedSubview(makeRowPill(g.time))
-            
-            gameRowsStack.addArrangedSubview(row)
-        }
-    }
-    
-    // MARK: - Builders
-    private func makeHeaderPill(_ text: String) -> UIView {
-        let l = UILabel()
-        l.text = text
-        l.textAlignment = .center
-        l.font = .systemFont(ofSize: 12, weight: .semibold)
-        l.textColor = .black
-        let bg = UIView()
-        bg.backgroundColor = .white
-        bg.layer.cornerRadius = 16
-        bg.layer.borderColor = UIColor.softGray.cgColor
-        bg.layer.borderWidth = 1
-        bg.translatesAutoresizingMaskIntoConstraints = false
-        l.translatesAutoresizingMaskIntoConstraints = false
-        bg.addSubview(l)
-        NSLayoutConstraint.activate([
-            l.topAnchor.constraint(equalTo: bg.topAnchor, constant: 6),
-            l.bottomAnchor.constraint(equalTo: bg.bottomAnchor, constant: -6),
-            l.leadingAnchor.constraint(equalTo: bg.leadingAnchor, constant: 8),
-            l.trailingAnchor.constraint(equalTo: bg.trailingAnchor, constant: -8),
-            bg.heightAnchor.constraint(greaterThanOrEqualToConstant: 30)
-        ])
-        return bg
-    }
-    
-    private func makeRowPill(_ text: String) -> UIView {
-        let l = UILabel()
-        l.text = text
-        l.font = .systemFont(ofSize: 13)
-        l.textColor = .black
-        l.numberOfLines = 2
+        // Reload table view and collection view
+        upcomingTable.reloadData()
+        teamsCollection.reloadData()
         
-        let bg = UIView()
-        bg.backgroundColor = .white
-        bg.layer.cornerRadius = 8
-        bg.layer.borderColor = UIColor.softGray.cgColor
-        bg.layer.borderWidth = 1
-        bg.translatesAutoresizingMaskIntoConstraints = false
-        l.translatesAutoresizingMaskIntoConstraints = false
-        bg.addSubview(l)
-        NSLayoutConstraint.activate([
-            l.topAnchor.constraint(equalTo: bg.topAnchor, constant: 8),
-            l.bottomAnchor.constraint(equalTo: bg.bottomAnchor, constant: -8),
-            l.leadingAnchor.constraint(equalTo: bg.leadingAnchor, constant: 8),
-            l.trailingAnchor.constraint(equalTo: bg.trailingAnchor, constant: -8),
-            bg.heightAnchor.constraint(greaterThanOrEqualToConstant: 36)
-        ])
-        return bg
+        // Update activity label
+        activityLabel.text = recentActivity?.text ?? "No recent activity"
+        
+        print("Activity label text set to: \(activityLabel.text ?? "nil")")
     }
     
     private func instantiateFromMainStoryboard(withIdentifier id: String) -> UIViewController {
@@ -557,14 +463,41 @@ class DashboardViewController: UIViewController {
     }
 }
 
+// MARK: - UITableViewDataSource
+extension DashboardViewController: UITableViewDataSource {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return upcomingGames.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "UpcomingGameCellID", for: indexPath) as! UpcomingGameCell
+        let game = upcomingGames[indexPath.row]
+        cell.configure(with: game, dateFormatter: formatDateWithOrdinal)
+        return cell
+    }
+}
+
+// MARK: - UITableViewDelegate
+extension DashboardViewController: UITableViewDelegate {
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 60
+    }
+}
+
 // MARK: - Collection View DataSource
 extension DashboardViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        teams.count
+        return myTeams.count
     }
+    
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: TeamCardCell.reuseID, for: indexPath) as! TeamCardCell
-        cell.configure(teams[indexPath.item])
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "TeamCardCellID", for: indexPath) as! TeamCardCell
+        let team = myTeams[indexPath.item]
+        cell.configure(with: team, dateFormatter: formatDateWithOrdinal)
+        cell.onViewTeamTapped = { [weak self] team in
+            print("View Team tapped for: \(team.name)")
+            // TODO: Navigate to team detail
+        }
         return cell
     }
 }
