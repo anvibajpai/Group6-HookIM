@@ -524,18 +524,8 @@ class DashboardViewController: UIViewController {
             vcToPush = teamVC
             
         case 2: // Schedule
-            let scheduleVC = ScheduleViewController()
-                    
-            let navController = UINavigationController(rootViewController: scheduleVC)
-            navController.modalPresentationStyle = .fullScreen
-            
-            present(navController, animated: true) {
-                self.selectedDotViews[newTab].alpha = 0
-                self.selectedTab = 0
-                self.selectedDotViews[self.selectedTab].alpha = 1
-            }
-            // exit for special case
-            return
+            guard let scheduleVC = instantiateFromMainStoryboard(withIdentifier: "ScheduleViewController") as? ScheduleViewController else { return }
+            vcToPush = scheduleVC
             
         case 3: // Standings
             guard let standingsVC = instantiateFromMainStoryboard(withIdentifier: "StandingsViewController") as? StandingsViewController else { return }
