@@ -29,6 +29,7 @@ class UserProfileViewController: UIViewController, UIImagePickerControllerDelega
     private var selectedSports = Set<String>()
     private var selectedDivision: String?
     private var selectedGender: String?
+    private var newProfileImage: UIImage?
     
     // MARK: - Properties
     var user: User!
@@ -63,9 +64,11 @@ class UserProfileViewController: UIViewController, UIImagePickerControllerDelega
                 return
             }
             self.user = user
+            DispatchQueue.main.async {
+                self.loadUserData()
+                self.setupUI()
+            }
         }
-        loadUserData()
-        setupUI()
     }
 
     private func setupUI() {
@@ -117,10 +120,6 @@ class UserProfileViewController: UIViewController, UIImagePickerControllerDelega
 
 
     private func loadUserData() {
-//        if let loadedUser = UserManager.shared.load() {
-//            user = loadedUser
-//        }
-        
         if let data = user.profileImageURL {
 //           let img = UIImage(data: data) {
 //            profileImageView.image = img
@@ -142,6 +141,7 @@ class UserProfileViewController: UIViewController, UIImagePickerControllerDelega
         freeAgentSwitch.isOn = user.isFreeAgent
         selectedDivision = user.division
         updateDivisionButtons()
+        
     }
 
     // MARK: - Division Buttons
@@ -205,12 +205,11 @@ class UserProfileViewController: UIViewController, UIImagePickerControllerDelega
         picker.dismiss(animated: true)
         guard let selectedImage = info[.originalImage] as? UIImage else { return }
         profileImageView.image = selectedImage
-        //user.profileImagURL = selectedImage.jpegData(compressionQuality: 0.8)
+        newProfileImage = selectedImage
     }
     
     // MARK: - Save Button
     @IBAction func saveTapped(_ sender: Any) {
-        
         guard let nameText = nameTextField.text, let gender = selectedGender else {
             showAlert(title: "Missing Info", message: "Please fill all required fields.")
             return
@@ -227,8 +226,52 @@ class UserProfileViewController: UIViewController, UIImagePickerControllerDelega
         user.interestedSports = Array(selectedSports)
         user.division = selectedDivision
         
-        //UserManager.shared.save(user)
-        showAlert(title: "Saved", message: "Your profile has been updated.")
+        if let newImage = newProfileImage {
+            uploadProfileImage(newImage) { urlString in
+                if let urlString = urlString {
+                    self.user.profileImageURL = urlString
+                }
+                self.updateUserInFirestore()
+            }
+        } else {
+            self.updateUserInFirestore()
+        }
+    }
+    
+    // MARK: - Firestore Update
+    private func updateUserInFirestore() {
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+
+        let userRef = Firestore.firestore().collection("users").document(uid)
+        userRef.updateData(user.dictionary) { error in
+            if let error = error {
+                self.showAlert(title: "Error", message: "Failed to update profile: \(error.localizedDescription)")
+            } else {
+                self.showAlert(title: "Saved", message: "Your profile has been updated.")
+            }
+        }
+    }
+    
+    // MARK: - Firebase Storage Upload, not implemented yet :(
+    private func uploadProfileImage(_ image: UIImage, completion: @escaping (String?) -> Void) {
+        guard let uid = Auth.auth().currentUser?.uid,
+              let imageData = image.jpegData(compressionQuality: 0.8) else {
+            completion(nil)
+            return
+        }
+
+        // upload image to storage
+//        let storageRef = Storage.storage().reference().child("profile_images/\(uid).jpg")
+//        storageRef.putData(imageData, metadata: nil) { _, error in
+//            if let error = error {
+//                print("Upload error: \(error)")
+//                completion(nil)
+//                return
+//            }
+//            storageRef.downloadURL { url, _ in
+//                completion(url?.absoluteString)
+//            }
+//        }
     }
     
     // MARK: - Helpers
