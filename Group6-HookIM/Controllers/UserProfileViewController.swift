@@ -7,6 +7,8 @@
 
 import UIKit
 import Photos
+import FirebaseAuth
+import FirebaseFirestore
 
 class UserProfileViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     
@@ -30,10 +32,38 @@ class UserProfileViewController: UIViewController, UIImagePickerControllerDelega
     
     // MARK: - Properties
     var user: User!
+    func fetchCurrentUser(completion: @escaping (User?) -> Void) {
+        guard let uid = Auth.auth().currentUser?.uid else {
+            completion(nil)
+            return
+        }
+
+        Firestore.firestore().collection("users").document(uid).getDocument { snapshot, error in
+            if let error = error {
+                print("Error fetching user: \(error.localizedDescription)")
+                completion(nil)
+                return
+            }
+
+            if let data = snapshot?.data(),
+               let user = User(from: data) {
+                completion(user)
+            } else {
+                completion(nil)
+            }
+        }
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        fetchCurrentUser { user in
+            guard let user = user else {
+                print("No logged in user found.")
+                return
+            }
+            self.user = user
+        }
         loadUserData()
         setupUI()
     }
@@ -91,9 +121,10 @@ class UserProfileViewController: UIViewController, UIImagePickerControllerDelega
 //            user = loadedUser
 //        }
         
-        if let data = user.profileImageData,
-           let img = UIImage(data: data) {
-            profileImageView.image = img
+        if let data = user.profileImageURL {
+//           let img = UIImage(data: data) {
+//            profileImageView.image = img
+            profileImageView.image = UIImage(systemName: "person.crop.circle")
         } else {
             profileImageView.image = UIImage(systemName: "person.crop.circle")
         }
@@ -174,7 +205,7 @@ class UserProfileViewController: UIViewController, UIImagePickerControllerDelega
         picker.dismiss(animated: true)
         guard let selectedImage = info[.originalImage] as? UIImage else { return }
         profileImageView.image = selectedImage
-        user.profileImageData = selectedImage.jpegData(compressionQuality: 0.8)
+        //user.profileImagURL = selectedImage.jpegData(compressionQuality: 0.8)
     }
     
     // MARK: - Save Button

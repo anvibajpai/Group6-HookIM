@@ -6,6 +6,8 @@
 //
 
 import UIKit
+import FirebaseAuth
+import FirebaseFirestore
 
 // MARK: - Color Helpers
 extension UIColor {
@@ -21,7 +23,28 @@ extension UIColor {
 // MARK: - Dashboard VC
 class DashboardViewController: UIViewController {
     
-    var user: User!  // Provided by previous screen
+    var user: User!
+    func fetchCurrentUser(completion: @escaping (User?) -> Void) {
+        guard let uid = Auth.auth().currentUser?.uid else {
+            completion(nil)
+            return
+        }
+
+        Firestore.firestore().collection("users").document(uid).getDocument { snapshot, error in
+            if let error = error {
+                print("Error fetching user: \(error.localizedDescription)")
+                completion(nil)
+                return
+            }
+
+            if let data = snapshot?.data(),
+               let user = User(from: data) {
+                completion(user)
+            } else {
+                completion(nil)
+            }
+        }
+    }
     
     // MARK: - Outlets
     @IBOutlet weak var activityLabel: UILabel!
@@ -94,27 +117,42 @@ class DashboardViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        // Debug print user
-        print("First name: \(user.firstName)")
-        print("Last name: \(user.lastName)")
-        print("Gender: \(user.gender)")
-        print("Email: \(user.email)")
-        print("Division: \(user.division ?? "none")")
-        print("Free Agent: \(user.isFreeAgent)")
-        print("Interested Sports: \(user.interestedSports.isEmpty ? "none" : user.interestedSports.joined(separator: ", "))")
-        
-        loadMockData()
-        buildUI()
-        layoutUI()
-        populateData()
-        
-        // Debug: Check if outlets are connected
-        print("upcomingGamesTitle: \(upcomingGamesTitle)")
-        print("myTeamsTitle: \(myTeamsTitle)")
-        print("recentActivityTitle: \(recentActivityTitle)")
-        print("upcomingTable: \(upcomingTable)")
-        print("teamsCollection: \(teamsCollection)")
-        print("activityLabel: \(activityLabel)")
+        fetchCurrentUser { user in
+            guard let user = user else {
+                print("No logged in user found.")
+                return
+            }
+
+            self.user = user
+            DispatchQueue.main.async {
+                self.updateUI()
+                // Debug print user
+                print("First name: \(user.firstName)")
+                print("Last name: \(user.lastName)")
+                print("Gender: \(user.gender)")
+                print("Email: \(user.email)")
+                print("Division: \(user.division ?? "none")")
+                print("Free Agent: \(user.isFreeAgent)")
+                print("Interested Sports: \(user.interestedSports.isEmpty ? "none" : user.interestedSports.joined(separator: ", "))")
+                
+                self.loadMockData()
+                self.buildUI()
+                self.layoutUI()
+                self.populateData()
+                
+                // Debug: Check if outlets are connected
+                print("upcomingGamesTitle: \(self.upcomingGamesTitle)")
+                print("myTeamsTitle: \(self.myTeamsTitle)")
+                print("recentActivityTitle: \(self.recentActivityTitle)")
+                print("upcomingTable: \(self.upcomingTable)")
+                print("teamsCollection: \(self.teamsCollection)")
+                print("activityLabel: \(self.activityLabel)")
+            }
+        }
+    }
+    
+    private func updateUI() {
+        greetLabel.text = "\(user.firstName) \(user.lastName)"
     }
     
     // MARK: - Actions

@@ -8,15 +8,13 @@
 import UIKit
 import AVFoundation
 import Photos
+//import FirebaseStorage
 
 /// View controller responsible for uploading or capturing a profile image.
 /// Handles image selection from camera or photo library and passes the image along with the user object.
 class UploadImageViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
 
     @IBOutlet weak var imageView: UIImageView!
-
-    // User object passed from previous screen
-    var user: User!
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -28,18 +26,12 @@ class UploadImageViewController: UIViewController, UIImagePickerControllerDelega
         imageView.contentMode = .scaleAspectFill
         imageView.layer.cornerRadius = 10
         imageView.clipsToBounds = true
-        
-        loadExistingImageIfAny()
+        imageView.image = UIImage(systemName: "person.crop.square") // default
     }
-
-    /// Loads existing profile image if it has been selected before (if user has pressed the back button from the next screen)
-    private func loadExistingImageIfAny() {
-        if let data = user.profileImageData,
-           let img = UIImage(data: data) {
-            imageView.image = img
-        } else {
-            imageView.image = UIImage(systemName: "person.crop.square")
-        }
+    
+    /// Get the UID from partial user data saved during Create Account
+    private var uid: String? {
+        UserDefaults.standard.dictionary(forKey: "partialUserData")?["uid"] as? String
     }
     
     /// Triggered when the "Take Picture" button is tapped
@@ -64,70 +56,17 @@ class UploadImageViewController: UIViewController, UIImagePickerControllerDelega
         }
     }
     
-    /// Permissions check for if app has permission to access camera. Requests access if not yet authorized.
-    private func checkCameraPermission(completion: @escaping (Bool) -> Void) {
-        switch AVCaptureDevice.authorizationStatus(for: .video) {
-        case .authorized:
-            completion(true)
-        case .notDetermined:
-            AVCaptureDevice.requestAccess(for: .video) { granted in
-                DispatchQueue.main.async { completion(granted) }
-            }
-        case .denied, .restricted:
-            completion(false)
-        @unknown default:
-            completion(false)
-        }
-    }
-    
-    /// Permissions check for if app has permission to access photo library. Requests access if not yet authorized.
-    private func checkPhotoLibraryPermission(completion: @escaping (Bool) -> Void) {
-        let status = PHPhotoLibrary.authorizationStatus()
-        switch status {
-        case .authorized, .limited:
-            completion(true)
-        case .notDetermined:
-            PHPhotoLibrary.requestAuthorization { newStatus in
-                DispatchQueue.main.async {
-                    completion(newStatus == .authorized || newStatus == .limited)
-                }
-            }
-        case .denied, .restricted:
-            completion(false)
-        @unknown default:
-            completion(false)
-        }
-    }
-    
-    /// If, upon being prompted to grant access, the user denies it, show permissions alert.
-    private func showPermissionAlert(for resource: String) {
-        let alert = UIAlertController(
-            title: "Permission Denied",
-            message: "Please allow access to your \(resource) in Settings to use this feature.",
-            preferredStyle: .alert
-        )
-        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
-        alert.addAction(UIAlertAction(title: "Open Settings", style: .default) { _ in
-            if let url = URL(string: UIApplication.openSettingsURLString) {
-                UIApplication.shared.open(url)
-            }
-        })
-        present(alert, animated: true)
-    }
-    
     /// Triggered when the "Next" button is tapped
     /// Saves the user with updated image and proceeds to sports selection
     @IBAction func nextTapped(_ sender: Any) {
-        UserManager.shared.save(user)
-        performSegue(withIdentifier: "selectSportsSegue", sender: user)
+        performSegue(withIdentifier: "selectSportsSegue", sender: nil)
     }
     
     /// Prepares data before navigating to the next view controller
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "selectSportsSegue",
-           let destinationVC = segue.destination as? SportsSelectionViewController,
-           let user = sender as? User {
-            destinationVC.user = user
+           let destinationVC = segue.destination as? SportsSelectionViewController {
+            //do nothing
         }
     }
 
@@ -163,19 +102,98 @@ class UploadImageViewController: UIViewController, UIImagePickerControllerDelega
 
         imageView.image = selectedImage
 
-        // Update the user object
-        user.profileImageData = selectedImage.jpegData(compressionQuality: 0.8)
+        // Update the image to firebase
+        uploadProfileImage(selectedImage)
     }
 
     /// Called when the user cancels image selection
     func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
         picker.dismiss(animated: true)
     }
+    
+    /// Helper to upload image to firebase storage.
+    private func uploadProfileImage(_ image: UIImage) {
+        guard let imageData = image.jpegData(compressionQuality: 0.8),
+              let uid = uid else { return }
 
+//        let storageRef = Storage.storage().reference().child("profile_images/\(uid).jpg")
+//        storageRef.putData(imageData, metadata: nil) { metadata, error in
+//            if let error = error {
+//                print("Upload failed: \(error.localizedDescription)")
+//                return
+//            }
+//            storageRef.downloadURL { url, error in
+//                if let url = url {
+//                    var data = UserDefaults.standard.dictionary(forKey: "partialUserData") ?? [:]
+//                    data["profileImageURL"] = url.absoluteString
+//                    UserDefaults.standard.set(data, forKey: "partialUserData")
+//                    print("Image uploaded and URL saved locally.")
+//                }
+//            }
+//        }
+        
+        var data = UserDefaults.standard.dictionary(forKey: "partialUserData") ?? [:]
+        data["profileImageURL"] = "default_profile_image"
+        UserDefaults.standard.set(data, forKey: "partialUserData")
+        print("will upload image later")
+    }
+    
+    // MARK: - Permissions + Alerts
+    /// Permissions check for if app has permission to access camera. Requests access if not yet authorized.
+    private func checkCameraPermission(completion: @escaping (Bool) -> Void) {
+        switch AVCaptureDevice.authorizationStatus(for: .video) {
+        case .authorized:
+            completion(true)
+        case .notDetermined:
+            AVCaptureDevice.requestAccess(for: .video) { granted in
+                DispatchQueue.main.async { completion(granted) }
+            }
+        case .denied, .restricted:
+            completion(false)
+        @unknown default:
+            completion(false)
+        }
+    }
+    
+    /// Permissions check for if app has permission to access photo library. Requests access if not yet authorized.
+    private func checkPhotoLibraryPermission(completion: @escaping (Bool) -> Void) {
+        let status = PHPhotoLibrary.authorizationStatus()
+        switch status {
+        case .authorized, .limited:
+            completion(true)
+        case .notDetermined:
+            PHPhotoLibrary.requestAuthorization { newStatus in
+                DispatchQueue.main.async {
+                    completion(newStatus == .authorized || newStatus == .limited)
+                }
+            }
+        case .denied, .restricted:
+            completion(false)
+        @unknown default:
+            completion(false)
+        }
+    }
+    
     /// Displays an alert with a title and message
     private func showAlert(title: String, message: String) {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alert, animated: true)
+    }
+    
+    /// If, upon being prompted to grant access, the user denies it, show permissions alert.
+    private func showPermissionAlert(for resource: String) {
+        let alert = UIAlertController(
+            title: "Permission Denied",
+            message: "Please allow access to your \(resource) in Settings to use this feature.",
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        alert.addAction(UIAlertAction(title: "Open Settings", style: .default) { _ in
+            if let url = URL(string: UIApplication.openSettingsURLString) {
+                UIApplication.shared.open(url)
+            }
+        })
         present(alert, animated: true)
     }
 

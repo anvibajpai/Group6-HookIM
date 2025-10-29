@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import FirebaseFirestore
 
 /// View controller responsible for selecting user sports and division.
 /// Handles Free Agent toggle, gender/division validation, and passes selected data to the dashboard.
@@ -18,7 +19,6 @@ class SportsSelectionViewController: UIViewController {
     @IBOutlet weak var womenButton: UIButton!
     @IBOutlet weak var coedButton: UIButton!
 
-    var user: User!  // User object passed from previous screen
     private var allSports = ["Basketball", "Soccer", "Volleyball", "Softball", "Tennis", "Ultimate", "Pickleball"]
     private var selectedSports = Set<String>()
     private var selectedDivision: String?
@@ -93,34 +93,56 @@ class SportsSelectionViewController: UIViewController {
 
     /// Triggered when "Finish" button is tapped. Validates selections and saves user
     @IBAction func finishTapped(_ sender: Any) {
-        user.interestedSports = Array(selectedSports)
-        user.division = selectedDivision
-        user.isFreeAgent = freeAgentSwitch.isOn
+        guard var data = UserDefaults.standard.dictionary(forKey: "partialUserData"),
+              let uid = data["uid"] as? String else { return }
 
-        if user.isFreeAgent && (user.interestedSports.isEmpty || user.division == nil) {
-            showAlert(title: "Profile Incomplete", message: "You turned Free Agent ON — please select at least one sport and a division before finishing.")
+        let gender = (data["gender"] as? String ?? "").lowercased()
+
+        // validations
+        if freeAgentSwitch.isOn && (selectedSports.isEmpty || selectedDivision == nil) {
+            showAlert(title: "Profile Incomplete", message: "You turned Free Agent ON — please select at least one sport and division.")
             return
         }
         
-        if let selected = selectedDivision {
-            if (selected == "Men's" && user.gender.lowercased() == "female") ||
-               (selected == "Women's" && user.gender.lowercased() == "male") {
-                showAlert(title: "Division Mismatch", message: "The selected division does not match your gender. Please select an appropriate division.")
+        if let division = selectedDivision {
+            if (division == "Men's" && gender == "female") ||
+               (division == "Women's" && gender == "male") {
+                showAlert(title: "Division Mismatch", message: "Please select a division that matches your gender.")
+                return
             }
         }
 
-        // Save user
-        UserManager.shared.save(user)
+        // Build the full user object
+        let user = User(
+            uid: uid,
+            firstName: data["firstName"] as! String,
+            lastName: data["lastName"] as! String,
+            email: data["email"] as! String,
+            password: data["password"] as! String,
+            gender: data["gender"] as! String,
+            profileImageURL: data["profileImageURL"] as? String,
+            interestedSports: Array(selectedSports),
+            division: selectedDivision,
+            isFreeAgent: freeAgentSwitch.isOn
+        )
 
-        performSegue(withIdentifier: "finishCreateAccountSegue", sender: user)
+        // Save to Firestore
+        Firestore.firestore().collection("users").document(uid).setData(user.dictionary) { err in
+            if let err = err {
+                self.showAlert(title: "Error", message: err.localizedDescription)
+            } else {
+                print("User fully saved to Firestore")
+                UserDefaults.standard.removeObject(forKey: "partialUserData")
+                self.performSegue(withIdentifier: "finishCreateAccountSegue", sender: nil)
+            }
+        }
     }
     
     /// Prepares data before navigating to DashboardViewController
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "finishCreateAccountSegue",
-           let destinationVC = segue.destination as? DashboardViewController,
-           let user = sender as? User {
-            destinationVC.user = user
+           let destinationVC = segue.destination as? DashboardViewController {
+            // do nothing
         }
     }
     

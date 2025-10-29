@@ -123,6 +123,7 @@
                     <connections>
                         <outlet property="emailTextField" destination="w5E-uf-3kv" id="ICw-lp-1TM"/>
                         <outlet property="passwordTextField" destination="1Kp-qf-IO2" id="W9p-TP-4Vf"/>
+                        <segue destination="F8w-S2-UeS" kind="show" identifier="loginSegue" id="YIk-PP-Zqj"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
@@ -256,7 +257,6 @@
                         <outlet property="lastName" destination="pWE-2y-qE2" id="Syt-vU-eQR"/>
                         <outlet property="passwordTextField" destination="ETf-WI-saj" id="a3T-yu-t2U"/>
                         <segue destination="W7u-Xw-Xw6" kind="show" identifier="uploadImageSegue" id="cgB-jJ-q3M"/>
-                        <segue destination="F8w-S2-UeS" kind="show" id="T2t-fr-vWk"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Xix-ON-Xpj" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
@@ -1724,7 +1724,7 @@
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="8Wq-gI-t89"/>
+        <segue reference="YIk-PP-Zqj"/>
     </inferredMetricsTieBreakers>
     <color key="tintColor" red="0.61176472900000001" green="0.38823530080000002" blue="0.1607843041" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
     <resources>
