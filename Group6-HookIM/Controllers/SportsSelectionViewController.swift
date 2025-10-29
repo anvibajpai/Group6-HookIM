@@ -93,7 +93,7 @@ class SportsSelectionViewController: UIViewController {
 
     /// Triggered when "Finish" button is tapped. Validates selections and saves user
     @IBAction func finishTapped(_ sender: Any) {
-        guard var data = UserDefaults.standard.dictionary(forKey: "partialUserData"),
+        guard let data = UserDefaults.standard.dictionary(forKey: "partialUserData"),
               let uid = data["uid"] as? String else { return }
 
         let gender = (data["gender"] as? String ?? "").lowercased()
@@ -135,14 +135,6 @@ class SportsSelectionViewController: UIViewController {
                 UserDefaults.standard.removeObject(forKey: "partialUserData")
                 self.performSegue(withIdentifier: "finishCreateAccountSegue", sender: nil)
             }
-        }
-    }
-    
-    /// Prepares data before navigating to DashboardViewController
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == "finishCreateAccountSegue",
-           let destinationVC = segue.destination as? DashboardViewController {
-            // do nothing
         }
     }
     

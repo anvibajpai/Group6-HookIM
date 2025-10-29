@@ -62,14 +62,6 @@ class UploadImageViewController: UIViewController, UIImagePickerControllerDelega
         performSegue(withIdentifier: "selectSportsSegue", sender: nil)
     }
     
-    /// Prepares data before navigating to the next view controller
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == "selectSportsSegue",
-           let destinationVC = segue.destination as? SportsSelectionViewController {
-            //do nothing
-        }
-    }
-
     /// Presents the image picker with specified source type (camera or photo library)
     private func openImagePicker(sourceType: UIImagePickerController.SourceType) {
         if sourceType == .camera && !UIImagePickerController.isSourceTypeAvailable(.camera) {
