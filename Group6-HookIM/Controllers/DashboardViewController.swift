@@ -151,6 +151,13 @@ class DashboardViewController: UIViewController {
         }
     }
     
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        // Ensure scroll view starts at the top after layout
+        scrollView.contentOffset = .zero
+        scrollView.contentInsetAdjustmentBehavior = .never
+    }
+    
     private func updateUI() {
         greetLabel.text = "\(user.firstName) \(user.lastName)"
     }
@@ -184,15 +191,34 @@ class DashboardViewController: UIViewController {
         upcomingTable.backgroundColor = .clear
         
         teamsCollection.dataSource = self
+        teamsCollection.delegate = self
         teamsCollection.register(TeamCardCell.self, forCellWithReuseIdentifier: "TeamCardCellID")
         teamsCollection.backgroundColor = .clear
         teamsCollection.showsHorizontalScrollIndicator = false
+        // Match layout to SportsDashboard
+        let layout = UICollectionViewFlowLayout()
+        layout.scrollDirection = .horizontal
+        layout.itemSize = CGSize(width: 240, height: 160)
+        layout.minimumLineSpacing = 12
+        layout.sectionInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
+        teamsCollection.collectionViewLayout = layout
         
-        // Ensure section titles are visible
+        // Ensure section titles are visible and set text
+        upcomingGamesTitle.text = "Upcoming Games"
+        myTeamsTitle.text = "My Teams"
+        recentActivityTitle.text = "Recent Activity"
         upcomingGamesTitle.textColor = .white
         myTeamsTitle.textColor = .white
         recentActivityTitle.textColor = .white
         activityLabel.textColor = .white
+        
+        // Ensure the upcoming games card has visible styling (matching SportsDashboard)
+        upcomingGamesCard.backgroundColor = .cardBG
+        upcomingGamesCard.layer.cornerRadius = 16
+        upcomingGamesCard.clipsToBounds = true
+        
+        // Configure table view to match SportsDashboard
+        upcomingTable.isScrollEnabled = false
         
         // Debug: Check if elements are visible
         print("upcomingGamesTitle.isHidden: \(upcomingGamesTitle.isHidden)")
@@ -363,57 +389,125 @@ class DashboardViewController: UIViewController {
     
     // MARK: - Layout
     private func layoutUI() {
-        // Comment out programmatic layout since we're using storyboard constraints
-        /*
+        // Deactivate any existing constraints from storyboard to avoid conflicts
+        // We need to deactivate on all views we're repositioning
+        NSLayoutConstraint.deactivate(scrollView.constraints)
+        NSLayoutConstraint.deactivate(contentView.constraints)
+        NSLayoutConstraint.deactivate(headerContainer.constraints)
+        NSLayoutConstraint.deactivate(upcomingGamesTitle.constraints)
+        NSLayoutConstraint.deactivate(upcomingGamesCard.constraints)
+        NSLayoutConstraint.deactivate(upcomingTable.constraints)
+        NSLayoutConstraint.deactivate(myTeamsTitle.constraints)
+        NSLayoutConstraint.deactivate(teamsCollection.constraints)
+        NSLayoutConstraint.deactivate(recentActivityTitle.constraints)
+        NSLayoutConstraint.deactivate(activityLabel.constraints)
+        
+        // Set translatesAutoresizingMaskIntoConstraints for storyboard outlets
+        // This is critical - storyboard views default to true, which conflicts with programmatic constraints
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        contentView.translatesAutoresizingMaskIntoConstraints = false
+        headerContainer.translatesAutoresizingMaskIntoConstraints = false
+        greetingLabel.translatesAutoresizingMaskIntoConstraints = false
+        notificationButton.translatesAutoresizingMaskIntoConstraints = false
+        logoImageView.translatesAutoresizingMaskIntoConstraints = false
+        upcomingGamesTitle.translatesAutoresizingMaskIntoConstraints = false
+        upcomingGamesCard.translatesAutoresizingMaskIntoConstraints = false
+        upcomingTable.translatesAutoresizingMaskIntoConstraints = false
+        myTeamsTitle.translatesAutoresizingMaskIntoConstraints = false
+        teamsCollection.translatesAutoresizingMaskIntoConstraints = false
+        recentActivityTitle.translatesAutoresizingMaskIntoConstraints = false
+        activityLabel.translatesAutoresizingMaskIntoConstraints = false
+        bottomTabBar.translatesAutoresizingMaskIntoConstraints = false
+        
+        // Ensure scroll view starts at the top
+        scrollView.contentOffset = .zero
+        
+        // Ensure table view is inside the card (may not be set in storyboard)
+        if !upcomingGamesCard.subviews.contains(upcomingTable) {
+            upcomingGamesCard.addSubview(upcomingTable)
+        }
+        
+        // Match SportsDashboard constraints exactly
         NSLayoutConstraint.activate([
+            // Scroll view constraints
             scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: bottomTabBar.topAnchor),
             
-            contentStack.topAnchor.constraint(equalTo: scrollView.topAnchor, constant: 10),
-            contentStack.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: 18),
-            contentStack.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor, constant: -18),
-            contentStack.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
-            contentStack.widthAnchor.constraint(equalTo: scrollView.widthAnchor, constant: -36),
+            // Tab bar constraints
+            bottomTabBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            bottomTabBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            bottomTabBar.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
             
-            // Header subviews
-            bellButton.leadingAnchor.constraint(equalTo: header.leadingAnchor, constant: 12),
-            bellButton.centerYAnchor.constraint(equalTo: header.centerYAnchor),
-            bellButton.widthAnchor.constraint(equalToConstant: 44),
-            bellButton.heightAnchor.constraint(equalToConstant: 44),
+            // Content view constraints
+            contentView.topAnchor.constraint(equalTo: scrollView.topAnchor),
+            contentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
+            contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
+            contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
+            contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
             
-            greetLabel.centerXAnchor.constraint(equalTo: header.centerXAnchor),
-            greetLabel.centerYAnchor.constraint(equalTo: header.centerYAnchor),
+            // Header container constraints
+            headerContainer.topAnchor.constraint(equalTo: contentView.topAnchor),
+            headerContainer.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            headerContainer.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            headerContainer.heightAnchor.constraint(equalToConstant: 120),
             
-            rightLogo.trailingAnchor.constraint(equalTo: header.trailingAnchor, constant: -16),
-            rightLogo.centerYAnchor.constraint(equalTo: header.centerYAnchor),
-            rightLogo.widthAnchor.constraint(equalToConstant: 36),
-            rightLogo.heightAnchor.constraint(equalToConstant: 36),
+            // Greeting label constraints
+            greetingLabel.centerXAnchor.constraint(equalTo: headerContainer.centerXAnchor),
+            greetingLabel.topAnchor.constraint(equalTo: headerContainer.topAnchor, constant: 20),
             
-            // Upcoming wrap pieces
-            upcomingTitle.topAnchor.constraint(equalTo: (contentStack.arrangedSubviews[1]).topAnchor),
-            upcomingTitle.leadingAnchor.constraint(equalTo: contentStack.leadingAnchor),
+            // Notification button constraints
+            notificationButton.trailingAnchor.constraint(equalTo: headerContainer.trailingAnchor, constant: -20),
+            notificationButton.topAnchor.constraint(equalTo: headerContainer.topAnchor, constant: 20),
+            notificationButton.widthAnchor.constraint(equalToConstant: 30),
+            notificationButton.heightAnchor.constraint(equalToConstant: 30),
             
-            upcomingCard.topAnchor.constraint(equalTo: upcomingTitle.bottomAnchor, constant: 8),
-            upcomingCard.leadingAnchor.constraint(equalTo: contentStack.leadingAnchor),
-            upcomingCard.trailingAnchor.constraint(equalTo: contentStack.trailingAnchor),
-            upcomingCard.heightAnchor.constraint(equalToConstant: 200),
+            // Logo constraints
+            logoImageView.centerXAnchor.constraint(equalTo: headerContainer.centerXAnchor),
+            logoImageView.bottomAnchor.constraint(equalTo: headerContainer.bottomAnchor, constant: -20),
+            logoImageView.widthAnchor.constraint(equalToConstant: 40),
+            logoImageView.heightAnchor.constraint(equalToConstant: 40),
             
-            upcomingTable.topAnchor.constraint(equalTo: upcomingCard.topAnchor, constant: 10),
-            upcomingTable.leadingAnchor.constraint(equalTo: upcomingCard.leadingAnchor, constant: 10),
-            upcomingTable.trailingAnchor.constraint(equalTo: upcomingCard.trailingAnchor, constant: -10),
-            upcomingTable.bottomAnchor.constraint(equalTo: upcomingCard.bottomAnchor, constant: -10),
+            // Upcoming games title constraints
+            upcomingGamesTitle.topAnchor.constraint(equalTo: headerContainer.bottomAnchor, constant: 20),
+            upcomingGamesTitle.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            upcomingGamesTitle.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
             
-            // Teams collection height
-            teamsCollection.heightAnchor.constraint(equalToConstant: 200),
+            // Upcoming games card constraints
+            upcomingGamesCard.topAnchor.constraint(equalTo: upcomingGamesTitle.bottomAnchor, constant: 10),
+            upcomingGamesCard.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            upcomingGamesCard.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+            upcomingGamesCard.heightAnchor.constraint(equalToConstant: 200),
             
-            // Tab bar
-            tabBarView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            tabBarView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            tabBarView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
+            // Table view constraints (inside card)
+            upcomingTable.topAnchor.constraint(equalTo: upcomingGamesCard.topAnchor, constant: 10),
+            upcomingTable.leadingAnchor.constraint(equalTo: upcomingGamesCard.leadingAnchor, constant: 10),
+            upcomingTable.trailingAnchor.constraint(equalTo: upcomingGamesCard.trailingAnchor, constant: -10),
+            upcomingTable.bottomAnchor.constraint(equalTo: upcomingGamesCard.bottomAnchor, constant: -10),
+            
+            // My teams title constraints
+            myTeamsTitle.topAnchor.constraint(equalTo: upcomingGamesCard.bottomAnchor, constant: 20),
+            myTeamsTitle.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            myTeamsTitle.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+            
+            // Teams collection constraints
+            teamsCollection.topAnchor.constraint(equalTo: myTeamsTitle.bottomAnchor, constant: 10),
+            teamsCollection.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            teamsCollection.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            teamsCollection.heightAnchor.constraint(equalToConstant: 180),
+            
+            // Recent activity title constraints
+            recentActivityTitle.topAnchor.constraint(equalTo: teamsCollection.bottomAnchor, constant: 20),
+            recentActivityTitle.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            recentActivityTitle.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+            
+            // Activity label constraints
+            activityLabel.topAnchor.constraint(equalTo: recentActivityTitle.bottomAnchor, constant: 10),
+            activityLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            activityLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+            activityLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -20)
         ])
-        */
     }
     
     // MARK: - Populate
@@ -538,6 +632,11 @@ extension DashboardViewController: UICollectionViewDataSource {
         }
         return cell
     }
+}
+
+// MARK: - UICollectionViewDelegate
+extension DashboardViewController: UICollectionViewDelegate {
+    // Add delegate methods if needed (selection, highlighting, etc.)
 }
 
 
