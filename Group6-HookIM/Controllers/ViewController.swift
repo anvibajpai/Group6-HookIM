@@ -86,6 +86,8 @@ class ViewController: UIViewController {
     
     /// Sets up a password visibility toggle button for a given text field.
     func setupPasswordToggle(for textField: UITextField) {
+        textField.isSecureTextEntry = true
+        
         let toggleButton = UIButton(type: .custom)
         toggleButton.setImage(UIImage(systemName: "eye.slash"), for: .normal)
         toggleButton.tintColor = .gray

@@ -44,6 +44,11 @@ class CreateAccountViewController: UIViewController {
        genderButton.showsMenuAsPrimaryAction = true
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        passwordTextField.isSecureTextEntry = true
+    }
+    
     /// Triggered when the "Next" button is tapped.
     /// Validates input, ensures email is UT-associated, and passes partial user to next screen.
     @IBAction func nextButtonTapped(_ sender: Any) {
