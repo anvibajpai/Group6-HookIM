@@ -297,9 +297,37 @@ class UserProfileViewController: UIViewController, UIImagePickerControllerDelega
         showAlert(title: "Permission Denied", message: "Please allow photo access in Settings to change your profile picture.")
     }
     
+    @IBAction func signOutTapped(_ sender: Any) {
+        let alert = UIAlertController(title: "Sign Out", message: "Are you sure you want to sign out?", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        alert.addAction(UIAlertAction(title: "Sign Out", style: .destructive) { _ in
+            do {
+                try Auth.auth().signOut()
+
+                // Clear any locally cached user info
+                UserDefaults.standard.removeObject(forKey: "partialUserData")
+
+                // Go back to login screen
+                if let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate {
+                    let storyboard = UIStoryboard(name: "Main", bundle: nil)
+                    let loginVC = storyboard.instantiateViewController(withIdentifier: "ViewController")
+                    sceneDelegate.window?.rootViewController = loginVC
+                }
+            } catch let signOutError as NSError {
+                print("Error signing out: \(signOutError.localizedDescription)")
+                let failAlert = UIAlertController(title: "Error", message: "Failed to sign out. Please try again.", preferredStyle: .alert)
+                failAlert.addAction(UIAlertAction(title: "OK", style: .default))
+                self.present(failAlert, animated: true)
+            }
+        })
+        present(alert, animated: true)
+    }
+
+    
     private func showAlert(title: String, message: String) {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default))
         present(alert, animated: true)
     }
+    
 }

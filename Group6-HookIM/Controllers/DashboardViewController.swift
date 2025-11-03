@@ -593,6 +593,7 @@ class DashboardViewController: UIViewController {
         // show new screen
         navigationController?.pushViewController(vcToPush, animated: true)
     }
+    
 }
 
 // MARK: - UITableViewDataSource
