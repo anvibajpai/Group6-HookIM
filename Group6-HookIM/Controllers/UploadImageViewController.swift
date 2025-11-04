@@ -8,7 +8,7 @@
 import UIKit
 import AVFoundation
 import Photos
-//import FirebaseStorage
+import FirebaseStorage
 
 /// View controller responsible for uploading or capturing a profile image.
 /// Handles image selection from camera or photo library and passes the image along with the user object.
@@ -108,26 +108,26 @@ class UploadImageViewController: UIViewController, UIImagePickerControllerDelega
         guard let imageData = image.jpegData(compressionQuality: 0.8),
               let uid = uid else { return }
 
-//        let storageRef = Storage.storage().reference().child("profile_images/\(uid).jpg")
-//        storageRef.putData(imageData, metadata: nil) { metadata, error in
-//            if let error = error {
-//                print("Upload failed: \(error.localizedDescription)")
-//                return
-//            }
-//            storageRef.downloadURL { url, error in
-//                if let url = url {
-//                    var data = UserDefaults.standard.dictionary(forKey: "partialUserData") ?? [:]
-//                    data["profileImageURL"] = url.absoluteString
-//                    UserDefaults.standard.set(data, forKey: "partialUserData")
-//                    print("Image uploaded and URL saved locally.")
-//                }
-//            }
-//        }
+        let storageRef = Storage.storage().reference().child("profile_images/\(uid).jpg")
+        storageRef.putData(imageData, metadata: nil) { metadata, error in
+            if let error = error {
+                print("Upload failed: \(error.localizedDescription)")
+                return
+            }
+            storageRef.downloadURL { url, error in
+                if let url = url {
+                    var data = UserDefaults.standard.dictionary(forKey: "partialUserData") ?? [:]
+                    data["profileImageURL"] = url.absoluteString
+                    UserDefaults.standard.set(data, forKey: "partialUserData")
+                    print("Image uploaded and URL saved locally.")
+                }
+            }
+        }
         
-        var data = UserDefaults.standard.dictionary(forKey: "partialUserData") ?? [:]
-        data["profileImageURL"] = "default_profile_image"
-        UserDefaults.standard.set(data, forKey: "partialUserData")
-        print("will upload image later")
+//        var data = UserDefaults.standard.dictionary(forKey: "partialUserData") ?? [:]
+//        data["profileImageURL"] = "default_profile_image"
+//        UserDefaults.standard.set(data, forKey: "partialUserData")
+//        print("will upload image later")
     }
     
     // MARK: - Permissions + Alerts

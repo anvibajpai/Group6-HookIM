@@ -9,6 +9,7 @@ import UIKit
 import Photos
 import FirebaseAuth
 import FirebaseFirestore
+import FirebaseStorage
 
 class UserProfileViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     
@@ -120,10 +121,22 @@ class UserProfileViewController: UIViewController, UIImagePickerControllerDelega
 
 
     private func loadUserData() {
-        if let data = user.profileImageURL {
-//           let img = UIImage(data: data) {
-//            profileImageView.image = img
-            profileImageView.image = UIImage(systemName: "person.crop.circle")
+        if let imageURL = user.profileImageURL,
+           !imageURL.isEmpty,
+           let url = URL(string: imageURL) {
+           
+           URLSession.shared.dataTask(with: url) { data, _, error in
+               DispatchQueue.main.async {
+                   if let data = data, let image = UIImage(data: data) {
+                       self.profileImageView.image = image
+                   } else {
+                       self.profileImageView.image = UIImage(systemName: "person.crop.circle")
+                       if let error = error {
+                           print("⚠️ Failed to load profile image: \(error.localizedDescription)")
+                       }
+                   }
+               }
+           }.resume()
         } else {
             profileImageView.image = UIImage(systemName: "person.crop.circle")
         }
@@ -261,17 +274,17 @@ class UserProfileViewController: UIViewController, UIImagePickerControllerDelega
         }
 
         // upload image to storage
-//        let storageRef = Storage.storage().reference().child("profile_images/\(uid).jpg")
-//        storageRef.putData(imageData, metadata: nil) { _, error in
-//            if let error = error {
-//                print("Upload error: \(error)")
-//                completion(nil)
-//                return
-//            }
-//            storageRef.downloadURL { url, _ in
-//                completion(url?.absoluteString)
-//            }
-//        }
+        let storageRef = Storage.storage().reference().child("profile_images/\(uid).jpg")
+        storageRef.putData(imageData, metadata: nil) { _, error in
+            if let error = error {
+                print("Upload error: \(error)")
+                completion(nil)
+                return
+            }
+            storageRef.downloadURL { url, _ in
+                completion(url?.absoluteString)
+            }
+        }
     }
     
     // MARK: - Helpers
