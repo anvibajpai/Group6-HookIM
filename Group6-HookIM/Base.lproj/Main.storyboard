@@ -498,7 +498,7 @@
             <objects>
                 <viewController id="FNL-TM-g9X" customClass="EditRecordViewController" customModule="Group6_HookIM" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="lJb-ub-VAU">
-                        <rect key="frame" x="0.0" y="0.0" width="402" height="802"/>
+                        <rect key="frame" x="0.0" y="0.0" width="402" height="874"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <view contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="cVn-z4-Jb7">
@@ -631,7 +631,7 @@
             <objects>
                 <viewController id="BYA-vX-Oi7" customClass="FreeAgentBoardViewController" customModule="Group6_HookIM" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="Lmg-h9-LKm">
-                        <rect key="frame" x="0.0" y="0.0" width="402" height="802"/>
+                        <rect key="frame" x="0.0" y="0.0" width="402" height="874"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <view contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Nc1-t0-XjQ">
@@ -1127,7 +1127,7 @@
             <objects>
                 <viewController id="ofP-Ta-w4H" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="7Hp-T9-geu">
-                        <rect key="frame" x="0.0" y="0.0" width="402" height="802"/>
+                        <rect key="frame" x="0.0" y="0.0" width="402" height="874"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <view contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="XXa-F7-FOd">
@@ -1687,7 +1687,7 @@
                                 </constraints>
                             </scrollView>
                             <tabBar contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="7cD-Cz-bQO">
-                                <rect key="frame" x="0.0" y="757" width="402" height="49"/>
+                                <rect key="frame" x="0.0" y="689" width="402" height="117"/>
                                 <color key="backgroundColor" name="BurntOrange"/>
                                 <items>
                                     <tabBarItem title="Home" image="house" catalog="system" id="TIT-N2-IVH"/>
@@ -1726,6 +1726,9 @@
                         <outlet property="upcomingGamesCard" destination="kGi-cN-D6X" id="Mao-fP-fWF"/>
                         <outlet property="upcomingGamesTitle" destination="nLC-ez-L6b" id="Eg7-Yo-tC5"/>
                         <outlet property="upcomingTable" destination="p9p-g8-6HI" id="v9D-TB-2qC"/>
+                        <segue destination="kbF-LA-jHL" kind="show" identifier="showTeamsSegue" id="teams-segue-id"/>
+                        <segue destination="uLu-EP-7KN" kind="show" identifier="showStandingsSegue" id="standings-segue-id"/>
+                        <segue destination="j0d-3y-T7D" kind="show" identifier="showProfileSegue" id="profile-segue-id"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="JE3-ig-tgc" sceneMemberID="firstResponder"/>

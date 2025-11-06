@@ -21,7 +21,7 @@ extension UIColor {
 
 
 // MARK: - Dashboard VC
-class DashboardViewController: UIViewController {
+class DashboardViewController: UIViewController, UITabBarDelegate {
     
     var user: User!
     func fetchCurrentUser(completion: @escaping (User?) -> Void) {
@@ -219,6 +219,9 @@ class DashboardViewController: UIViewController {
         
         // Configure table view to match SportsDashboard
         upcomingTable.isScrollEnabled = false
+        
+        // Set up tab bar delegate
+        bottomTabBar.delegate = self
         
         // Debug: Check if elements are visible
         print("upcomingGamesTitle.isHidden: \(upcomingGamesTitle.isHidden)")
@@ -455,7 +458,7 @@ class DashboardViewController: UIViewController {
             
             // Greeting label constraints
             greetingLabel.centerXAnchor.constraint(equalTo: headerContainer.centerXAnchor),
-            greetingLabel.topAnchor.constraint(equalTo: headerContainer.topAnchor, constant: 20),
+            greetingLabel.centerYAnchor.constraint(equalTo: headerContainer.centerYAnchor),
             
             // Notification button constraints
             notificationButton.trailingAnchor.constraint(equalTo: headerContainer.trailingAnchor, constant: -20),
@@ -558,8 +561,8 @@ class DashboardViewController: UIViewController {
         
         switch newTab {
         case 1: // Teams
-            guard let teamVC = instantiateFromMainStoryboard(withIdentifier: "CaptainTeamViewController") as? CaptainTeamViewController else { return }
-            vcToPush = teamVC
+            performSegue(withIdentifier: "showTeamsSegue", sender: self)
+            return
             
         case 2: // Schedule
             let scheduleVC = ScheduleViewController()
@@ -576,14 +579,12 @@ class DashboardViewController: UIViewController {
             return
             
         case 3: // Standings
-            guard let standingsVC = instantiateFromMainStoryboard(withIdentifier: "StandingsViewController") as? StandingsViewController else { return }
-            vcToPush = standingsVC
+            performSegue(withIdentifier: "showStandingsSegue", sender: self)
+            return
             
-        case 4: // Profile (placeholder)
-            let placeholderVC = UIViewController()
-            placeholderVC.view.backgroundColor = .systemBackground
-            placeholderVC.title = "Profile"
-            vcToPush = placeholderVC
+        case 4: // Profile
+            performSegue(withIdentifier: "showProfileSegue", sender: self)
+            return
             
         default:
             // Should never happen
@@ -592,6 +593,36 @@ class DashboardViewController: UIViewController {
         
         // show new screen
         navigationController?.pushViewController(vcToPush, animated: true)
+    }
+    
+    // MARK: - UITabBarDelegate
+    func tabBar(_ tabBar: UITabBar, didSelect item: UITabBarItem) {
+        guard let items = tabBar.items, let selectedIndex = items.firstIndex(of: item) else { return }
+        
+        // Handle tab selection based on index
+        switch selectedIndex {
+        case 0: // Home
+            // Already on home, do nothing or scroll to top
+            return
+            
+        case 1: // Teams
+            performSegue(withIdentifier: "showTeamsSegue", sender: self)
+            
+        case 2: // Schedule
+            let scheduleVC = ScheduleViewController()
+            let navController = UINavigationController(rootViewController: scheduleVC)
+            navController.modalPresentationStyle = .fullScreen
+            present(navController, animated: true)
+            
+        case 3: // Standings
+            performSegue(withIdentifier: "showStandingsSegue", sender: self)
+            
+        case 4: // Profile
+            performSegue(withIdentifier: "showProfileSegue", sender: self)
+            
+        default:
+            break
+        }
     }
     
 }
