@@ -223,6 +223,14 @@ class DashboardViewController: UIViewController, UITabBarDelegate {
         // Set up tab bar delegate
         bottomTabBar.delegate = self
         
+        // Set header and tab bar colors to match other view controllers
+        headerContainer.backgroundColor = UIColor(red: 0.611764729, green: 0.3882353008, blue: 0.1607843041, alpha: 1)
+        bottomTabBar.backgroundColor = UIColor(red: 0.7490196078, green: 0.3411764706, blue: 0.0, alpha: 0.7)
+        
+        // Ensure notification button is visible and styled
+        notificationButton.tintColor = .white
+        notificationButton.isHidden = false
+        
         // Debug: Check if elements are visible
         print("upcomingGamesTitle.isHidden: \(upcomingGamesTitle.isHidden)")
         print("myTeamsTitle.isHidden: \(myTeamsTitle.isHidden)")
@@ -397,6 +405,8 @@ class DashboardViewController: UIViewController, UITabBarDelegate {
         NSLayoutConstraint.deactivate(scrollView.constraints)
         NSLayoutConstraint.deactivate(contentView.constraints)
         NSLayoutConstraint.deactivate(headerContainer.constraints)
+        NSLayoutConstraint.deactivate(notificationButton.constraints)
+        NSLayoutConstraint.deactivate(logoImageView.constraints)
         NSLayoutConstraint.deactivate(upcomingGamesTitle.constraints)
         NSLayoutConstraint.deactivate(upcomingGamesCard.constraints)
         NSLayoutConstraint.deactivate(upcomingTable.constraints)
@@ -460,17 +470,17 @@ class DashboardViewController: UIViewController, UITabBarDelegate {
             greetingLabel.centerXAnchor.constraint(equalTo: headerContainer.centerXAnchor),
             greetingLabel.centerYAnchor.constraint(equalTo: headerContainer.centerYAnchor),
             
-            // Notification button constraints
-            notificationButton.trailingAnchor.constraint(equalTo: headerContainer.trailingAnchor, constant: -20),
-            notificationButton.topAnchor.constraint(equalTo: headerContainer.topAnchor, constant: 20),
-            notificationButton.widthAnchor.constraint(equalToConstant: 30),
-            notificationButton.heightAnchor.constraint(equalToConstant: 30),
+            // Notification button constraints (top left)
+            notificationButton.leadingAnchor.constraint(equalTo: headerContainer.leadingAnchor, constant: 16),
+            notificationButton.centerYAnchor.constraint(equalTo: headerContainer.centerYAnchor),
+            notificationButton.widthAnchor.constraint(equalToConstant: 28),
+            notificationButton.heightAnchor.constraint(equalToConstant: 28),
             
-            // Logo constraints
-            logoImageView.centerXAnchor.constraint(equalTo: headerContainer.centerXAnchor),
-            logoImageView.bottomAnchor.constraint(equalTo: headerContainer.bottomAnchor, constant: -20),
-            logoImageView.widthAnchor.constraint(equalToConstant: 40),
-            logoImageView.heightAnchor.constraint(equalToConstant: 40),
+            // Logo constraints (top right - longhorn icon)
+            logoImageView.trailingAnchor.constraint(equalTo: headerContainer.trailingAnchor, constant: -14),
+            logoImageView.topAnchor.constraint(equalTo: headerContainer.topAnchor, constant: 10.5),
+            logoImageView.widthAnchor.constraint(equalToConstant: 82),
+            logoImageView.heightAnchor.constraint(equalToConstant: 79),
             
             // Upcoming games title constraints
             upcomingGamesTitle.topAnchor.constraint(equalTo: headerContainer.bottomAnchor, constant: 20),
