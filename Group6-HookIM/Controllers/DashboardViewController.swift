@@ -205,10 +205,10 @@ class DashboardViewController: UIViewController, UITabBarDelegate {
         upcomingGamesTitle.text = "Upcoming Games"
         myTeamsTitle.text = "My Teams"
         recentActivityTitle.text = "Recent Activity"
-        upcomingGamesTitle.textColor = .white
-        myTeamsTitle.textColor = .white
-        recentActivityTitle.textColor = .white
-        activityLabel.textColor = .white
+        upcomingGamesTitle.textColor = .label
+        myTeamsTitle.textColor = .label
+        recentActivityTitle.textColor = .label
+        activityLabel.textColor = .label
         
         // Ensure the upcoming games card has visible styling (matching SportsDashboard)
         upcomingGamesCard.backgroundColor = .cardBG
@@ -236,164 +236,6 @@ class DashboardViewController: UIViewController, UITabBarDelegate {
         print("upcomingTable.isHidden: \(upcomingTable.isHidden)")
         print("teamsCollection.isHidden: \(teamsCollection.isHidden)")
         
-        // Comment out programmatic UI creation since we're using storyboard
-        /*
-        // Scroll area
-        scrollView.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(scrollView)
-        
-        contentStack.axis = .vertical
-        contentStack.spacing = 20
-        contentStack.translatesAutoresizingMaskIntoConstraints = false
-        scrollView.addSubview(contentStack)
-        
-        // Header (orange)
-        header.backgroundColor = .warmOrange
-        header.translatesAutoresizingMaskIntoConstraints = false
-        header.heightAnchor.constraint(equalToConstant: 120).isActive = true
-        
-        bellButton.setImage(UIImage(systemName: "bell"), for: .normal)
-        bellButton.tintColor = .white
-        bellButton.backgroundColor = UIColor(white: 0, alpha: 0.2)
-        bellButton.layer.cornerRadius = 10
-        bellButton.translatesAutoresizingMaskIntoConstraints = false
-        // --- THIS IS YOUR CHANGE (added action) ---
-        bellButton.addTarget(self, action: #selector(didTapNotifications), for: .touchUpInside)
-        
-        greetLabel.textColor = .white
-        greetLabel.font = .boldSystemFont(ofSize: 20)
-        greetLabel.translatesAutoresizingMaskIntoConstraints = false
-        
-        rightLogo.image = UIImage(systemName: "tortoise.fill") // replace with your asset logo
-        rightLogo.tintColor = .white
-        rightLogo.contentMode = .scaleAspectFit
-        rightLogo.translatesAutoresizingMaskIntoConstraints = false
-        
-        header.addSubview(bellButton)
-        header.addSubview(greetLabel)
-        header.addSubview(rightLogo)
-        contentStack.addArrangedSubview(header)
-        
-        // Upcoming Games
-        let upWrap = UIView(); upWrap.translatesAutoresizingMaskIntoConstraints = false
-        upcomingTitle.text = "Upcoming Games"
-        upcomingTitle.textColor = .white
-        upcomingTitle.font = .boldSystemFont(ofSize: 17)
-        
-        upcomingCard.backgroundColor = .cardBG
-        upcomingCard.layer.cornerRadius = 14
-        upcomingCard.layer.shadowOpacity = 0.15
-        upcomingCard.layer.shadowColor = UIColor.black.cgColor
-        upcomingCard.layer.shadowRadius = 4
-        upcomingCard.layer.shadowOffset = CGSize(width: 0, height: 2)
-        upcomingCard.translatesAutoresizingMaskIntoConstraints = false
-        
-        // Configure table view
-        upcomingTable.translatesAutoresizingMaskIntoConstraints = false
-        upcomingTable.dataSource = self
-        upcomingTable.delegate = self
-        upcomingTable.isScrollEnabled = false
-        upcomingTable.backgroundColor = .clear
-        upcomingTable.separatorStyle = .none
-        upcomingTable.register(UpcomingGameCell.self, forCellReuseIdentifier: "UpcomingGameCellID")
-        
-        upcomingCard.addSubview(upcomingTable)
-        
-        upWrap.addSubview(upcomingTitle)
-        upWrap.addSubview(upcomingCard)
-        contentStack.addArrangedSubview(upWrap)
-        
-        // My Teams (horizontal collection)
-        teamsTitle.text = "My Teams"
-        teamsTitle.textColor = .white
-        teamsTitle.font = .boldSystemFont(ofSize: 17)
-        
-        let layout = UICollectionViewFlowLayout()
-        layout.scrollDirection = .horizontal
-        layout.minimumLineSpacing = 14
-        layout.itemSize = CGSize(width: 240, height: 200)
-        
-        teamsCollection = UICollectionView(frame: .zero, collectionViewLayout: layout)
-        teamsCollection.translatesAutoresizingMaskIntoConstraints = false
-        teamsCollection.backgroundColor = .clear
-        teamsCollection.showsHorizontalScrollIndicator = false
-        teamsCollection.register(TeamCardCell.self, forCellWithReuseIdentifier: "TeamCardCellID")
-        teamsCollection.dataSource = self
-        
-        let teamsWrap = UIStackView(arrangedSubviews: [teamsTitle, teamsCollection])
-        teamsWrap.axis = .vertical
-        teamsWrap.spacing = 12
-        teamsWrap.translatesAutoresizingMaskIntoConstraints = false
-        contentStack.addArrangedSubview(teamsWrap)
-        
-        // Recent Activity
-        recentTitle.text = "Recent Activity"
-        recentTitle.textColor = .white
-        recentTitle.font = .boldSystemFont(ofSize: 17)
-        
-        recentLabel.textColor = UIColor.white.withAlphaComponent(0.85)
-        recentLabel.numberOfLines = 0
-        recentLabel.font = .systemFont(ofSize: 14)
-        recentLabel.text = recentActivity?.text ?? "No recent activity"
-        
-        let recentWrap = UIStackView(arrangedSubviews: [recentTitle, recentLabel])
-        recentWrap.axis = .vertical
-        recentWrap.spacing = 8
-        recentWrap.translatesAutoresizingMaskIntoConstraints = false
-        contentStack.addArrangedSubview(recentWrap)
-        
-        // Spacer for tab bar
-        let spacer = UIView()
-        spacer.translatesAutoresizingMaskIntoConstraints = false
-        spacer.heightAnchor.constraint(equalToConstant: 70).isActive = true
-        contentStack.addArrangedSubview(spacer)
-        
-        // Bottom Tab Bar
-        tabBarView.backgroundColor = .warmOrange
-        tabBarView.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(tabBarView)
-        
-        let symbols = ["house.fill", "person.3.fill", "calendar", "rosette", "person.crop.circle"]
-        let stack = UIStackView()
-        stack.axis = .horizontal
-        stack.spacing = 0
-        stack.distribution = .equalSpacing
-        stack.translatesAutoresizingMaskIntoConstraints = false
-        
-        tabBarView.addSubview(stack)
-        
-        for i in 0..<5 {
-            let v = UIStackView()
-            v.axis = .vertical
-            v.alignment = .center
-            v.spacing = 4
-            v.translatesAutoresizingMaskIntoConstraints = false
-            
-            selectedDotViews[i].backgroundColor = .white
-            selectedDotViews[i].layer.cornerRadius = 3
-            selectedDotViews[i].translatesAutoresizingMaskIntoConstraints = false
-            selectedDotViews[i].heightAnchor.constraint(equalToConstant: 6).isActive = true
-            selectedDotViews[i].widthAnchor.constraint(equalToConstant: 6).isActive = true
-            selectedDotViews[i].alpha = (i == selectedTab) ? 1 : 0
-            
-            tabButtons[i].setImage(UIImage(systemName: symbols[i]), for: .normal)
-            tabButtons[i].tintColor = .white
-            tabButtons[i].tag = i
-            tabButtons[i].addTarget(self, action: #selector(tabTapped(_:)), for: .touchUpInside)
-            
-            v.addArrangedSubview(selectedDotViews[i])
-            v.addArrangedSubview(tabButtons[i])
-            stack.addArrangedSubview(v)
-        }
-        
-        // Constraints for tab bar inner stack
-        NSLayoutConstraint.activate([
-            stack.leadingAnchor.constraint(equalTo: tabBarView.leadingAnchor, constant: 28),
-            stack.trailingAnchor.constraint(equalTo: tabBarView.trailingAnchor, constant: -28),
-            stack.topAnchor.constraint(equalTo: tabBarView.topAnchor, constant: 6),
-            stack.bottomAnchor.constraint(equalTo: tabBarView.bottomAnchor, constant: -10)
-        ])
-        */
     }
     
     // MARK: - Layout

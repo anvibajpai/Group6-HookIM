@@ -127,9 +127,9 @@ extension ScheduleViewController: UITableViewDataSource, UITableViewDelegate {
         cell.timeLabel.text = timeFormatter.string(from: game.date)
         
          if indexPath.row % 2 == 0 {
-             cell.backgroundColor = UIColor.systemGray6
+             cell.backgroundColor = UIColor.systemGroupedBackground
          } else {
-             cell.backgroundColor = UIColor.white
+             cell.backgroundColor = UIColor.secondarySystemGroupedBackground
          }
 
         return cell

@@ -50,8 +50,8 @@ class CalendarViewController: UIViewController, UICalendarViewDelegate, UICalend
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationItem.title = "Games Calendar"
-        view.backgroundColor = .systemGray6
-        tableView.backgroundColor = .clear
+        view.backgroundColor = .systemGroupedBackground
+        tableView.backgroundColor = .systemGroupedBackground
         
         tableView.dataSource = self
         tableView.delegate = self
@@ -195,9 +195,9 @@ extension CalendarViewController: UITableViewDataSource, UITableViewDelegate {
         cell.timeLabel.text = timeFormatter.string(from: game.date)
         
         if indexPath.row % 2 == 1 {
-            cell.backgroundColor = .systemGray6
+            cell.backgroundColor = .systemGroupedBackground
         } else {
-            cell.backgroundColor = .white
+            cell.backgroundColor = .secondarySystemGroupedBackground
         }
         
         return cell
