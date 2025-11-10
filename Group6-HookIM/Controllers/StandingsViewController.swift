@@ -56,6 +56,12 @@ class StandingsViewController: UIViewController {
         }
     }
 
+    // make nav bar appear
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.setNavigationBarHidden(false, animated: animated)
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationItem.title = "Standings"
