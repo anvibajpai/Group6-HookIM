@@ -7,6 +7,9 @@
 
 import UIKit
 import Photos
+import FirebaseAuth
+import FirebaseFirestore
+import FirebaseStorage
 
 class UserProfileViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     
@@ -27,15 +30,46 @@ class UserProfileViewController: UIViewController, UIImagePickerControllerDelega
     private var selectedSports = Set<String>()
     private var selectedDivision: String?
     private var selectedGender: String?
+    private var newProfileImage: UIImage?
     
     // MARK: - Properties
     var user: User!
+    func fetchCurrentUser(completion: @escaping (User?) -> Void) {
+        guard let uid = Auth.auth().currentUser?.uid else {
+            completion(nil)
+            return
+        }
+
+        Firestore.firestore().collection("users").document(uid).getDocument { snapshot, error in
+            if let error = error {
+                print("Error fetching user: \(error.localizedDescription)")
+                completion(nil)
+                return
+            }
+
+            if let data = snapshot?.data(),
+               let user = User(from: data) {
+                completion(user)
+            } else {
+                completion(nil)
+            }
+        }
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        loadUserData()
-        setupUI()
+        fetchCurrentUser { user in
+            guard let user = user else {
+                print("No logged in user found.")
+                return
+            }
+            self.user = user
+            DispatchQueue.main.async {
+                self.loadUserData()
+                self.setupUI()
+            }
+        }
     }
 
     private func setupUI() {
@@ -87,13 +121,22 @@ class UserProfileViewController: UIViewController, UIImagePickerControllerDelega
 
 
     private func loadUserData() {
-//        if let loadedUser = UserManager.shared.load() {
-//            user = loadedUser
-//        }
-        
-        if let data = user.profileImageData,
-           let img = UIImage(data: data) {
-            profileImageView.image = img
+        if let imageURL = user.profileImageURL,
+           !imageURL.isEmpty,
+           let url = URL(string: imageURL) {
+           
+           URLSession.shared.dataTask(with: url) { data, _, error in
+               DispatchQueue.main.async {
+                   if let data = data, let image = UIImage(data: data) {
+                       self.profileImageView.image = image
+                   } else {
+                       self.profileImageView.image = UIImage(systemName: "person.crop.circle")
+                       if let error = error {
+                           print("⚠️ Failed to load profile image: \(error.localizedDescription)")
+                       }
+                   }
+               }
+           }.resume()
         } else {
             profileImageView.image = UIImage(systemName: "person.crop.circle")
         }
@@ -111,6 +154,7 @@ class UserProfileViewController: UIViewController, UIImagePickerControllerDelega
         freeAgentSwitch.isOn = user.isFreeAgent
         selectedDivision = user.division
         updateDivisionButtons()
+        
     }
 
     // MARK: - Division Buttons
@@ -174,12 +218,11 @@ class UserProfileViewController: UIViewController, UIImagePickerControllerDelega
         picker.dismiss(animated: true)
         guard let selectedImage = info[.originalImage] as? UIImage else { return }
         profileImageView.image = selectedImage
-        user.profileImageData = selectedImage.jpegData(compressionQuality: 0.8)
+        newProfileImage = selectedImage
     }
     
     // MARK: - Save Button
     @IBAction func saveTapped(_ sender: Any) {
-        
         guard let nameText = nameTextField.text, let gender = selectedGender else {
             showAlert(title: "Missing Info", message: "Please fill all required fields.")
             return
@@ -196,8 +239,52 @@ class UserProfileViewController: UIViewController, UIImagePickerControllerDelega
         user.interestedSports = Array(selectedSports)
         user.division = selectedDivision
         
-        //UserManager.shared.save(user)
-        showAlert(title: "Saved", message: "Your profile has been updated.")
+        if let newImage = newProfileImage {
+            uploadProfileImage(newImage) { urlString in
+                if let urlString = urlString {
+                    self.user.profileImageURL = urlString
+                }
+                self.updateUserInFirestore()
+            }
+        } else {
+            self.updateUserInFirestore()
+        }
+    }
+    
+    // MARK: - Firestore Update
+    private func updateUserInFirestore() {
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+
+        let userRef = Firestore.firestore().collection("users").document(uid)
+        userRef.updateData(user.dictionary) { error in
+            if let error = error {
+                self.showAlert(title: "Error", message: "Failed to update profile: \(error.localizedDescription)")
+            } else {
+                self.showAlert(title: "Saved", message: "Your profile has been updated.")
+            }
+        }
+    }
+    
+    // MARK: - Firebase Storage Upload, not implemented yet :(
+    private func uploadProfileImage(_ image: UIImage, completion: @escaping (String?) -> Void) {
+        guard let uid = Auth.auth().currentUser?.uid,
+              let imageData = image.jpegData(compressionQuality: 0.8) else {
+            completion(nil)
+            return
+        }
+
+        // upload image to storage
+        let storageRef = Storage.storage().reference().child("profile_images/\(uid).jpg")
+        storageRef.putData(imageData, metadata: nil) { _, error in
+            if let error = error {
+                print("Upload error: \(error)")
+                completion(nil)
+                return
+            }
+            storageRef.downloadURL { url, _ in
+                completion(url?.absoluteString)
+            }
+        }
     }
     
     // MARK: - Helpers
@@ -223,9 +310,37 @@ class UserProfileViewController: UIViewController, UIImagePickerControllerDelega
         showAlert(title: "Permission Denied", message: "Please allow photo access in Settings to change your profile picture.")
     }
     
+    @IBAction func signOutTapped(_ sender: Any) {
+        let alert = UIAlertController(title: "Sign Out", message: "Are you sure you want to sign out?", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        alert.addAction(UIAlertAction(title: "Sign Out", style: .destructive) { _ in
+            do {
+                try Auth.auth().signOut()
+
+                // Clear any locally cached user info
+                UserDefaults.standard.removeObject(forKey: "partialUserData")
+
+                // Go back to login screen
+                if let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate {
+                    let storyboard = UIStoryboard(name: "Main", bundle: nil)
+                    let loginVC = storyboard.instantiateViewController(withIdentifier: "ViewController")
+                    sceneDelegate.window?.rootViewController = loginVC
+                }
+            } catch let signOutError as NSError {
+                print("Error signing out: \(signOutError.localizedDescription)")
+                let failAlert = UIAlertController(title: "Error", message: "Failed to sign out. Please try again.", preferredStyle: .alert)
+                failAlert.addAction(UIAlertAction(title: "OK", style: .default))
+                self.present(failAlert, animated: true)
+            }
+        })
+        present(alert, animated: true)
+    }
+
+    
     private func showAlert(title: String, message: String) {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default))
         present(alert, animated: true)
     }
+    
 }

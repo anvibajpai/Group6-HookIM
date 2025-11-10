@@ -7,6 +7,8 @@
 //
 
 import UIKit
+import FirebaseAuth
+import FirebaseFirestore
 
 /// View controller responsible for creating a new account.
 /// Handles input of user information: name, gender, email, and password.
@@ -42,15 +44,22 @@ class CreateAccountViewController: UIViewController {
        genderButton.showsMenuAsPrimaryAction = true
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        passwordTextField.isSecureTextEntry = true
+    }
+    
     /// Triggered when the "Next" button is tapped.
     /// Validates input, ensures email is UT-associated, and passes partial user to next screen.
     @IBAction func nextButtonTapped(_ sender: Any) {
         // ensure all fields are filled
-        guard let first = firstName.text, !first.isEmpty,
-              let last = lastName.text, !last.isEmpty,
-              let gender = selectedGender,
-              let email = emailTextField.text, !email.isEmpty,
-              let password = passwordTextField.text, !password.isEmpty else {
+        guard
+            let first = firstName.text, !first.isEmpty,
+            let last = lastName.text, !last.isEmpty,
+            let email = emailTextField.text, !email.isEmpty,
+            let password = passwordTextField.text, !password.isEmpty,
+            let gender = selectedGender
+        else {
             showAlert(title: "Missing Fields", message: "Please complete all fields.")
             return
         }
@@ -64,17 +73,25 @@ class CreateAccountViewController: UIViewController {
             return
         }
         
-        // Save a partial user to pass to next screen
-        let user = User(firstName: first,
-                        lastName: last,
-                        gender: gender,
-                        email: email,
-                        password: password,
-                        profileImageData: nil,
-                        interestedSports: [],
-                        division: nil,
-                        isFreeAgent: false)
-        performSegue(withIdentifier: "uploadImageSegue", sender: user)
+        Auth.auth().createUser(withEmail: email, password: password) { authResult, error in
+            if let error = error {
+                self.showAlert(title: "Signup failed: ", message: "\(error.localizedDescription)")
+                return
+            }
+            guard let uid = authResult?.user.uid else { return }
+            
+            let partialUserData: [String: Any] = [
+                "uid": uid,
+                "firstName": first,
+                "lastName": last,
+                "email": email,
+                "gender": gender,
+                "password": password //might not want to store plaintext locally
+            ]
+            UserDefaults.standard.set(partialUserData, forKey: "partialUserData")
+    
+            self.performSegue(withIdentifier: "uploadImageSegue", sender: nil)
+        }
     }
         
     /// Displays an alert with a title, message, and optional additional actions.
@@ -101,14 +118,5 @@ class CreateAccountViewController: UIViewController {
         toggleButton.addTarget(self, action: #selector(togglePasswordVisibility(_:)), for: .touchUpInside)
         textField.rightView = toggleButton
         textField.rightViewMode = .always
-    }
-    
-    /// Set destination VCs user data to current VC's user data before segue.
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == "uploadImageSegue",
-           let destinationVC = segue.destination as? UploadImageViewController,
-           let user = sender as? User {
-            destinationVC.user = user
-        }
     }
 }

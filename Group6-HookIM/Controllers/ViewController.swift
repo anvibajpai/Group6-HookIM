@@ -6,6 +6,8 @@
 //
 
 import UIKit
+import FirebaseAuth
+import FirebaseFirestore
 
 /// View controller responsible for user login.
 /// Handles email/password input, validation, and navigation to dashboard or account creation.
@@ -13,25 +15,9 @@ class ViewController: UIViewController {
 
     @IBOutlet weak var emailTextField: UITextField!
     @IBOutlet weak var passwordTextField: UITextField!
-    
-    // Fake user for testing purposes.
-    let fakeUser = User(
-        firstName: "Fake",
-        lastName: "User",
-        gender: "Other",
-        email: "fake@utexas.edu",
-        password: "pw",
-        profileImageData: nil,
-        interestedSports: ["Soccer", "Basketball"],
-        division: "Women's",
-        isFreeAgent: true
-    )
-    
+  
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        // Save the fake user for testing
-        UserManager.shared.save(fakeUser)
         
         setupPasswordToggle(for: passwordTextField)
         emailTextField.text = ""
@@ -55,22 +41,32 @@ class ViewController: UIViewController {
     /// Validates user input and logs in if credentials match.
     @IBAction func loginTapped(_ sender: Any) {
         guard let email = emailTextField.text, !email.isEmpty,
-        let pw = passwordTextField.text, !pw.isEmpty else {
-            showAlert(title: "Missing Info", message: "Please enter email and password.")
+              let pw = passwordTextField.text, !pw.isEmpty else {
+            self.showAlert(title: "Missing Info", message: "Please enter email and password.")
             return
         }
-            
-        if email == fakeUser.email && pw == fakeUser.password {
-            performSegue(withIdentifier: "loginSegue", sender: fakeUser)
-            print("login good")
-        } else {
-            showAlert(title: "Invalid Credentials", message: "No matching user found. Try creating an account.")
+
+        Auth.auth().signIn(withEmail: email, password: pw) { authResult, error in
+            if let error = error {
+                self.showAlert(title: "Invalid Credentials", message: "No matching user found. Try creating an account.")
+                return
+            }
+
+            guard let uid = authResult?.user.uid else { return }
+
+            Firestore.firestore().collection("users").document(uid).getDocument { snapshot, err in
+                if let err = err {
+                    self.showAlert(title: "Error fetching user: ", message: "\(err.localizedDescription)")
+                    return
+                }
+                if let data = snapshot?.data(), let user = User(from: data) {
+                    print("Welcome back, \(user.firstName)!")
+                    // Move to dashboard
+                    self.performSegue(withIdentifier: "loginSegue", sender: nil)
+                }
+            }
         }
-    }
-    
-    /// Triggered when the Sign Up button is tapped,  Navigates to the Create Account screen.
-    @IBAction func signUpTapped(_ sender: Any) {
-        performSegue(withIdentifier: "createAccountSegue", sender: nil)
+        
     }
     
     /// Displays an alert with a title, message, and optional additional actions.
@@ -90,6 +86,8 @@ class ViewController: UIViewController {
     
     /// Sets up a password visibility toggle button for a given text field.
     func setupPasswordToggle(for textField: UITextField) {
+        textField.isSecureTextEntry = true
+        
         let toggleButton = UIButton(type: .custom)
         toggleButton.setImage(UIImage(systemName: "eye.slash"), for: .normal)
         toggleButton.tintColor = .gray
@@ -97,14 +95,5 @@ class ViewController: UIViewController {
         toggleButton.addTarget(self, action: #selector(togglePasswordVisibility(_:)), for: .touchUpInside)
         textField.rightView = toggleButton
         textField.rightViewMode = .always
-    }
-    
-    /// Prepares data before navigating to another view controller.
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == "loginSegue",
-           let destinationVC = segue.destination as? DashboardViewController,
-           let user = sender as? User {
-            destinationVC.user = user
-        }
     }
 }
