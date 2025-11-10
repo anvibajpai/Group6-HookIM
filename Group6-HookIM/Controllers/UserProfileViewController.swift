@@ -56,10 +56,9 @@ class UserProfileViewController: UIViewController, UIImagePickerControllerDelega
         }
     }
     
-    // need this to make nav bar appear
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        navigationController?.setNavigationBarHidden(false, animated: animated)
+        self.navigationController?.setNavigationBarHidden(true, animated: false)
     }
 
     override func viewDidLoad() {
