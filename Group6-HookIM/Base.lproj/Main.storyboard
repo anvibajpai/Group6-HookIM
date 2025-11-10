@@ -1523,7 +1523,11 @@
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="KCI-cy-9NA">
-                        <barButtonItem key="rightBarButtonItem" title="Item" image="gearshape" catalog="system" id="fYc-pe-swA"/>
+                        <barButtonItem key="rightBarButtonItem" title="Item" image="gearshape" catalog="system" id="fYc-pe-swA">
+                            <connections>
+                                <segue destination="notif-settings-vc" kind="show" id="OrO-eh-CmM"/>
+                            </connections>
+                        </barButtonItem>
                     </navigationItem>
                     <connections>
                         <outlet property="coedButton" destination="weq-Xd-BF9" id="Ms8-kL-hjc"/>
