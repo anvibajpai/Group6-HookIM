@@ -233,6 +233,14 @@ class UserProfileViewController: UIViewController, UIImagePickerControllerDelega
             return
         }
         
+        if let division = selectedDivision {
+            if (division == "Men's" && gender == "Female") ||
+               (division == "Women's" && gender == "Male") {
+                showAlert(title: "Division Mismatch", message: "Please select a division that matches your gender.")
+                return
+            }
+        }
+        
         let splitName = nameText.split(separator: " ", maxSplits: 1).map(String.init)
         let first = splitName.first ?? ""
         let last = splitName.count > 1 ? splitName[1] : ""

@@ -1339,23 +1339,27 @@
                                             <action selector="signOutTapped:" destination="j0d-3y-T7D" eventType="touchUpInside" id="RHW-FK-Dmn"/>
                                         </connections>
                                     </button>
-                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" image="gearshape.fill" catalog="system" translatesAutoresizingMaskIntoConstraints="NO" id="Xsp-HC-SwR">
-                                        <rect key="frame" x="348" y="70.333333333333329" width="30" height="29.333333333333329"/>
-                                        <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="9If-Av-wVq">
+                                        <rect key="frame" x="343" y="70" width="50" height="34.333333333333343"/>
                                         <constraints>
-                                            <constraint firstAttribute="width" constant="30" id="0Bw-EG-Knm"/>
-                                            <constraint firstAttribute="width" secondItem="Xsp-HC-SwR" secondAttribute="height" multiplier="1:1" id="AMj-yx-crm"/>
-                                            <constraint firstAttribute="height" constant="30" id="RRq-yp-UMV"/>
+                                            <constraint firstAttribute="width" constant="50" id="6Gd-q0-LAN"/>
+                                            <constraint firstAttribute="width" secondItem="9If-Av-wVq" secondAttribute="height" multiplier="51:35" id="k0L-l6-2Xy"/>
                                         </constraints>
-                                    </imageView>
+                                        <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <state key="normal" title="Button"/>
+                                        <buttonConfiguration key="configuration" style="plain" image="gearshape.fill" catalog="system"/>
+                                        <connections>
+                                            <segue destination="notif-settings-vc" kind="show" identifier="notificationsSegue" id="mbK-fh-AIS"/>
+                                        </connections>
+                                    </button>
                                 </subviews>
                                 <color key="backgroundColor" red="0.61176472900000001" green="0.38823530080000002" blue="0.1607843041" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                 <constraints>
                                     <constraint firstItem="5sv-d3-1r5" firstAttribute="leading" secondItem="bg0-2d-pbU" secondAttribute="leading" constant="20" id="0sU-L5-dZs"/>
                                     <constraint firstItem="5sv-d3-1r5" firstAttribute="top" secondItem="bg0-2d-pbU" secondAttribute="top" constant="70" id="Jtq-Cy-P1k"/>
-                                    <constraint firstItem="Xsp-HC-SwR" firstAttribute="top" secondItem="bg0-2d-pbU" secondAttribute="top" constant="70" id="P1S-yF-LQ5"/>
                                     <constraint firstItem="P2t-la-jVB" firstAttribute="centerX" secondItem="bg0-2d-pbU" secondAttribute="centerX" id="UnW-vD-2nc"/>
-                                    <constraint firstAttribute="trailing" secondItem="Xsp-HC-SwR" secondAttribute="trailing" constant="50" id="nzi-oI-f92"/>
+                                    <constraint firstAttribute="trailing" secondItem="9If-Av-wVq" secondAttribute="trailing" constant="35" id="VpK-QK-9Ky"/>
+                                    <constraint firstItem="9If-Av-wVq" firstAttribute="top" secondItem="bg0-2d-pbU" secondAttribute="top" constant="70" id="iy4-8c-SrI"/>
                                     <constraint firstItem="P2t-la-jVB" firstAttribute="top" secondItem="bg0-2d-pbU" secondAttribute="top" constant="70" id="o9R-4R-dOr"/>
                                 </constraints>
                             </view>
