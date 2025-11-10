@@ -7,13 +7,6 @@
 
 import UIKit
 
-class ScheduleCell: UITableViewCell {
-    @IBOutlet weak var teamLabel: UILabel!
-    @IBOutlet weak var opponentLabel: UILabel!
-    @IBOutlet weak var locationLabel: UILabel!
-    @IBOutlet weak var timeLabel: UILabel!
-}
-
 class ScheduleViewController: UIViewController {
 
     @IBOutlet weak var sportButton: UIButton!
@@ -22,16 +15,17 @@ class ScheduleViewController: UIViewController {
     // MARK: - Properties
     let sports = ["Women's Basketball", "Men's Basketball", "Co-ed Basketball"]
     
-    var scheduleData: [String: [Game]] = [
+    lazy var scheduleData: [String: [Game]] = [
         "Women's Basketball": [
-            Game(team: "Hoopers", opponent: "Swish", location: "Gregory Gym", time: "Oct 29, 7PM"),
-            Game(team: "Slam Dunks", opponent: "Hoopers", location: "Belmont Hall", time: "Nov 2, 8PM")
+            Game(team: "Hoopers", opponent: "Swish", location: "Gregory Gym", date: makeDate("Oct 29, 7PM")),
+            Game(team: "Slam Dunks", opponent: "Hoopers", location: "Belmont Hall", date: makeDate("Nov 2, 8PM"))
         ],
         "Men's Basketball": [
-            Game(team: "myTeam", opponent: "Team1", location: "Gregory Gym", time: "Oct 30, 6PM")
+            Game(team: "myTeam", opponent: "Team1", location: "Gregory Gym", date: makeDate("Oct 30, 6PM"))
         ],
         "Co-ed Basketball": [
-            Game(team: "Hoops", opponent: "Swishers", location: "Gregory Gym", time: "Nov 1, 9PM")
+            Game(team: "Hoops", opponent: "Swishers", location: "Gregory Gym", date: makeDate("Nov 1, 9PM")),
+            Game(team: "Hoops", opponent: "TeamX", location: "Gregory Gym", date: makeDate("Nov 1, 10PM"))
         ]
     ]
 
@@ -40,6 +34,11 @@ class ScheduleViewController: UIViewController {
             sportButton.setTitle(selectedSport ?? "Select Sport", for: .normal)
             tableView.reloadData()
         }
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.setNavigationBarHidden(false, animated: animated)
     }
 
 
@@ -65,7 +64,25 @@ class ScheduleViewController: UIViewController {
         selectedSport = sports.first
     }
 
-    /// Setup Sport Selection Dropdown
+    // MARK: - Helpers
+    private func makeDate(_ dateString: String) -> Date {
+        let cal = Calendar.current
+        let currentYear = cal.component(.year, from: Date())
+        let formatter = DateFormatter()
+        
+        formatter.dateFormat = "MMM d, ha, yyyy"
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        
+        let fullDateString = "\(dateString), \(currentYear)"
+        
+        if let date = formatter.date(from: fullDateString) {
+            return date
+        } else {
+            print("ERROR: Failed to parse date string: \(fullDateString).")
+            return Date()
+        }
+    }
+    
     private func setupSportDropdown() {
         let actions = sports.map { sport in
             UIAction(title: sport) { _ in
@@ -79,9 +96,16 @@ class ScheduleViewController: UIViewController {
     @objc private func didTapCalendarButton() {
         performSegue(withIdentifier: "toCalendarSegue", sender: self)
     }
+    
+    private lazy var timeFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "h:mm a"
+        formatter.amSymbol = "AM"
+        formatter.pmSymbol = "PM"
+        return formatter
+    }()
 }
 
-/// UITableViewDataSource & UITableViewDelegate
 extension ScheduleViewController: UITableViewDataSource, UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -100,7 +124,7 @@ extension ScheduleViewController: UITableViewDataSource, UITableViewDelegate {
         cell.teamLabel.text = game.team
         cell.opponentLabel.text = "vs \(game.opponent)"
         cell.locationLabel.text = game.location
-        cell.timeLabel.text = game.time
+        cell.timeLabel.text = timeFormatter.string(from: game.date)
         
          if indexPath.row % 2 == 0 {
              cell.backgroundColor = UIColor.systemGray6
@@ -114,4 +138,5 @@ extension ScheduleViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
     }
+    
 }

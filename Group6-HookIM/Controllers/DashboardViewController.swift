@@ -107,12 +107,10 @@ class DashboardViewController: UIViewController, UITabBarDelegate {
     private let recentTitle = UILabel()
     private let recentLabel = UILabel()
     
-    private let tabBarView = UIView()
-    private let tabButtons: [UIButton] = (0..<5).map { _ in UIButton(type: .system) }
-    private let selectedDotViews: [UIView] = (0..<5).map { _ in UIView() }
-    
-    // --- THIS IS YOUR CHANGE (set default to 0) ---
-    private var selectedTab: Int = 0
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.setNavigationBarHidden(true, animated: animated)
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -556,44 +554,6 @@ class DashboardViewController: UIViewController, UITabBarDelegate {
         present(navController, animated: true)
     }
     
-    @objc private func tabTapped(_ sender: UIButton) {
-        let newTab = sender.tag
-        
-        // home tab. only works from home for now
-        if newTab == 0 {
-            selectedDotViews[selectedTab].alpha = 0
-            selectedTab = newTab
-            selectedDotViews[selectedTab].alpha = 1
-            return
-        }
-        
-        let vcToPush: UIViewController
-        
-        switch newTab {
-        case 1: // Teams
-            performSegue(withIdentifier: "showTeamsSegue", sender: self)
-            return
-            
-        case 2: // Schedule
-            guard let scheduleVC = instantiateFromMainStoryboard(withIdentifier: "ScheduleViewController") as? ScheduleViewController else { return }
-            vcToPush = scheduleVC
-            
-        case 3: // Standings
-            performSegue(withIdentifier: "showStandingsSegue", sender: self)
-            return
-            
-        case 4: // Profile
-            performSegue(withIdentifier: "showProfileSegue", sender: self)
-            return
-            
-        default:
-            // Should never happen
-            return
-        }
-        
-        // show new screen
-        navigationController?.pushViewController(vcToPush, animated: true)
-    }
     
     // MARK: - UITabBarDelegate
     func tabBar(_ tabBar: UITabBar, didSelect item: UITabBarItem) {
@@ -609,10 +569,7 @@ class DashboardViewController: UIViewController, UITabBarDelegate {
             performSegue(withIdentifier: "showTeamsSegue", sender: self)
             
         case 2: // Schedule
-            let scheduleVC = ScheduleViewController()
-            let navController = UINavigationController(rootViewController: scheduleVC)
-            navController.modalPresentationStyle = .fullScreen
-            present(navController, animated: true)
+            performSegue(withIdentifier: "showScheduleSegue", sender: self)
             
         case 3: // Standings
             performSegue(withIdentifier: "showStandingsSegue", sender: self)
@@ -671,35 +628,3 @@ extension DashboardViewController: UICollectionViewDelegate {
     // Add delegate methods if needed (selection, highlighting, etc.)
 }
 
-
-//class DashboardViewController: UIViewController {
-//
-//
-//    var user: User!  // User object passed from previous screen
-//
-//    override func viewDidLoad() {
-//        super.viewDidLoad()
-//
-//       print("First name: \(user.firstName)")
-//       print("Last name: \(user.lastName)")
-//       print("Gender: \(user.gender)")
-//       print("Email: \(user.email)")
-//       print("Division: \(user.division ?? "none")")
-//       print("Free Agent: \(user.isFreeAgent)")
-//       print("Interested Sports: \(user.interestedSports.isEmpty ? "none" : user.interestedSports.joined(separator: ", "))")
-//
-//        // Do any additional setup after loading the view.
-//    }
-    
-
-    /*
-     MARK: - Navigation
-
-     In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-         Get the new view controller using segue.destination.
-         Pass the selected object to the new view controller.
-    }
-    */
-
-//}
