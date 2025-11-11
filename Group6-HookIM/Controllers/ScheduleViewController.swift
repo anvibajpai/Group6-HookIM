@@ -50,6 +50,9 @@ class ScheduleViewController: UIViewController, UITabBarDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        view.backgroundColor = UIColor(named: "AppBackground")
+        tableView.backgroundColor = UIColor(named: "AppBackground")
+        
         let calendarButton = UIBarButtonItem(
             image: UIImage(systemName: "calendar"),
             style: .plain,
@@ -280,9 +283,9 @@ extension ScheduleViewController: UITableViewDataSource, UITableViewDelegate {
         cell.timeLabel.text = timeFormatter.string(from: game.date)
         
          if indexPath.row % 2 == 0 {
-             cell.backgroundColor = UIColor.systemGroupedBackground
+             cell.backgroundColor = UIColor(named: "AppBackground")
          } else {
-             cell.backgroundColor = UIColor.secondarySystemGroupedBackground
+             cell.backgroundColor = UIColor(named: "CardBackground")
          }
 
         return cell
