@@ -91,24 +91,33 @@ class CreateTeamViewController: UIViewController {
                     "memberUids": [ownerUid],
                     "wins": 0,
                     "losses": 0,
-                    "points": 0,        
+                    "points": 0,
                     "createdAt": FieldValue.serverTimestamp()
                 ]
 
         createButton.isEnabled = false
 
-                Firestore.firestore().collection("teams").addDocument(data: data) { [weak self] error in
-                    guard let self = self else { return }
-                    self.createButton.isEnabled = true
+        let db = Firestore.firestore()
+        let docRef = db.collection("teams").document()
 
-                    if let error = error {
-                        self.showAlert("Error", "Failed to create team: \(error.localizedDescription)")
-                    } else {
-                        self.showAlert("Success", "Team created successfully!") {
-                            self.navigationController?.popViewController(animated: true)
-                        }
-                    }
+        docRef.setData(data) { [weak self] error in
+            guard let self = self else { return }
+            self.createButton.isEnabled = true
+
+            if let error = error {
+                self.showAlert("Error", "Failed to create team: \(error.localizedDescription)")
+                return
+            }
+
+            // Add the team ID to the user's teams array
+            db.collection("users").document(ownerUid).updateData([
+                "teams": FieldValue.arrayUnion([docRef.documentID])
+            ]) { _ in
+                self.showAlert("Success", "Team created successfully!") {
+                    self.navigationController?.popViewController(animated: true)
                 }
+            } 
+        }
         
     }
     

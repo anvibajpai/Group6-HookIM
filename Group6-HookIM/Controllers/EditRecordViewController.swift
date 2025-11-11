@@ -4,7 +4,6 @@ class EditRecordViewController: UIViewController {
 
     
     @IBOutlet weak var winsTextField: UITextField!
-    
     @IBOutlet weak var lossesTextField: UITextField!
     
     var wins: Int = 0

@@ -364,8 +364,8 @@
                                     <segue destination="FNL-TM-g9X" kind="show" identifier="editRecordSegue" id="lDL-7X-2Bx"/>
                                 </connections>
                             </button>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Category: Co-ed" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ZlJ-Ng-R2i">
-                                <rect key="frame" x="137" y="270" width="128" height="21"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Category:" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ZlJ-Ng-R2i">
+                                <rect key="frame" x="79" y="269" width="75" height="21"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -385,7 +385,7 @@
                                 <state key="normal" title="Button"/>
                                 <buttonConfiguration key="configuration" style="plain" image="plus.circle" catalog="system"/>
                                 <connections>
-                                    <segue destination="BYA-vX-Oi7" kind="show" id="mS7-Pn-tu7"/>
+                                    <segue destination="BYA-vX-Oi7" kind="show" identifier="freeAgentBoardSegue" id="mS7-Pn-tu7"/>
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="xDO-WF-4Wy">
@@ -394,13 +394,6 @@
                                 <state key="normal" title="Button"/>
                                 <buttonConfiguration key="configuration" style="gray" title="My Team"/>
                             </button>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Sport: Basketball" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="NUG-SS-Jj2">
-                                <rect key="frame" x="139" y="241" width="130" height="21"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                <nil key="highlightedColor"/>
-                            </label>
                             <view contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ePh-iy-WFl">
                                 <rect key="frame" x="54" y="551" width="95" height="102"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
@@ -473,14 +466,39 @@
                                     <segue destination="ofP-Ta-w4H" kind="show" id="izQ-QS-EIM"/>
                                 </connections>
                             </button>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Sport:" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Hv4-O2-mgE">
+                                <rect key="frame" x="93" y="230" width="47" height="21"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Label" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Fmv-bF-pmW">
+                                <rect key="frame" x="162" y="269" width="153" height="21"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Label" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="OGT-ZZ-VQb">
+                                <rect key="frame" x="162" y="230" width="153" height="21"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="lgM-p6-m5B"/>
                         <color key="backgroundColor" red="0.2823529541" green="0.27450981740000002" blue="0.27450981740000002" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                     </view>
                     <navigationItem key="navigationItem" title="Team Page" id="vey-a6-x6Q"/>
                     <connections>
+                        <outlet property="categoryLabel" destination="Fmv-bF-pmW" id="7mm-am-QkC"/>
                         <outlet property="lossLabel" destination="PoQ-qU-Yy5" id="HlC-zt-Iez"/>
-                        <outlet property="rosterTableView" destination="h42-WC-T4u" id="j2L-ok-OCj"/>
+                        <outlet property="ptsLabel" destination="BIj-nn-hd6" id="iVB-Yh-swM"/>
+                        <outlet property="rosterTableView" destination="h42-WC-T4u" id="sRZ-yF-DYb"/>
+                        <outlet property="sportLabel" destination="OGT-ZZ-VQb" id="NfA-4V-7aO"/>
+                        <outlet property="teamNameSelector" destination="xDO-WF-4Wy" id="9gL-3d-czf"/>
                         <outlet property="winsLabel" destination="QPI-4s-rih" id="4uw-Yf-flf"/>
                     </connections>
                 </viewController>
@@ -679,6 +697,7 @@
                     </view>
                     <navigationItem key="navigationItem" title="Free Agent Board" id="XhZ-8Q-YKa"/>
                     <connections>
+                        <outlet property="sportCategroy" destination="7db-QM-NXQ" id="hJ4-zc-dHQ"/>
                         <outlet property="tableView" destination="dDG-Jg-knd" id="Ehk-UG-LHy"/>
                     </connections>
                 </viewController>
@@ -2122,7 +2141,7 @@
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="YIk-PP-Zqj"/>
+        <segue reference="8Wq-gI-t89"/>
     </inferredMetricsTieBreakers>
     <color key="tintColor" red="0.61176472900000001" green="0.38823530080000002" blue="0.1607843041" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
     <resources>
