@@ -480,8 +480,8 @@
                                 <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Label" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="OGT-ZZ-VQb">
-                                <rect key="frame" x="162" y="230" width="153" height="21"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Label" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="X41-Qb-btM">
+                                <rect key="frame" x="162" y="229" width="153" height="21"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -493,12 +493,12 @@
                     </view>
                     <navigationItem key="navigationItem" title="Team Page" id="vey-a6-x6Q"/>
                     <connections>
-                        <outlet property="categoryLabel" destination="Fmv-bF-pmW" id="7mm-am-QkC"/>
+                        <outlet property="categoryLabel" destination="Fmv-bF-pmW" id="UMF-Ta-u5K"/>
                         <outlet property="lossLabel" destination="PoQ-qU-Yy5" id="HlC-zt-Iez"/>
-                        <outlet property="ptsLabel" destination="BIj-nn-hd6" id="iVB-Yh-swM"/>
-                        <outlet property="rosterTableView" destination="h42-WC-T4u" id="sRZ-yF-DYb"/>
-                        <outlet property="sportLabel" destination="OGT-ZZ-VQb" id="NfA-4V-7aO"/>
-                        <outlet property="teamNameSelector" destination="xDO-WF-4Wy" id="9gL-3d-czf"/>
+                        <outlet property="ptsLabel" destination="BIj-nn-hd6" id="gIF-Rw-Uqb"/>
+                        <outlet property="rosterTableView" destination="h42-WC-T4u" id="IKo-hD-Zpz"/>
+                        <outlet property="sportLabel" destination="X41-Qb-btM" id="xdg-5n-ECb"/>
+                        <outlet property="teamNameSelector" destination="xDO-WF-4Wy" id="dAv-9l-CPQ"/>
                         <outlet property="winsLabel" destination="QPI-4s-rih" id="4uw-Yf-flf"/>
                     </connections>
                 </viewController>
@@ -2165,7 +2165,7 @@
             <color red="0.16500000655651093" green="0.16500000655651093" blue="0.16500000655651093" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <systemColor name="linkColor">
-            <color red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.0" green="0.47843137254901963" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
