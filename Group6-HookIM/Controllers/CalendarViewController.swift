@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import FirebaseFirestore
 
 // TODO: remove debug prints
 
@@ -18,7 +19,10 @@ class CalendarViewController: UIViewController, UICalendarViewDelegate, UICalend
     
     private var calendarView: UICalendarView!
     
+    private var allGames: [Game] = []
     private var gamesForSelectedDay: [Game] = []
+    
+    private let db = Firestore.firestore()
     
     private lazy var timeFormatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -30,20 +34,6 @@ class CalendarViewController: UIViewController, UICalendarViewDelegate, UICalend
     
     // i hate date checking
     private var gameDates: Set<String> = []
-    
-    lazy var scheduleData: [String: [Game]] = [
-        "Women's Basketball": [
-            Game(team: "Hoopers", opponent: "Swish", location: "Gregory Gym", date: makeDate("Oct 29, 7PM")),
-            Game(team: "Slam Dunks", opponent: "Hoopers", location: "Belmont Hall", date: makeDate("Nov 2, 8PM"))
-        ],
-        "Men's Basketball": [
-            Game(team: "myTeam", opponent: "Team1", location: "Gregory Gym", date: makeDate("Oct 30, 6PM"))
-        ],
-        "Co-ed Basketball": [
-            Game(team: "Hoops", opponent: "Swishers", location: "Gregory Gym", date: makeDate("Nov 1, 9PM")),
-            Game(team: "Hoops", opponent: "TeamX", location: "Gregory Gym", date: makeDate("Nov 1, 10PM"))
-        ]
-    ]
 
     // MARK: - View Lifecycle
         
@@ -59,11 +49,8 @@ class CalendarViewController: UIViewController, UICalendarViewDelegate, UICalend
         tableView.estimatedRowHeight = 60
         tableView.tableFooterView = UIView()
         
-        processGameData()
         configureCalendar()
-        
-        let today = Calendar.current.dateComponents([.year, .month, .day], from: Date())
-        filterGames(for: today)
+        fetchGames()
     }
     
     // MARK: - Setup
@@ -96,29 +83,43 @@ class CalendarViewController: UIViewController, UICalendarViewDelegate, UICalend
 
 
     // MARK: - Data Helpers
-
-    private func makeDate(_ dateString: String) -> Date {
-        let cal = Calendar.current
-        let currentYear = cal.component(.year, from: Date())
-        let formatter = DateFormatter()
-        
-        formatter.dateFormat = "MMM d, ha, yyyy"
-        formatter.locale = Locale(identifier: "en_US_POSIX")
-        
-        let fullDateString = "\(dateString), \(currentYear)"
-        
-        if let date = formatter.date(from: fullDateString) {
-            return date
-        } else {
-            print("ERROR: Failed to parse date string: \(fullDateString).")
-            return Date()
-        }
+    private func fetchGames() {
+        db.collection("games")
+            .whereField("status", isEqualTo: "upcoming")
+            .order(by: "date", descending: false)
+            .getDocuments { [weak self] (querySnapshot, error) in
+                guard let self = self else { return }
+                
+                if let error = error {
+                    print("Error fetching games: \(error.localizedDescription)")
+                    return
+                }
+                
+                guard let documents = querySnapshot?.documents else {
+                    print("No documents found")
+                    return
+                }
+                
+                self.allGames = documents.compactMap { doc in
+                    return Game(dictionary: doc.data())
+                }
+                
+                DispatchQueue.main.async {
+                    self.processGameData()
+                    let today = Calendar.current.dateComponents([.year, .month, .day], from: Date())
+                    self.filterGames(for: today)
+                    
+                    self.calendarView.reloadDecorations(forDateComponents: documents.compactMap {
+                        let game = Game(dictionary: $0.data())
+                        return game != nil ? Calendar.current.dateComponents([.year, .month, .day], from: game!.date) : nil
+                    }, animated: true)
+                }
+            }
     }
+    
     
     private func processGameData() {
         let cal = Calendar.current
-        
-        let allGames = scheduleData.values.flatMap { $0 }
         
         for game in allGames {
             let dc = cal.dateComponents([.year, .month, .day], from: game.date)
@@ -136,8 +137,6 @@ class CalendarViewController: UIViewController, UICalendarViewDelegate, UICalend
     private func filterGames(for dateComponents: DateComponents) {
         let cal = Calendar.current
         guard let selectedDate = cal.date(from: dateComponents) else { return }
-        
-        let allGames = scheduleData.values.flatMap { $0 }
         
         gamesForSelectedDay = allGames.filter { game in
             return cal.isDate(game.date, inSameDayAs: selectedDate)

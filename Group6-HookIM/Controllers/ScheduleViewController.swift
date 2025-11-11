@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import FirebaseFirestore
 
 class ScheduleViewController: UIViewController, UITabBarDelegate {
 
@@ -17,33 +18,31 @@ class ScheduleViewController: UIViewController, UITabBarDelegate {
     // MARK: - Properties
     let sports = ["Women's Basketball", "Men's Basketball", "Co-ed Basketball"]
     
-    lazy var scheduleData: [String: [Game]] = [
-        "Women's Basketball": [
-            Game(team: "Hoopers", opponent: "Swish", location: "Gregory Gym", date: makeDate("Oct 29, 7PM")),
-            Game(team: "Slam Dunks", opponent: "Hoopers", location: "Belmont Hall", date: makeDate("Nov 2, 8PM"))
-        ],
-        "Men's Basketball": [
-            Game(team: "myTeam", opponent: "Team1", location: "Gregory Gym", date: makeDate("Oct 30, 6PM"))
-        ],
-        "Co-ed Basketball": [
-            Game(team: "Hoops", opponent: "Swishers", location: "Gregory Gym", date: makeDate("Nov 1, 9PM")),
-            Game(team: "Hoops", opponent: "TeamX", location: "Gregory Gym", date: makeDate("Nov 1, 10PM"))
-        ]
-    ]
+    
+    private var games: [Game] = []
 
     var selectedSport: String? {
         didSet {
             sportButton.setTitle(selectedSport ?? "Select Sport", for: .normal)
-            tableView.reloadData()
+            fetchGames()
         }
     }
+    
+    private let db = Firestore.firestore()
+    
+    private lazy var timeFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "h:mm a"
+        formatter.amSymbol = "AM"
+        formatter.pmSymbol = "PM"
+        return formatter
+    }()
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.setNavigationBarHidden(false, animated: animated)
-        // Set Schedule tab as selected
         if let items = bottomTabBar?.items, items.count > 2 {
-            bottomTabBar.selectedItem = items[2] // Schedule item
+            bottomTabBar.selectedItem = items[2]
         }
     }
 
@@ -72,6 +71,61 @@ class ScheduleViewController: UIViewController, UITabBarDelegate {
         setupTabBar()
     }
     
+    private func fetchGames() {
+        // if we cant find the sport for some reason
+        guard let selectedSport = selectedSport else {
+            self.games = []
+            self.tableView.reloadData()
+            return
+        }
+
+        // string parsing *clown emoji*
+        let sportComponents = selectedSport.split(separator: " ")
+        let division: String
+        let sport: String
+        
+        if sportComponents.count > 1 {
+            division = String(sportComponents.first!)
+            sport = String(sportComponents.last!)
+        } else {
+            // TODO: make sure defaulting to coed division is valid
+            division = "Co-ed"
+            sport = selectedSport
+        }
+        
+        // show loading spinner etc
+        
+        db.collection("games")
+            .whereField("sport", isEqualTo: sport)
+            .whereField("division", isEqualTo: division)
+            .whereField("status", isEqualTo: "upcoming")
+            .order(by: "date", descending: false)
+            .getDocuments { [weak self] (querySnapshot, error) in
+                
+                guard let self = self else { return }
+                
+                if let error = error {
+                    print("Error fetching games: \(error.localizedDescription)")
+                    return
+                }
+                
+                guard let documents = querySnapshot?.documents else {
+                    print("No documents found")
+                    self.games = []
+                    self.tableView.reloadData()
+                    return
+                }
+                
+                self.games = documents.compactMap { doc in
+                    return Game(dictionary: doc.data())
+                }
+                
+                DispatchQueue.main.async {
+                    self.tableView.reloadData()
+                }
+            }
+    }
+    
     private func setupTabBar() {
         bottomTabBar = UITabBar()
         bottomTabBar.translatesAutoresizingMaskIntoConstraints = false
@@ -95,15 +149,12 @@ class ScheduleViewController: UIViewController, UITabBarDelegate {
             bottomTabBar.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
         ])
         
-        // Adjust table view bottom constraint
         tableView.translatesAutoresizingMaskIntoConstraints = false
-        // Find and deactivate existing bottom constraints
         let constraintsToDeactivate = view.constraints.filter { constraint in
             (constraint.firstItem === tableView && constraint.firstAttribute == .bottom) ||
             (constraint.secondItem === tableView && constraint.secondAttribute == .bottom)
         }
         NSLayoutConstraint.deactivate(constraintsToDeactivate)
-        // Add new constraint to tab bar
         tableView.bottomAnchor.constraint(equalTo: bottomTabBar.topAnchor).isActive = true
     }
     
@@ -111,16 +162,15 @@ class ScheduleViewController: UIViewController, UITabBarDelegate {
         guard let items = tabBar.items, let selectedIndex = items.firstIndex(of: item) else { return }
         
         switch selectedIndex {
-        case 0: // Home
+        case 0:
             navigateToDashboard()
-        case 1: // Teams
+        case 1:
             navigateToTeams()
-        case 2: // Schedule
-            // Already on schedule, do nothing
+        case 2:
             return
-        case 3: // Standings
+        case 3:
             navigateToStandings()
-        case 4: // Profile
+        case 4:
             navigateToProfile()
         default:
             break
@@ -130,11 +180,9 @@ class ScheduleViewController: UIViewController, UITabBarDelegate {
     private func navigateToTeams() {
         guard let navController = navigationController else { return }
         
-        // Check if CaptainTeamViewController is already in the stack
         if let teamsVC = navController.viewControllers.first(where: { $0 is CaptainTeamViewController }) {
             navController.popToViewController(teamsVC, animated: true)
         } else {
-            // Instantiate and push directly
             let storyboard = UIStoryboard(name: "Main", bundle: nil)
             if let teamsVC = storyboard.instantiateViewController(withIdentifier: "CaptainTeamViewController") as? CaptainTeamViewController {
                 navController.pushViewController(teamsVC, animated: true)
@@ -145,11 +193,9 @@ class ScheduleViewController: UIViewController, UITabBarDelegate {
     private func navigateToStandings() {
         guard let navController = navigationController else { return }
         
-        // Check if StandingsViewController is already in the stack
         if let standingsVC = navController.viewControllers.first(where: { $0 is StandingsViewController }) {
             navController.popToViewController(standingsVC, animated: true)
         } else {
-            // Instantiate and push directly
             let storyboard = UIStoryboard(name: "Main", bundle: nil)
             if let standingsVC = storyboard.instantiateViewController(withIdentifier: "StandingsViewController") as? StandingsViewController {
                 navController.pushViewController(standingsVC, animated: true)
@@ -160,11 +206,9 @@ class ScheduleViewController: UIViewController, UITabBarDelegate {
     private func navigateToProfile() {
         guard let navController = navigationController else { return }
         
-        // Check if UserProfileViewController is already in the stack
         if let profileVC = navController.viewControllers.first(where: { $0 is UserProfileViewController }) {
             navController.popToViewController(profileVC, animated: true)
         } else {
-            // Instantiate and push directly
             let storyboard = UIStoryboard(name: "Main", bundle: nil)
             if let profileVC = storyboard.instantiateViewController(withIdentifier: "UserProfileViewController") as? UserProfileViewController {
                 navController.pushViewController(profileVC, animated: true)
@@ -175,11 +219,9 @@ class ScheduleViewController: UIViewController, UITabBarDelegate {
     private func navigateToDashboard() {
         guard let navController = navigationController else { return }
         
-        // Check if DashboardViewController is already in the stack (should be root)
         if let dashboardVC = navController.viewControllers.first(where: { $0 is DashboardViewController }) {
             navController.popToViewController(dashboardVC, animated: true)
         } else {
-            // If for some reason Dashboard is not in stack, instantiate and set as root
             let storyboard = UIStoryboard(name: "Main", bundle: nil)
             if let dashboardVC = storyboard.instantiateViewController(withIdentifier: "DashboardViewController") as? DashboardViewController {
                 navController.setViewControllers([dashboardVC], animated: true)
@@ -220,27 +262,15 @@ class ScheduleViewController: UIViewController, UITabBarDelegate {
         performSegue(withIdentifier: "toCalendarSegue", sender: self)
     }
     
-    private lazy var timeFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "h:mm a"
-        formatter.amSymbol = "AM"
-        formatter.pmSymbol = "PM"
-        return formatter
-    }()
 }
 
 extension ScheduleViewController: UITableViewDataSource, UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        guard let sport = selectedSport else { return 0 }
-        return scheduleData[sport]?.count ?? 0
+        return games.count
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-
-        guard let sport = selectedSport,
-              let games = scheduleData[sport] else { return UITableViewCell() }
-        
         let game = games[indexPath.row]
         let cell = tableView.dequeueReusableCell(withIdentifier: "ScheduleCell", for: indexPath) as! ScheduleCell
         
