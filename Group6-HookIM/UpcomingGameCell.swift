@@ -5,7 +5,7 @@ class UpcomingGameCell: UITableViewCell {
     // MARK: - UI Elements
     private let containerView: UIView = {
         let view = UIView()
-        view.backgroundColor = UIColor.systemBackground
+        view.backgroundColor = .clear
         view.layer.cornerRadius = 10
         view.translatesAutoresizingMaskIntoConstraints = false
         return view

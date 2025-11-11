@@ -38,7 +38,7 @@ class NotificationSettingsViewController: UIViewController {
         headerView.backgroundColor = UIColor(red: 0.611764729, green: 0.3882353008, blue: 0.1607843041, alpha: 1)
         
         titleLabel.text = "Notification Settings"
-        titleLabel.textColor = .white
+        titleLabel.textColor = .label
         titleLabel.font = .boldSystemFont(ofSize: 24)
         
         backButton.setImage(UIImage(systemName: "chevron.left"), for: .normal)

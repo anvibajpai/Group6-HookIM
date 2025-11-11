@@ -175,7 +175,7 @@ class DashboardViewController: UIViewController, UITabBarDelegate {
     
     // MARK: - Build
     private func buildUI() {
-        view.backgroundColor = .nearBlack
+        view.backgroundColor = UIColor(named: "AppBackground")
         navigationController?.setNavigationBarHidden(true, animated: false)
         
         // Ensure content view is visible
@@ -211,7 +211,7 @@ class DashboardViewController: UIViewController, UITabBarDelegate {
         activityLabel.textColor = .label
         
         // Ensure the upcoming games card has visible styling (matching SportsDashboard)
-        upcomingGamesCard.backgroundColor = .cardBG
+        upcomingGamesCard.backgroundColor = UIColor(named: "CardBackground")
         upcomingGamesCard.layer.cornerRadius = 16
         upcomingGamesCard.clipsToBounds = true
         

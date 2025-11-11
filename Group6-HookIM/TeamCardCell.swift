@@ -9,7 +9,7 @@ class TeamCardCell: UICollectionViewCell {
     // MARK: - UI Elements
     private let cardView: UIView = {
         let view = UIView()
-        view.backgroundColor = UIColor.systemBackground
+        view.backgroundColor = UIColor(named: "CardBackground")
         view.layer.cornerRadius = 16
         view.layer.shadowColor = UIColor.black.cgColor
         view.layer.shadowOffset = CGSize(width: 0, height: 4)
@@ -39,7 +39,7 @@ class TeamCardCell: UICollectionViewCell {
     private let recordLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
-        label.textColor = .systemBlue
+        label.textColor = .label //this used to be blue, maybe make it diff than .label
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -65,7 +65,7 @@ class TeamCardCell: UICollectionViewCell {
         let button = UIButton(type: .system)
         button.setTitle("View Team", for: .normal)
         button.setTitleColor(.white, for: .normal)
-        button.backgroundColor = UIColor.systemBlue
+        button.backgroundColor = .warmOrange
         button.layer.cornerRadius = 8
         button.titleLabel?.font = UIFont.systemFont(ofSize: 14, weight: .medium)
         button.translatesAutoresizingMaskIntoConstraints = false
