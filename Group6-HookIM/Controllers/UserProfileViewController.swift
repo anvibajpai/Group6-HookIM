@@ -11,7 +11,7 @@ import FirebaseAuth
 import FirebaseFirestore
 import FirebaseStorage
 
-class UserProfileViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+class UserProfileViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UITabBarDelegate {
     
     // MARK: - Outlets
     @IBOutlet weak var profileImageView: UIImageView!
@@ -24,6 +24,8 @@ class UserProfileViewController: UIViewController, UIImagePickerControllerDelega
     @IBOutlet weak var mensButton: UIButton!
     @IBOutlet weak var womensButton: UIButton!
     @IBOutlet weak var coedButton: UIButton!
+    
+    private var bottomTabBar: UITabBar!
     
     private let allSports = ["Basketball", "Soccer", "Volleyball", "Softball", "Tennis", "Ultimate", "Pickleball"]
     private let genderOptions = ["Male", "Female", "Other"]
@@ -59,6 +61,10 @@ class UserProfileViewController: UIViewController, UIImagePickerControllerDelega
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         self.navigationController?.setNavigationBarHidden(true, animated: false)
+        // Set Profile tab as selected
+        if let items = bottomTabBar?.items, items.count > 4 {
+            bottomTabBar.selectedItem = items[4] // Profile item
+        }
     }
 
     override func viewDidLoad() {
@@ -73,6 +79,125 @@ class UserProfileViewController: UIViewController, UIImagePickerControllerDelega
             DispatchQueue.main.async {
                 self.loadUserData()
                 self.setupUI()
+                self.setupTabBar()
+            }
+        }
+    }
+    
+    private func setupTabBar() {
+        bottomTabBar = UITabBar()
+        bottomTabBar.translatesAutoresizingMaskIntoConstraints = false
+        bottomTabBar.backgroundColor = UIColor(red: 0.7490196078, green: 0.3411764706, blue: 0.0, alpha: 0.7)
+        bottomTabBar.delegate = self
+        
+        let homeItem = UITabBarItem(title: "Home", image: UIImage(systemName: "house"), tag: 0)
+        let teamsItem = UITabBarItem(title: "Teams", image: UIImage(systemName: "person.3"), tag: 1)
+        let scheduleItem = UITabBarItem(title: "Schedule", image: UIImage(systemName: "calendar"), tag: 2)
+        let standingsItem = UITabBarItem(title: "Leaderboard", image: UIImage(systemName: "trophy"), tag: 3)
+        let profileItem = UITabBarItem(title: "Profile", image: UIImage(systemName: "person"), tag: 4)
+        
+        bottomTabBar.items = [homeItem, teamsItem, scheduleItem, standingsItem, profileItem]
+        bottomTabBar.selectedItem = profileItem
+        
+        view.addSubview(bottomTabBar)
+        
+        NSLayoutConstraint.activate([
+            bottomTabBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            bottomTabBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            bottomTabBar.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
+        ])
+        
+        // Adjust main view's bottom constraint to account for tab bar
+        // Find the main content view (usually the first subview that's not the tab bar)
+        if let mainContentView = view.subviews.first(where: { !($0 is UITabBar) }) {
+            mainContentView.translatesAutoresizingMaskIntoConstraints = false
+            // Find and deactivate existing bottom constraints
+            let constraintsToDeactivate = view.constraints.filter { constraint in
+                (constraint.firstItem === mainContentView && constraint.firstAttribute == .bottom) ||
+                (constraint.secondItem === mainContentView && constraint.secondAttribute == .bottom)
+            }
+            NSLayoutConstraint.deactivate(constraintsToDeactivate)
+            // Add new constraint to tab bar
+            mainContentView.bottomAnchor.constraint(equalTo: bottomTabBar.topAnchor).isActive = true
+        }
+    }
+    
+    func tabBar(_ tabBar: UITabBar, didSelect item: UITabBarItem) {
+        guard let items = tabBar.items, let selectedIndex = items.firstIndex(of: item) else { return }
+        
+        switch selectedIndex {
+        case 0: // Home
+            navigateToDashboard()
+        case 1: // Teams
+            navigateToTeams()
+        case 2: // Schedule
+            navigateToSchedule()
+        case 3: // Standings
+            navigateToStandings()
+        case 4: // Profile
+            // Already on profile, do nothing
+            return
+        default:
+            break
+        }
+    }
+    
+    private func navigateToTeams() {
+        guard let navController = navigationController else { return }
+        
+        // Check if CaptainTeamViewController is already in the stack
+        if let teamsVC = navController.viewControllers.first(where: { $0 is CaptainTeamViewController }) {
+            navController.popToViewController(teamsVC, animated: true)
+        } else {
+            // Instantiate and push directly
+            let storyboard = UIStoryboard(name: "Main", bundle: nil)
+            if let teamsVC = storyboard.instantiateViewController(withIdentifier: "CaptainTeamViewController") as? CaptainTeamViewController {
+                navController.pushViewController(teamsVC, animated: true)
+            }
+        }
+    }
+    
+    private func navigateToSchedule() {
+        guard let navController = navigationController else { return }
+        
+        // Check if ScheduleViewController is already in the stack
+        if let scheduleVC = navController.viewControllers.first(where: { $0 is ScheduleViewController }) {
+            navController.popToViewController(scheduleVC, animated: true)
+        } else {
+            // Instantiate and push directly
+            let storyboard = UIStoryboard(name: "Main", bundle: nil)
+            if let scheduleVC = storyboard.instantiateViewController(withIdentifier: "ScheduleViewController") as? ScheduleViewController {
+                navController.pushViewController(scheduleVC, animated: true)
+            }
+        }
+    }
+    
+    private func navigateToStandings() {
+        guard let navController = navigationController else { return }
+        
+        // Check if StandingsViewController is already in the stack
+        if let standingsVC = navController.viewControllers.first(where: { $0 is StandingsViewController }) {
+            navController.popToViewController(standingsVC, animated: true)
+        } else {
+            // Instantiate and push directly
+            let storyboard = UIStoryboard(name: "Main", bundle: nil)
+            if let standingsVC = storyboard.instantiateViewController(withIdentifier: "StandingsViewController") as? StandingsViewController {
+                navController.pushViewController(standingsVC, animated: true)
+            }
+        }
+    }
+    
+    private func navigateToDashboard() {
+        guard let navController = navigationController else { return }
+        
+        // Check if DashboardViewController is already in the stack (should be root)
+        if let dashboardVC = navController.viewControllers.first(where: { $0 is DashboardViewController }) {
+            navController.popToViewController(dashboardVC, animated: true)
+        } else {
+            // If for some reason Dashboard is not in stack, instantiate and set as root
+            let storyboard = UIStoryboard(name: "Main", bundle: nil)
+            if let dashboardVC = storyboard.instantiateViewController(withIdentifier: "DashboardViewController") as? DashboardViewController {
+                navController.setViewControllers([dashboardVC], animated: true)
             }
         }
     }

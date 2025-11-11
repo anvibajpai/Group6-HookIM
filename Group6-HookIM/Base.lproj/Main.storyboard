@@ -1223,7 +1223,7 @@
         <!--User Profile View Controller-->
         <scene sceneID="1pa-bu-n37">
             <objects>
-                <viewController id="j0d-3y-T7D" customClass="UserProfileViewController" customModule="Group6_HookIM" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="UserProfileViewController" id="j0d-3y-T7D" customClass="UserProfileViewController" customModule="Group6_HookIM" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="Cgh-VE-a5g">
                         <rect key="frame" x="0.0" y="0.0" width="402" height="874"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>

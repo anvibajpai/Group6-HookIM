@@ -110,6 +110,10 @@ class DashboardViewController: UIViewController, UITabBarDelegate {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.setNavigationBarHidden(true, animated: animated)
+        // Set Home tab as selected
+        if let items = bottomTabBar.items, items.count > 0 {
+            bottomTabBar.selectedItem = items[0] // Home item
+        }
     }
     
     override func viewDidLoad() {
