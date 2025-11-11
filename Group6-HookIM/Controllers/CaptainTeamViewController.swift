@@ -6,6 +6,8 @@
 //
 
 import UIKit
+import FirebaseAuth
+import FirebaseFirestore
 
 final class RosterCell: UITableViewCell {
     
@@ -19,50 +21,85 @@ final class RosterCell: UITableViewCell {
 
 
 class CaptainTeamViewController: UIViewController, UITabBarDelegate {
-    @IBOutlet weak var winsLabel: UILabel!
     
+    @IBOutlet weak var winsLabel: UILabel!
     @IBOutlet weak var lossLabel: UILabel!
+    @IBOutlet weak var ptsLabel: UILabel!
+    @IBOutlet weak var teamNameSelector: UIButton!
+    @IBOutlet weak var sportLabel: UILabel!
+    
+    @IBOutlet weak var rosterTableView: UITableView!
+    
+    
+    @IBOutlet weak var categoryLabel: UILabel!
     
     private var bottomTabBar: UITabBar!
     
     struct Player { let name: String }
-    struct Team {
+        
+    struct TeamLite {
+        let id: String
         let name: String
         let sport: String
-        let category: String
-        var roster: [Player]
+        let division: String
         var wins: Int
         var losses: Int
+        var points: Int
+        let memberUids: [String]
+
+        init?(id: String, data: [String: Any]) {
+            guard
+                let name = data["name"] as? String,
+                let sport = data["sport"] as? String,
+                let division = data["division"] as? String,
+                let wins = data["wins"] as? Int,
+                let losses = data["losses"] as? Int,
+                let points = data["points"] as? Int,
+                let memberUids = data["memberUids"] as? [String]
+            else { return nil }
+            self.id = id
+            self.name = name
+            self.sport = sport
+            self.division = division
+            self.wins = wins
+            self.losses = losses
+            self.points = points
+            self.memberUids = memberUids
+        }
     }
     
-    var wins = 3
-    var losses = 2
+   private let db = Firestore.firestore()
+   private var myTeams: [TeamLite] = []
+   private var selectedTeam: TeamLite?
+   private var roster: [Player] = []
+
     
+    private var wins: Int = 0
+    private var losses: Int = 0
     
-    func updateLabels() {
-            winsLabel.text = "\(wins)"
-            lossLabel.text = "\(losses)"
-        }
-    
-    @IBOutlet weak var teamNameSelector: UIButton!
-    @IBOutlet weak var rosterTableView: UITableView!
-    
-    var team = Team(
-            name: "My Team",
-            sport: "Basketball",
-            category: "Co-ed",
-            roster: [
-                Player(name: "John Doe"),
-                Player(name: "Jane Doe"),
-                Player(name: "Jared Doe"),
-                Player(name: "Jenny Doe"),
-                Player(name: "Jamie Doe")
-            ],
-            wins: 3, losses: 1
-    )
+    override func viewDidLoad() {
+       super.viewDidLoad()
+       rosterTableView.dataSource = self
+       rosterTableView.delegate   = self
+       rosterTableView.tableFooterView = UIView()
+       
+       // Basic styling so the menu shows as a dropdown
+       teamNameSelector.configuration = nil
+       teamNameSelector.backgroundColor = .white
+       teamNameSelector.setTitleColor(.black, for: .normal)
+       teamNameSelector.layer.cornerRadius = 8
+       teamNameSelector.layer.borderWidth = 1
+       teamNameSelector.layer.borderColor = UIColor.systemGray4.cgColor
+       teamNameSelector.setTitle("My Team", for: .normal)
+
+       loadUserTeams()
+       setupTabBar()
+   }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        refreshSelectedTeamAndRoster()
+        loadUserTeams()
         navigationController?.setNavigationBarHidden(false, animated: animated)
         // Set Teams tab as selected
         if let items = bottomTabBar?.items, items.count > 1 {
@@ -70,15 +107,187 @@ class CaptainTeamViewController: UIViewController, UITabBarDelegate {
         }
     }
     
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        rosterTableView.dataSource = self
-        rosterTableView.delegate   = self
-        rosterTableView.tableFooterView = UIView()
-        
-        setupTabBar()
+    private func refreshSelectedTeamAndRoster() {
+        guard let id = selectedTeam?.id else { return }
+        db.collection("teams").document(id).getDocument { [weak self] doc, err in
+            guard let self = self, let data = doc?.data(),
+                  let fresh = TeamLite(id: id, data: data) else { return }
+            self.selectedTeam = fresh
+            self.applyTeam(fresh)
+            self.fetchRoster(for: fresh)
+        }
     }
+    
+    func updateLabels() {
+            winsLabel.text = "\(wins)"
+            lossLabel.text = "\(losses)"
+    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+            if segue.identifier == "editRecordSegue",
+                   let vc = segue.destination as? EditRecordViewController {
+
+                    // Pre-fill editor
+                    vc.wins = wins
+                    vc.losses = losses
+
+                    // Callback from editor when Save is tapped
+                    vc.onSave = { [weak self] updatedWins, updatedLosses in
+                        guard let self = self else { return }
+                        guard var current = self.selectedTeam else {
+                            // Optional: show an alert if no team is selected
+                            let a = UIAlertController(title:  "No Team Selected",
+                                                      message: "Please select a team first.",
+                                                      preferredStyle: .alert)
+                            a.addAction(UIAlertAction(title: "OK", style: .default))
+                            self.present(a, animated: true)
+                            return
+                        }
+
+                        // 1) Update local UI state
+                        self.wins = updatedWins
+                        self.losses = updatedLosses
+                        self.updateLabels()
+
+                        // 2) Update in-memory models
+                        current.wins = updatedWins
+                        current.losses = updatedLosses
+                        self.selectedTeam = current
+                        if let idx = self.myTeams.firstIndex(where: { $0.id == current.id }) {
+                            self.myTeams[idx] = current
+                        }
+
+                        // 3) Persist to Firestore for THIS team
+                        self.db.collection("teams").document(current.id)
+                            .updateData([
+                                "wins": updatedWins,
+                                "losses": updatedLosses
+                            ]) { err in
+                                if let err = err {
+                                    print(" Firestore update error: \(err)")
+                                }
+                            }
+                    }
+                }
+            
+            if segue.identifier == "freeAgentBoardSegue",
+                   let vc = segue.destination as? FreeAgentBoardViewController {
+                    vc.sportText = selectedTeam?.sport
+                    vc.teamId = selectedTeam?.id
+                }
+            }
+    
+    private func loadUserTeams() {                            // NEW
+                guard let uid = Auth.auth().currentUser?.uid else { return }
+                db.collection("users").document(uid).getDocument { [weak self] snap, err in
+                    guard let self = self else { return }
+                    if let err = err { print("User fetch error: \(err)"); return }
+                    let teamIDs = (snap?.data()?["teams"] as? [String]) ?? []
+                    guard !teamIDs.isEmpty else {
+                        self.teamNameSelector.setTitle("No Teams Yet", for: .normal)
+                        self.applyTeam(nil)
+                        return
+                    }
+
+                    // Fetch teams by id in chunks of <= 10
+                    var fetched: [TeamLite] = []
+                    let chunks = stride(from: 0, to: teamIDs.count, by: 10).map {
+                        Array(teamIDs[$0 ..< min($0+10, teamIDs.count)])
+                    }
+                    let group = DispatchGroup()
+                    for chunk in chunks {
+                        group.enter()
+                        self.db.collection("teams")
+                            .whereField(FieldPath.documentID(), in: chunk)
+                            .getDocuments { qs, _ in
+                                qs?.documents.forEach { d in
+                                    if let t = TeamLite(id: d.documentID, data: d.data()) {
+                                        fetched.append(t)
+                                    }
+                                }
+                                group.leave()
+                            }
+                    }
+                    group.notify(queue: .main) {
+                        // Preserve order from user.teams
+                        self.myTeams = teamIDs.compactMap { id in fetched.first { $0.id == id } }
+                        self.buildTeamMenu()
+                        if self.selectedTeam == nil, let first = self.myTeams.first {
+                            self.selectTeam(first)
+                        }
+                    }
+                }
+            }
+
+    
+    
+    
+    private func buildTeamMenu() {                            // NEW
+                let actions = myTeams.map { team in
+                    UIAction(title: team.name,
+                             state: (team.id == selectedTeam?.id ? .on : .off)) { [weak self] _ in
+                        self?.selectTeam(team)
+                    }
+                }
+                teamNameSelector.menu = UIMenu(title: "My Teams", children: actions)
+                teamNameSelector.showsMenuAsPrimaryAction = true
+            }
+
+            private func selectTeam(_ team: TeamLite) {
+                selectedTeam = team
+                teamNameSelector.setTitle(team.name, for: .normal)
+                buildTeamMenu()
+                applyTeam(team)
+                roster.removeAll()
+                rosterTableView.reloadData()
+                fetchRoster(for: team)
+            }
+
+            private func applyTeam(_ team: TeamLite?) {
+                if let t = team {
+                    wins = t.wins
+                    losses = t.losses
+                    sportLabel.text = t.sport
+                    categoryLabel.text = t.division
+                    ptsLabel.text = "\(t.points)"
+                } else {
+                    wins = 0; losses = 0
+                    sportLabel.text = "—"
+                    categoryLabel.text = "—"
+                    ptsLabel.text = "—"
+                }
+                updateLabels()
+            }
+    
+    private func fetchRoster(for team: TeamLite) {
+                let ids = team.memberUids
+        guard !ids.isEmpty else {roster = []; rosterTableView.reloadData(); return }
+
+                var collected: [(String, Player)] = []
+                let chunks = stride(from: 0, to: ids.count, by: 10).map {
+                    Array(ids[$0 ..< min($0 + 10, ids.count)])
+                }
+                let group = DispatchGroup()
+                for chunk in chunks {
+                    group.enter()
+                    db.collection("users")
+                        .whereField(FieldPath.documentID(), in: chunk)
+                        .getDocuments { snap, _ in
+                            snap?.documents.forEach { d in
+                                let first = d.data()["firstName"] as? String ?? ""
+                                let last  = d.data()["lastName"]  as? String ?? ""
+                                let name = [first, last].joined(separator: " ").trimmingCharacters(in: .whitespaces)
+                                collected.append((d.documentID, Player(name: name.isEmpty ? "Unnamed" : name)))
+                            }
+                            group.leave()
+                        }
+                }
+                group.notify(queue: .main) {
+                    // Keep original order from memberUids
+                    self.roster = ids.compactMap { id in collected.first { $0.0 == id }?.1 }
+                    self.rosterTableView.reloadData()
+                }
+            }
     
     private func setupTabBar() {
         bottomTabBar = UITabBar()
@@ -194,53 +403,38 @@ class CaptainTeamViewController: UIViewController, UITabBarDelegate {
             }
         }
     }
-    
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-            if segue.identifier == "editRecordSegue" {
-                if let destinationVC = segue.destination as? EditRecordViewController {
-                    destinationVC.wins = wins
-                    destinationVC.losses = losses
-                    
-                    // Setup callback
-                    destinationVC.onSave = { [weak self] updatedWins, updatedLosses in
-                        self?.wins = updatedWins
-                        self?.losses = updatedLosses
-                        self?.updateLabels()
-                    }
-                }
-            }
-        }
 }
 
 extension CaptainTeamViewController: UITableViewDataSource, UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        team.roster.count
+        roster.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "RosterCell", for: indexPath) as! RosterCell
-        let player = team.roster[indexPath.row]
-        cell.nameLabel.text = "Jane Doe"
-        cell.onPlus = { [weak self] in
-            guard let self else { return }
-            // demo action for the small "+" inside each row
-            let alert = UIAlertController(title: "Added", message: "\(player.name) tapped +", preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "OK", style: .default))
-            self.present(alert, animated: true)
+            let cell = tableView.dequeueReusableCell(withIdentifier: "RosterCell", for: indexPath) as! RosterCell
+                    let player = roster[indexPath.row]
+                    cell.nameLabel.text = player.name
+                    cell.onPlus = { [weak self] in
+                        guard let self else { return }
+                        let alert = UIAlertController(title: "Added",
+                                                      message: "\(player.name) tapped +",
+                                                      preferredStyle: .alert)
+                        alert.addAction(UIAlertAction(title: "OK", style: .default))
+                        self.present(alert, animated: true)
+                    }
+            return cell
         }
-        return cell
-    }
-    
-    // swipe to delete (just edits the in-memory list)
-    func tableView(_ tableView: UITableView,
-                   trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath)
-    -> UISwipeActionsConfiguration? {
-        let delete = UIContextualAction(style: .destructive, title: "Delete") { [weak self] _,_,done in
-            self?.team.roster.remove(at: indexPath.row)
-            tableView.deleteRows(at: [indexPath], with: .automatic)
-            done(true)
+        
+        // swipe to delete (just edits the in-memory list)
+        func tableView(_ tableView: UITableView,
+                       trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath)
+        -> UISwipeActionsConfiguration? {
+            let delete = UIContextualAction(style: .destructive, title: "Delete") { [weak self] _,_,done in
+                        self?.roster.remove(at: indexPath.row)
+                        tableView.deleteRows(at: [indexPath], with: .automatic)
+                        done(true)
+                    }
+            return UISwipeActionsConfiguration(actions: [delete])
         }
-        return UISwipeActionsConfiguration(actions: [delete])
-    }
 }
