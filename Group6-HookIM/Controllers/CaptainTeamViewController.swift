@@ -111,9 +111,9 @@ class CaptainTeamViewController: UIViewController, UITabBarDelegate {
 
         rosterConstraints = [
             rosterTableView.topAnchor.constraint(equalTo: rosterTitleLabel.bottomAnchor, constant: 12),
-            rosterTableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
-            rosterTableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
-            rosterTableView.heightAnchor.constraint(equalToConstant: 180)
+            rosterTableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 50),
+            rosterTableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -50),
+            rosterTableView.heightAnchor.constraint(equalToConstant: 160)
         ]
         NSLayoutConstraint.activate(rosterConstraints)
 
