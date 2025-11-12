@@ -63,6 +63,7 @@ class DashboardViewController: UIViewController, UITabBarDelegate {
     private var upcomingGames: [Game] = []
     private var myTeams: [DashboardTeam] = []
     private var recentActivity: Activity?
+    private var selectedTeamIdForNavigation: String? // Team ID to pass to Teams view
     
    
     private func formatDateWithOrdinal(_ date: Date) -> String {
@@ -268,7 +269,7 @@ class DashboardViewController: UIViewController, UITabBarDelegate {
     }
     
     private func fetchUpcomingGames(for teams: [DashboardTeam], completion: @escaping ([Game]) -> Void) {
-        // Use the same approach as ScheduleViewController - query directly and convert
+        
         Firestore.firestore().collection("games")
             .whereField("status", isEqualTo: "upcoming")
             .order(by: "date", descending: false)
@@ -482,6 +483,17 @@ class DashboardViewController: UIViewController, UITabBarDelegate {
     }
     
     
+    // MARK: - Navigation
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "showTeamsSegue",
+           let destinationVC = segue.destination as? CaptainTeamViewController,
+           let teamId = selectedTeamIdForNavigation {
+            destinationVC.teamIdToSelect = teamId
+            
+            selectedTeamIdForNavigation = nil
+        }
+    }
+    
     // MARK: - UITabBarDelegate
     func tabBar(_ tabBar: UITabBar, didSelect item: UITabBarItem) {
         guard let items = tabBar.items, let selectedIndex = items.firstIndex(of: item) else { return }
@@ -491,6 +503,8 @@ class DashboardViewController: UIViewController, UITabBarDelegate {
             return
             
         case 1:
+            
+            selectedTeamIdForNavigation = nil
             performSegue(withIdentifier: "showTeamsSegue", sender: self)
             
         case 2:
@@ -541,6 +555,7 @@ extension DashboardViewController: UICollectionViewDataSource {
         let team = myTeams[indexPath.item]
         cell.configure(with: team, dateFormatter: formatDateWithOrdinal)
         cell.onViewTeamTapped = { [weak self] team in
+            self?.selectedTeamIdForNavigation = team.firebaseDocumentId
             self?.performSegue(withIdentifier: "showTeamsSegue", sender: self)
         }
         return cell

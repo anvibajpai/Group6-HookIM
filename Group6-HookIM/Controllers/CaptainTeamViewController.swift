@@ -77,6 +77,7 @@ class CaptainTeamViewController: UIViewController, UITabBarDelegate {
    private var myTeams: [TeamLite] = []
    private var selectedTeam: TeamLite?
    private var roster: [Player] = []
+   var teamIdToSelect: String?
 
     
     private var wins: Int = 0
@@ -133,6 +134,14 @@ class CaptainTeamViewController: UIViewController, UITabBarDelegate {
         // Set Teams tab as selected
         if let items = bottomTabBar?.items, items.count > 1 {
             bottomTabBar.selectedItem = items[1] // Teams item
+        }
+        
+        
+        if let teamIdToSelect = teamIdToSelect,
+           !myTeams.isEmpty,
+           let teamToSelect = myTeams.first(where: { $0.id == teamIdToSelect }) {
+            selectTeam(teamToSelect)
+            self.teamIdToSelect = nil
         }
     }
     
@@ -262,7 +271,13 @@ class CaptainTeamViewController: UIViewController, UITabBarDelegate {
 
             self.myTeams = fetched.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
             self.buildTeamMenu()
-            if self.selectedTeam == nil, let first = self.myTeams.first {
+            
+            
+            if let teamIdToSelect = self.teamIdToSelect,
+               let teamToSelect = self.myTeams.first(where: { $0.id == teamIdToSelect }) {
+                self.selectTeam(teamToSelect)
+                self.teamIdToSelect = nil
+            } else if self.selectedTeam == nil, let first = self.myTeams.first {
                 self.selectTeam(first)
             }
         }
