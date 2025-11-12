@@ -392,11 +392,6 @@ class DashboardViewController: UIViewController, UITabBarDelegate {
         return storyboard.instantiateViewController(withIdentifier: id)
     }
     
-    // MARK: - Actions
-    @objc private func didTapNotifications() {
-        //TODO: wire up in-app team joining notifs
-    }
-    
     
     // MARK: - UITabBarDelegate
     func tabBar(_ tabBar: UITabBar, didSelect item: UITabBarItem) {
