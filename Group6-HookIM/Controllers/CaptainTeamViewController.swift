@@ -28,6 +28,7 @@ class CaptainTeamViewController: UIViewController, UITabBarDelegate {
     @IBOutlet weak var teamNameSelector: UIButton!
     @IBOutlet weak var sportLabel: UILabel!
     
+    @IBOutlet weak var rosterLabel: UILabel!
     @IBOutlet weak var rosterTableView: UITableView!
     
     
@@ -94,7 +95,37 @@ class CaptainTeamViewController: UIViewController, UITabBarDelegate {
 
        loadUserTeams()
        setupTabBar()
+       placeRosterTableExactly()
    }
+    
+    private var rosterConstraints: [NSLayoutConstraint] = []
+
+    private func placeRosterTableExactly() {
+        // 1) Stop AutoResizing from making its own constraints
+        rosterTableView.translatesAutoresizingMaskIntoConstraints = false
+
+        // 2) Remove ANY constraints that reference the table's bottom (these often push it down)
+        let bottomRefs = view.constraints.filter { c in
+            (c.firstItem === rosterTableView && c.firstAttribute == .bottom) ||
+            (c.secondItem === rosterTableView && c.secondAttribute == .bottom)
+        }
+        NSLayoutConstraint.deactivate(bottomRefs + rosterConstraints)
+
+        // 3) Re-pin where you want it (under your "Roster" label, fixed height, no bottom anchor)
+        // If you don't have a dedicated "Roster" label outlet, use the label just above the table.
+        // Example assumes you have: @IBOutlet weak var rosterTitleLabel: UILabel!
+        rosterConstraints = [
+            rosterTableView.topAnchor.constraint(equalTo: rosterLabel.bottomAnchor, constant: 12),
+            rosterTableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
+            rosterTableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
+            rosterTableView.heightAnchor.constraint(equalToConstant: 180) // make the table small on purpose
+        ]
+        NSLayoutConstraint.activate(rosterConstraints)
+
+        // 4) Make sure it sits above anything else visually
+        view.bringSubviewToFront(rosterTableView)
+        view.layoutIfNeeded()
+    }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
