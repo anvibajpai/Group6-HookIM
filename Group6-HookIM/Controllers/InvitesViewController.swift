@@ -37,7 +37,7 @@ class InvitesViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        // Do any additional setup after loading the view.
+       
         guard let uid = Auth.auth().currentUser?.uid else {
             print("Error: No user logged in.")
             navigationController?.popViewController(animated: true)

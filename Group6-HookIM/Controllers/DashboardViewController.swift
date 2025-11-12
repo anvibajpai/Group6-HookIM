@@ -268,75 +268,32 @@ class DashboardViewController: UIViewController, UITabBarDelegate {
     }
     
     private func fetchUpcomingGames(for teams: [DashboardTeam], completion: @escaping ([Game]) -> Void) {
-        let teamFirebaseIds = teams.map { $0.firebaseDocumentId }
-        let teamNames = teams.map { $0.name }
-        
+        // Use the same approach as ScheduleViewController - query directly and convert
         Firestore.firestore().collection("games")
-            .limit(to: 100)
-            .getDocuments { snapshot, error in
-                if error != nil {
+            .whereField("status", isEqualTo: "upcoming")
+            .order(by: "date", descending: false)
+            .getDocuments { [weak self] (querySnapshot, error) in
+                guard let self = self else { return }
+                
+                if let error = error {
+                    print("Error fetching games: \(error.localizedDescription)")
                     completion([])
                     return
                 }
                 
-                guard let documents = snapshot?.documents else {
+                guard let documents = querySnapshot?.documents else {
+                    print("No documents found")
                     completion([])
                     return
                 }
                 
-                self.processGames(
-                    documents: documents,
-                    teamFirebaseIds: teamFirebaseIds,
-                    teamNames: teamNames,
-                    completion: completion
-                )
+                
+                let games = documents.compactMap { doc in
+                    return Game(dictionary: doc.data(), id: doc.documentID)
+                }
+                
+                completion(games)
             }
-    }
-    
-    private func processGames(
-        documents: [QueryDocumentSnapshot],
-        teamFirebaseIds: [String],
-        teamNames: [String],
-        completion: @escaping ([Game]) -> Void
-    ) {
-        var matchedGames: [Game] = []
-        let now = Date()
-        
-        for doc in documents {
-            let data = doc.data()
-            
-            var isUpcoming = true
-            if let dateTimestamp = data["date"] as? Timestamp {
-                let gameDate = dateTimestamp.dateValue()
-                isUpcoming = gameDate > now
-            } else if let status = data["Status"] as? String {
-                isUpcoming = status.lowercased() == "upcoming"
-            }
-            
-            if !isUpcoming {
-                continue
-            }
-            
-            guard let game = Game(dictionary: data, id: doc.documentID) else {
-                continue
-            }
-            
-            let teamAId = data["teamA_id"] as? String ?? ""
-            let teamBId = data["teamB_id"] as? String ?? ""
-            
-            let gameInvolvesUserTeam = teamFirebaseIds.contains(teamAId) ||
-                                     teamFirebaseIds.contains(teamBId) ||
-                                     teamNames.contains(game.team) ||
-                                     teamNames.contains(game.opponent)
-            
-            if gameInvolvesUserTeam {
-                matchedGames.append(game)
-            }
-        }
-        
-        let sortedGames = matchedGames.sorted { $0.date < $1.date }
-        let finalGames = Array(sortedGames.prefix(3))
-        completion(finalGames)
     }
     
     private func updateTeamsWithNextGames(games: [Game]) {
@@ -390,7 +347,7 @@ class DashboardViewController: UIViewController, UITabBarDelegate {
         upcomingGamesCard.layer.cornerRadius = 16
         upcomingGamesCard.clipsToBounds = true
         
-        upcomingTable.isScrollEnabled = false
+        upcomingTable.isScrollEnabled = true
         
         bottomTabBar.delegate = self
         
@@ -479,7 +436,7 @@ class DashboardViewController: UIViewController, UITabBarDelegate {
             upcomingGamesCard.topAnchor.constraint(equalTo: upcomingGamesTitle.bottomAnchor, constant: 10),
             upcomingGamesCard.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
             upcomingGamesCard.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
-            upcomingGamesCard.heightAnchor.constraint(equalToConstant: 200),
+            upcomingGamesCard.heightAnchor.constraint(equalToConstant: 400),
             
             upcomingTable.topAnchor.constraint(equalTo: upcomingGamesCard.topAnchor, constant: 10),
             upcomingTable.leadingAnchor.constraint(equalTo: upcomingGamesCard.leadingAnchor, constant: 10),
