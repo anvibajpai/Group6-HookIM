@@ -16,7 +16,7 @@ class ScheduleViewController: UIViewController, UITabBarDelegate {
     private var bottomTabBar: UITabBar!
     
     // MARK: - Properties
-    let sports = ["Women's Basketball", "Men's Basketball", "Co-ed Basketball"]
+    let sports = ["Women's Basketball", "Men's Basketball", "Co-ed Basketball", "Women's Soccer", "Men's Soccer", "Co-ed Soccer", "Women's Dodgeball", "Men's Dodgeball", "Co-ed Dodgeball", "Women's Flag Football", "Men's Flag Football", "Co-ed Flag Football"]
     
     
     private var games: [Game] = []
@@ -89,7 +89,7 @@ class ScheduleViewController: UIViewController, UITabBarDelegate {
         
         if sportComponents.count > 1 {
             division = String(sportComponents.first!)
-            sport = String(sportComponents.last!)
+            sport = sportComponents.dropFirst().joined(separator: " ")
         } else {
             // TODO: make sure defaulting to coed division is valid
             division = "Co-ed"
@@ -97,6 +97,8 @@ class ScheduleViewController: UIViewController, UITabBarDelegate {
         }
         
         // show loading spinner etc
+        
+        print("DEBUG: Querying for sport='\(sport)', division='\(division)'")
         
         db.collection("games")
             .whereField("sport", isEqualTo: sport)
@@ -120,8 +122,10 @@ class ScheduleViewController: UIViewController, UITabBarDelegate {
                 }
                 
                 self.games = documents.compactMap { doc in
-                    return Game(dictionary: doc.data())
+                    return Game(dictionary: doc.data(), id: doc.documentID)
                 }
+                
+                NotificationScheduler.scheduleNotifications(for: self.games)
                 
                 DispatchQueue.main.async {
                     self.tableView.reloadData()
@@ -293,6 +297,33 @@ extension ScheduleViewController: UITableViewDataSource, UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
+//        scheduleTestNotifications(indexPath: indexPath)
     }
+    
+    func scheduleTestNotifications(indexPath: IndexPath) {
+        let game = games[indexPath.row]
+                
+        print("Scheduling test notification for game: \(game.team) vs \(game.opponent)")
+        
+        let center = UNUserNotificationCenter.current()
+        
+        let content = UNMutableNotificationContent()
+        content.title = "Test Notification: Game Data"
+        content.body = "You tapped on \(game.team) vs \(game.opponent) at \(game.location)."
+        content.sound = .default
+        
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 5, repeats: false)
+        
+        let request = UNNotificationRequest(identifier: "test-\(game.id)", content: content, trigger: trigger)
+        
+        center.add(request) { error in
+            if let error = error {
+                print("Error scheduling test notification: \(error.localizedDescription)")
+            } else {
+                print("Test notification scheduled. Put app in background.")
+            }
+        }
+    }
+
     
 }

@@ -18,6 +18,8 @@ struct DashboardTeam {
 }
 
 struct Game {
+    let id: String
+    
     let team: String
     let opponent: String
     let location: String
@@ -26,7 +28,7 @@ struct Game {
     let division: String
     
     // read these values in from firebase w error handling
-    init?(dictionary: [String: Any]) {
+    init?(dictionary: [String: Any], id: String) {
         guard let date = (dictionary["date"] as? Timestamp)?.dateValue(),
               let location = dictionary["location"] as? String,
               let teamAName = dictionary["teamA_name"] as? String,
@@ -36,6 +38,7 @@ struct Game {
             
             return nil
         }
+        self.id = id
         
         self.date = date
         self.location = location
@@ -46,7 +49,8 @@ struct Game {
     }
     
     // TODO: delete this once we're fully migrated to firebase
-    init(team: String, opponent: String, location: String, date: Date, sport: String, division: String) {
+    init(id: String = UUID().uuidString, team: String, opponent: String, location: String, date: Date, sport: String, division: String) {
+        self.id = id
         self.team = team
         self.opponent = opponent
         self.location = location

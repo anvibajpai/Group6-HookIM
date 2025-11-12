@@ -2,10 +2,11 @@
 //  NotificationSettingsViewController.swift
 //  Group6-HookIM
 //
-//  Created on 11/25/25.
+//  Created by Arnav Chopra on 11/11/25.
 //
 
 import UIKit
+import UserNotifications
 
 class NotificationSettingsViewController: UIViewController {
     
@@ -31,10 +32,14 @@ class NotificationSettingsViewController: UIViewController {
         loadSettings()
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        checkNotificationPermissions()
+    }
+    
     private func setupUI() {
         view.backgroundColor = UIColor(named: "Charcoal")
         
-       
         headerView.backgroundColor = UIColor(red: 0.611764729, green: 0.3882353008, blue: 0.1607843041, alpha: 1)
         
         titleLabel.text = "Notification Settings"
@@ -84,6 +89,37 @@ class NotificationSettingsViewController: UIViewController {
         darkModeToggle.isOn = darkModeEnabled
     }
     
+    // checks at the OS level to update value at the app level
+    private func checkNotificationPermissions() {
+        UNUserNotificationCenter.current().getNotificationSettings { [weak self] settings in
+            DispatchQueue.main.async {
+                guard let self = self else { return }
+                
+                if settings.authorizationStatus == .denied {
+                    self.gameScheduleToggle.isOn = false
+                    self.gameScheduleToggle.isEnabled = false
+                    
+                    self.gameScheduleEnabled = false
+                    UserDefaults.standard.set(false, forKey: "gameScheduleNotifications")
+                    UserDefaults.standard.set(true, forKey: "gameScheduleNotificationsSet")
+                    
+                    self.showPermissionAlert()
+                    
+                } else {
+                    self.gameScheduleToggle.isEnabled = true
+                }
+            }
+        }
+    }
+    
+    private func showPermissionAlert() {
+        let alert = UIAlertController(title: "Notifications Disabled",
+                                    message: "You have disabled notifications for this app. To use this feature, please go to your iPhone's Settings > HookIM > Notifications.",
+                                    preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alert, animated: true)
+    }
+    
     // MARK: - Actions
     @IBAction func backButtonTapped(_ sender: UIButton) {
         navigationController?.popViewController(animated: true)
@@ -104,6 +140,12 @@ class NotificationSettingsViewController: UIViewController {
         
         UserDefaults.standard.set(darkModeEnabled, forKey: "darkModeEnabled")
         UserDefaults.standard.set(true, forKey: "darkModeEnabledSet")
+        
+        if !gameScheduleEnabled {
+            UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
+        } else {
+            // we need the user to visit scheduleVC or calendarVC to automatically schedule notifs
+        }
         
         if let windowScene = view.window?.windowScene {
             windowScene.windows.forEach { window in

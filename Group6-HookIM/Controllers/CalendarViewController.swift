@@ -104,8 +104,10 @@ class CalendarViewController: UIViewController, UICalendarViewDelegate, UICalend
                 }
                 
                 self.allGames = documents.compactMap { doc in
-                    return Game(dictionary: doc.data())
+                    return Game(dictionary: doc.data(), id: doc.documentID)
                 }
+                
+                NotificationScheduler.scheduleNotifications(for: self.allGames)
                 
                 DispatchQueue.main.async {
                     self.processGameData()
@@ -113,7 +115,8 @@ class CalendarViewController: UIViewController, UICalendarViewDelegate, UICalend
                     self.filterGames(for: today)
                     
                     self.calendarView.reloadDecorations(forDateComponents: documents.compactMap {
-                        let game = Game(dictionary: $0.data())
+                        // $0 is the document reference
+                        let game = Game(dictionary: $0.data(), id: $0.documentID)
                         return game != nil ? Calendar.current.dateComponents([.year, .month, .day], from: game!.date) : nil
                     }, animated: true)
                 }

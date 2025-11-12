@@ -394,10 +394,7 @@ class DashboardViewController: UIViewController, UITabBarDelegate {
     
     // MARK: - Actions
     @objc private func didTapNotifications() {
-        let requestsVC = RequestsViewController()
-        let navController = UINavigationController(rootViewController: requestsVC)
-        // modal presentation = slides up from the bottom
-        present(navController, animated: true)
+        //TODO: wire up in-app team joining notifs
     }
     
     
