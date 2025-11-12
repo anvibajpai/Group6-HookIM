@@ -28,13 +28,17 @@ class CaptainTeamViewController: UIViewController, UITabBarDelegate {
     @IBOutlet weak var teamNameSelector: UIButton!
     @IBOutlet weak var sportLabel: UILabel!
     
+    @IBOutlet weak var addRosterButton: UIButton!
+    @IBOutlet weak var editStatsButton: UIButton!
+    
     @IBOutlet weak var rosterTitleLabel: UILabel!
     @IBOutlet weak var rosterTableView: UITableView!
     
-    
     @IBOutlet weak var categoryLabel: UILabel!
     
+    @IBOutlet weak var warningMessage: UILabel!
     private var bottomTabBar: UITabBar!
+    private var canManageTeam = false
     
     struct Player { let name: String }
         
@@ -93,7 +97,7 @@ class CaptainTeamViewController: UIViewController, UITabBarDelegate {
        teamNameSelector.layer.borderColor = UIColor.systemGray4.cgColor
        teamNameSelector.setTitle("My Team", for: .normal)
 
-       loadUserTeams()
+        loadAllTeams()
        setupTabBar()
         placeRosterTableExactly()
    }
@@ -124,7 +128,7 @@ class CaptainTeamViewController: UIViewController, UITabBarDelegate {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         refreshSelectedTeamAndRoster()
-        loadUserTeams()
+        loadAllTeams()
         navigationController?.setNavigationBarHidden(false, animated: animated)
         // Set Teams tab as selected
         if let items = bottomTabBar?.items, items.count > 1 {
@@ -132,20 +136,65 @@ class CaptainTeamViewController: UIViewController, UITabBarDelegate {
         }
     }
     
+    private func selectTeam(_ team: TeamLite) {
+        selectedTeam = team
+        teamNameSelector.setTitle(team.name, for: .normal)
+        buildTeamMenu()
+        applyTeam(team)
+
+        // compute permission
+        let uid = Auth.auth().currentUser?.uid
+        canManageTeam = uid != nil && team.memberUids.contains(uid!)
+
+        // lock/unlock UI
+        addRosterButton.isHidden = !canManageTeam
+        
+        let title = canManageTeam ? "Edit Game Stats" : "Not part of team"
+        editStatsButton.setTitle(title, for: .normal)
+//        editStatsButton.isEnabled = canManageTeam
+        editStatsButton.alpha = canManageTeam ? 1.0 : 0.5
+
+        roster.removeAll()
+        rosterTableView.reloadData()
+        fetchRoster(for: team)
+    }
+    
     private func refreshSelectedTeamAndRoster() {
         guard let id = selectedTeam?.id else { return }
-        db.collection("teams").document(id).getDocument { [weak self] doc, err in
-            guard let self = self, let data = doc?.data(),
-                  let fresh = TeamLite(id: id, data: data) else { return }
-            self.selectedTeam = fresh
-            self.applyTeam(fresh)
-            self.fetchRoster(for: fresh)
+            db.collection("teams").document(id).getDocument { [weak self] doc, _ in
+                guard let self = self, let data = doc?.data(), let fresh = TeamLite(id: id, data: data) else { return }
+                self.selectedTeam = fresh
+                self.applyTeam(fresh)
+                // recompute permission
+                let uid = Auth.auth().currentUser?.uid
+                self.canManageTeam = uid != nil && fresh.memberUids.contains(uid!)
+                self.addRosterButton.isHidden = !self.canManageTeam
+                
+                let title = canManageTeam ? "Edit Game Stats" : "Not part of team"
+                editStatsButton.setTitle(title, for: .normal)
+//                editStatsButton.isEnabled = canManageTeam
+                editStatsButton.alpha = canManageTeam ? 1.0 : 0.5
+                self.fetchRoster(for: fresh)
         }
     }
     
     func updateLabels() {
             winsLabel.text = "\(wins)"
             lossLabel.text = "\(losses)"
+    }
+    
+    override func shouldPerformSegue(withIdentifier identifier: String, sender: Any?) -> Bool {
+        if identifier == "editRecordSegue", !canManageTeam {
+            let a = UIAlertController(
+                title: "View Only",
+                message: "Only team members can edit stats.",
+                preferredStyle: .alert
+            )
+            a.addAction(UIAlertAction(title: "OK", style: .default))
+            present(a, animated: true)
+            return false
+        }
+        return true
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
@@ -202,6 +251,23 @@ class CaptainTeamViewController: UIViewController, UITabBarDelegate {
                 }
             }
     
+    private func loadAllTeams() {
+        db.collection("teams").getDocuments { [weak self] qs, err in
+            guard let self = self else { return }
+            if let err = err { print("teams fetch error:", err); return }
+
+            let fetched: [TeamLite] = qs?.documents.compactMap {
+                TeamLite(id: $0.documentID, data: $0.data())
+            } ?? []
+
+            self.myTeams = fetched.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+            self.buildTeamMenu()
+            if self.selectedTeam == nil, let first = self.myTeams.first {
+                self.selectTeam(first)
+            }
+        }
+    }
+    
     private func loadUserTeams() {                            // NEW
                 guard let uid = Auth.auth().currentUser?.uid else { return }
                 db.collection("users").document(uid).getDocument { [weak self] snap, err in
@@ -256,16 +322,6 @@ class CaptainTeamViewController: UIViewController, UITabBarDelegate {
                 }
                 teamNameSelector.menu = UIMenu(title: "My Teams", children: actions)
                 teamNameSelector.showsMenuAsPrimaryAction = true
-            }
-
-            private func selectTeam(_ team: TeamLite) {
-                selectedTeam = team
-                teamNameSelector.setTitle(team.name, for: .normal)
-                buildTeamMenu()
-                applyTeam(team)
-                roster.removeAll()
-                rosterTableView.reloadData()
-                fetchRoster(for: team)
             }
 
             private func applyTeam(_ team: TeamLite?) {

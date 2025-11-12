@@ -708,7 +708,9 @@
                     </view>
                     <navigationItem key="navigationItem" title="Team Page" id="vey-a6-x6Q"/>
                     <connections>
+                        <outlet property="addRosterButton" destination="cuy-eF-agF" id="087-B8-ZrZ"/>
                         <outlet property="categoryLabel" destination="Fmv-bF-pmW" id="UMF-Ta-u5K"/>
+                        <outlet property="editStatsButton" destination="tBy-5U-bNt" id="pfi-mJ-yvZ"/>
                         <outlet property="lossLabel" destination="PoQ-qU-Yy5" id="HlC-zt-Iez"/>
                         <outlet property="ptsLabel" destination="BIj-nn-hd6" id="gIF-Rw-Uqb"/>
                         <outlet property="rosterTableView" destination="h42-WC-T4u" id="IKo-hD-Zpz"/>
