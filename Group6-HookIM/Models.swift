@@ -9,12 +9,46 @@ struct DashboardUser {
 }
 
 struct DashboardTeam {
-    let id: UUID = UUID()
-    let name: String
-    let sport: String
-    let record: String
-    let divisionStanding: String
-    let nextGame: Game?
+    let id: UUID
+    let firebaseDocumentId: String
+    var name: String
+    var sport: String
+    var record: String
+    var divisionStanding: String
+    var nextGame: Game?
+    
+    init(name: String, sport: String, record: String, divisionStanding: String, nextGame: Game?) {
+        self.id = UUID()
+        self.firebaseDocumentId = UUID().uuidString
+        self.name = name
+        self.sport = sport
+        self.record = record
+        self.divisionStanding = divisionStanding
+        self.nextGame = nextGame
+    }
+    
+    init?(dictionary: [String: Any], id: String) {
+        guard let name = dictionary["name"] as? String,
+              let sport = dictionary["sport"] as? String,
+              let wins = dictionary["wins"] as? Int,
+              let losses = dictionary["losses"] as? Int else {
+            return nil
+        }
+        
+        self.id = UUID(uuidString: id) ?? UUID()
+        self.firebaseDocumentId = id
+        self.name = name
+        self.sport = sport
+        self.record = "\(wins)W - \(losses)L"
+        
+        if let standing = dictionary["divisionStanding"] as? String {
+            self.divisionStanding = standing
+        } else {
+            self.divisionStanding = "—"
+        }
+        
+        self.nextGame = nil
+    }
 }
 
 struct Game {
@@ -27,18 +61,31 @@ struct Game {
     let sport: String
     let division: String
     
-    // read these values in from firebase w error handling
     init?(dictionary: [String: Any], id: String) {
-        guard let date = (dictionary["date"] as? Timestamp)?.dateValue(),
-              let location = dictionary["location"] as? String,
-              let teamAName = dictionary["teamA_name"] as? String,
-              let teamBName = dictionary["teamB_name"] as? String,
-              let sport = dictionary["sport"] as? String,
-              let division = dictionary["division"] as? String else {
-            
+        let location = dictionary["Location"] as? String ?? dictionary["location"] as? String
+        let teamAName = dictionary["teamA_name"] as? String
+        let teamBName = dictionary["teamB_name"] as? String
+        let sport = dictionary["Sport"] as? String ?? dictionary["sport"] as? String
+        let division = dictionary["Division"] as? String ?? dictionary["division"] as? String
+        
+        guard let location = location,
+              let teamAName = teamAName,
+              let teamBName = teamBName,
+              let sport = sport,
+              let division = division else {
             return nil
         }
+        
         self.id = id
+        
+        let date: Date
+        if let dateTimestamp = dictionary["date"] as? Timestamp {
+            date = dateTimestamp.dateValue()
+        } else if let dateTimestamp = dictionary["Date"] as? Timestamp {
+            date = dateTimestamp.dateValue()
+        } else {
+            date = Calendar.current.date(byAdding: .day, value: 1, to: Date()) ?? Date()
+        }
         
         self.date = date
         self.location = location
@@ -109,73 +156,5 @@ struct Activity {
     let text: String
 }
 
-// MARK: - Mock Data Generator
 
-class MockDataGenerator {
-    static func generateMockData() -> (user: DashboardUser, upcomingGames: [Game], teams: [DashboardTeam], activity: Activity) {
-        let calendar = Calendar.current
-        let october7 = calendar.date(from: DateComponents(year: 2025, month: 10, day: 7, hour: 18))!
-        let october8 = calendar.date(from: DateComponents(year: 2025, month: 10, day: 8, hour: 19))!
-        let october12 = calendar.date(from: DateComponents(year: 2025, month: 10, day: 12, hour: 18))!
-        
-        let g1 = Game(
-            team: "Arch and Friends",
-            opponent: "The Bevo Buddies",
-            location: "Whittaker Fields",
-            date: october8,
-            sport: "Flag Football",
-            division: "Men's"
-        )
-        
-        let g2 = Game(
-            team: "The Dodge Fathers",
-            opponent: "Spike it",
-            location: "Gregory Gym",
-            date: october12,
-            sport: "Dodgeball",
-            division: "Co-ed"
-        )
-        
-        let g3 = Game(
-            team: "The Dodge Fathers",
-            opponent: "Batman",
-            location: "Belmont Hall",
-            date: october7,
-            sport: "Dodgeball",
-            division: "Co-ed"
-        )
-        
-        let upcomingGames = [g1, g2, g3]
-        
-        let t1 = DashboardTeam(
-            name: "The Dodge Fathers",
-            sport: "Co-ed Dodgeball",
-            record: "5W - 2L",
-            divisionStanding: "3rd in Division",
-            nextGame: g3
-        )
-        
-        let t2 = DashboardTeam(
-            name: "Arch and Friends",
-            sport: "Men's Flag Football",
-            record: "3W - 2L",
-            divisionStanding: "2nd in Division",
-            nextGame: g1
-        )
-        
-        let t3 = DashboardTeam(
-            name: "Arch and ...",
-            sport: "Men's Flag",
-            record: "3W - 2L",
-            divisionStanding: "—",
-            nextGame: nil
-        )
-        
-        let teams = [t1, t2, t3]
-        
-        let user = DashboardUser(name: "Ismael", teams: teams)
-        let activity = Activity(text: "You and the Dodge Fathers beat Bevo Buddies 3–1!")
-        
-        return (user, upcomingGames, teams, activity)
-    }
-}
+

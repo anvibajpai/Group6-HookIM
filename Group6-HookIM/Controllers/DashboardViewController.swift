@@ -17,8 +17,6 @@ extension UIColor {
     static let softGray    = UIColor(white: 0.85, alpha: 1)
 }
 
-// MARK: - Team Card Cell (using external TeamCardCell class)
-
 
 // MARK: - Dashboard VC
 class DashboardViewController: UIViewController, UITabBarDelegate {
@@ -31,8 +29,7 @@ class DashboardViewController: UIViewController, UITabBarDelegate {
         }
 
         Firestore.firestore().collection("users").document(uid).getDocument { snapshot, error in
-            if let error = error {
-                print("Error fetching user: \(error.localizedDescription)")
+            if error != nil {
                 completion(nil)
                 return
             }
@@ -67,7 +64,7 @@ class DashboardViewController: UIViewController, UITabBarDelegate {
     private var myTeams: [DashboardTeam] = []
     private var recentActivity: Activity?
     
-    // Helper function to format date with ordinal suffix
+   
     private func formatDateWithOrdinal(_ date: Date) -> String {
         let calendar = Calendar.current
         let day = calendar.component(.day, from: date)
@@ -90,7 +87,7 @@ class DashboardViewController: UIViewController, UITabBarDelegate {
         return "\(month) \(day)\(ordinalSuffix), \(time)"
     }
     
-    // Views
+   
     private let contentStack = UIStackView()
     
     private let header = UIView()
@@ -110,7 +107,7 @@ class DashboardViewController: UIViewController, UITabBarDelegate {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.setNavigationBarHidden(true, animated: animated)
-        // Set Home tab as selected
+       
         if let items = bottomTabBar.items, items.count > 0 {
             bottomTabBar.selectedItem = items[0] // Home item
         }
@@ -121,41 +118,22 @@ class DashboardViewController: UIViewController, UITabBarDelegate {
         
         fetchCurrentUser { user in
             guard let user = user else {
-                print("No logged in user found.")
                 return
             }
 
             self.user = user
             DispatchQueue.main.async {
                 self.updateUI()
-                // Debug print user
-                print("First name: \(user.firstName)")
-                print("Last name: \(user.lastName)")
-                print("Gender: \(user.gender)")
-                print("Email: \(user.email)")
-                print("Division: \(user.division ?? "none")")
-                print("Free Agent: \(user.isFreeAgent)")
-                print("Interested Sports: \(user.interestedSports.isEmpty ? "none" : user.interestedSports.joined(separator: ", "))")
-                
-                self.loadMockData()
+                self.loadFirebaseData()
                 self.buildUI()
                 self.layoutUI()
-                self.populateData()
-                
-                // Debug: Check if outlets are connected
-                print("upcomingGamesTitle: \(self.upcomingGamesTitle)")
-                print("myTeamsTitle: \(self.myTeamsTitle)")
-                print("recentActivityTitle: \(self.recentActivityTitle)")
-                print("upcomingTable: \(self.upcomingTable)")
-                print("teamsCollection: \(self.teamsCollection)")
-                print("activityLabel: \(self.activityLabel)")
             }
         }
     }
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        // Ensure scroll view starts at the top after layout
+       
         scrollView.contentOffset = .zero
         scrollView.contentInsetAdjustmentBehavior = .never
     }
@@ -174,11 +152,201 @@ class DashboardViewController: UIViewController, UITabBarDelegate {
         }
 }
     
-    private func loadMockData() {
-        let mockData = MockDataGenerator.generateMockData()
-        upcomingGames = mockData.upcomingGames
-        myTeams = mockData.teams
-        recentActivity = mockData.activity
+    private func loadFirebaseData() {
+        guard let userId = Auth.auth().currentUser?.uid else {
+            self.upcomingGames = []
+            self.myTeams = []
+            self.recentActivity = Activity(text: "No recent activity")
+            DispatchQueue.main.async {
+                self.populateData()
+            }
+            return
+        }
+        
+        fetchUserTeams(userId: userId) { [weak self] teams in
+            guard let self = self else { return }
+            self.myTeams = teams
+            self.fetchUpcomingGames(for: teams) { games in
+                self.upcomingGames = games
+                self.updateTeamsWithNextGames(games: games)
+                self.recentActivity = Activity(text: "No recent activity")
+                DispatchQueue.main.async {
+                    self.populateData()
+                }
+            }
+        }
+    }
+    
+    private func fetchUserTeams(userId: String, completion: @escaping ([DashboardTeam]) -> Void) {
+        let userRef = Firestore.firestore().collection("users").document(userId)
+        
+        userRef.getDocument { [weak self] document, error in
+            guard let self = self else { return }
+            
+            if error != nil {
+                completion([])
+                return
+            }
+            
+            guard let data = document?.data() else {
+                self.fetchUserTeamsFromSubcollection(userId: userId, completion: completion)
+                return
+            }
+            
+            var teamIds: [String] = []
+            
+            if let teamsArray = data["teams"] as? [String] {
+                teamIds = teamsArray
+            } else if let teamsArray = data["teams"] as? [Any] {
+                teamIds = teamsArray.compactMap { $0 as? String }
+            }
+            
+            if teamIds.isEmpty {
+                self.fetchUserTeamsFromSubcollection(userId: userId, completion: completion)
+                return
+            }
+            
+            self.fetchTeamDetails(teamIds: teamIds, completion: completion)
+        }
+    }
+    
+    private func fetchUserTeamsFromSubcollection(userId: String, completion: @escaping ([DashboardTeam]) -> Void) {
+        Firestore.firestore().collection("users").document(userId)
+            .collection("teams").getDocuments { [weak self] snapshot, error in
+                guard let self = self else { return }
+                
+                if error != nil {
+                    completion([])
+                    return
+                }
+                
+                guard let documents = snapshot?.documents else {
+                    completion([])
+                    return
+                }
+                
+                let teamIds = documents.compactMap { doc -> String? in
+                    return doc.data()["teamId"] as? String ?? doc.documentID
+                }
+                
+                self.fetchTeamDetails(teamIds: teamIds, completion: completion)
+            }
+    }
+    
+    private func fetchTeamDetails(teamIds: [String], completion: @escaping ([DashboardTeam]) -> Void) {
+        if teamIds.isEmpty {
+            completion([])
+            return
+        }
+        
+        let group = DispatchGroup()
+        var teams: [DashboardTeam] = []
+        
+        for teamId in teamIds {
+            group.enter()
+            Firestore.firestore().collection("teams").document(teamId)
+                .getDocument { document, error in
+                    defer { group.leave() }
+                    
+                    if error != nil {
+                        return
+                    }
+                    
+                    guard let document = document, document.exists,
+                          let data = document.data(),
+                          let team = DashboardTeam(dictionary: data, id: teamId) else {
+                        return
+                    }
+                    
+                    teams.append(team)
+                }
+        }
+        
+        group.notify(queue: .main) {
+            completion(teams)
+        }
+    }
+    
+    private func fetchUpcomingGames(for teams: [DashboardTeam], completion: @escaping ([Game]) -> Void) {
+        let teamFirebaseIds = teams.map { $0.firebaseDocumentId }
+        let teamNames = teams.map { $0.name }
+        
+        Firestore.firestore().collection("games")
+            .limit(to: 100)
+            .getDocuments { snapshot, error in
+                if error != nil {
+                    completion([])
+                    return
+                }
+                
+                guard let documents = snapshot?.documents else {
+                    completion([])
+                    return
+                }
+                
+                self.processGames(
+                    documents: documents,
+                    teamFirebaseIds: teamFirebaseIds,
+                    teamNames: teamNames,
+                    completion: completion
+                )
+            }
+    }
+    
+    private func processGames(
+        documents: [QueryDocumentSnapshot],
+        teamFirebaseIds: [String],
+        teamNames: [String],
+        completion: @escaping ([Game]) -> Void
+    ) {
+        var matchedGames: [Game] = []
+        let now = Date()
+        
+        for doc in documents {
+            let data = doc.data()
+            
+            var isUpcoming = true
+            if let dateTimestamp = data["date"] as? Timestamp {
+                let gameDate = dateTimestamp.dateValue()
+                isUpcoming = gameDate > now
+            } else if let status = data["Status"] as? String {
+                isUpcoming = status.lowercased() == "upcoming"
+            }
+            
+            if !isUpcoming {
+                continue
+            }
+            
+            guard let game = Game(dictionary: data, id: doc.documentID) else {
+                continue
+            }
+            
+            let teamAId = data["teamA_id"] as? String ?? ""
+            let teamBId = data["teamB_id"] as? String ?? ""
+            
+            let gameInvolvesUserTeam = teamFirebaseIds.contains(teamAId) ||
+                                     teamFirebaseIds.contains(teamBId) ||
+                                     teamNames.contains(game.team) ||
+                                     teamNames.contains(game.opponent)
+            
+            if gameInvolvesUserTeam {
+                matchedGames.append(game)
+            }
+        }
+        
+        let sortedGames = matchedGames.sorted { $0.date < $1.date }
+        let finalGames = Array(sortedGames.prefix(3))
+        completion(finalGames)
+    }
+    
+    private func updateTeamsWithNextGames(games: [Game]) {
+        for i in 0..<myTeams.count {
+            let team = myTeams[i]
+            let nextGame = games.first { game in
+                game.team == team.name || game.opponent == team.name
+            }
+            myTeams[i].nextGame = nextGame
+        }
     }
     
     // MARK: - Build
@@ -186,10 +354,10 @@ class DashboardViewController: UIViewController, UITabBarDelegate {
         view.backgroundColor = UIColor(named: "AppBackground")
         navigationController?.setNavigationBarHidden(true, animated: false)
         
-        // Ensure content view is visible
+        
         contentView.backgroundColor = UIColor.clear
         
-        // Set up table view and collection view data sources
+        
         upcomingTable.dataSource = self
         upcomingTable.delegate = self
         upcomingTable.register(UpcomingGameCell.self, forCellReuseIdentifier: "UpcomingGameCellID")
@@ -201,7 +369,7 @@ class DashboardViewController: UIViewController, UITabBarDelegate {
         teamsCollection.register(TeamCardCell.self, forCellWithReuseIdentifier: "TeamCardCellID")
         teamsCollection.backgroundColor = .clear
         teamsCollection.showsHorizontalScrollIndicator = false
-        // Match layout to SportsDashboard
+       
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
         layout.itemSize = CGSize(width: 240, height: 160)
@@ -209,7 +377,7 @@ class DashboardViewController: UIViewController, UITabBarDelegate {
         layout.sectionInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
         teamsCollection.collectionViewLayout = layout
         
-        // Ensure section titles are visible and set text
+        
         upcomingGamesTitle.text = "Upcoming Games"
         myTeamsTitle.text = "My Teams"
         recentActivityTitle.text = "Recent Activity"
@@ -218,38 +386,24 @@ class DashboardViewController: UIViewController, UITabBarDelegate {
         recentActivityTitle.textColor = .label
         activityLabel.textColor = .label
         
-        // Ensure the upcoming games card has visible styling (matching SportsDashboard)
         upcomingGamesCard.backgroundColor = UIColor(named: "CardBackground")
         upcomingGamesCard.layer.cornerRadius = 16
         upcomingGamesCard.clipsToBounds = true
         
-        // Configure table view to match SportsDashboard
         upcomingTable.isScrollEnabled = false
         
-        // Set up tab bar delegate
         bottomTabBar.delegate = self
         
-        // Set header and tab bar colors to match other view controllers
         headerContainer.backgroundColor = UIColor(red: 0.611764729, green: 0.3882353008, blue: 0.1607843041, alpha: 1)
         bottomTabBar.backgroundColor = UIColor(red: 0.7490196078, green: 0.3411764706, blue: 0.0, alpha: 0.7)
         
-        // Ensure notification button is visible and styled
         notificationButton.tintColor = .white
         notificationButton.isHidden = false
-        
-        // Debug: Check if elements are visible
-        print("upcomingGamesTitle.isHidden: \(upcomingGamesTitle.isHidden)")
-        print("myTeamsTitle.isHidden: \(myTeamsTitle.isHidden)")
-        print("recentActivityTitle.isHidden: \(recentActivityTitle.isHidden)")
-        print("upcomingTable.isHidden: \(upcomingTable.isHidden)")
-        print("teamsCollection.isHidden: \(teamsCollection.isHidden)")
-        
     }
     
     // MARK: - Layout
     private func layoutUI() {
-        // Deactivate any existing constraints from storyboard to avoid conflicts
-        // We need to deactivate on all views we're repositioning
+   
         NSLayoutConstraint.deactivate(scrollView.constraints)
         NSLayoutConstraint.deactivate(contentView.constraints)
         NSLayoutConstraint.deactivate(headerContainer.constraints)
@@ -263,8 +417,6 @@ class DashboardViewController: UIViewController, UITabBarDelegate {
         NSLayoutConstraint.deactivate(recentActivityTitle.constraints)
         NSLayoutConstraint.deactivate(activityLabel.constraints)
         
-        // Set translatesAutoresizingMaskIntoConstraints for storyboard outlets
-        // This is critical - storyboard views default to true, which conflicts with programmatic constraints
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         contentView.translatesAutoresizingMaskIntoConstraints = false
         headerContainer.translatesAutoresizingMaskIntoConstraints = false
@@ -280,90 +432,73 @@ class DashboardViewController: UIViewController, UITabBarDelegate {
         activityLabel.translatesAutoresizingMaskIntoConstraints = false
         bottomTabBar.translatesAutoresizingMaskIntoConstraints = false
         
-        // Ensure scroll view starts at the top
         scrollView.contentOffset = .zero
         
-        // Ensure table view is inside the card (may not be set in storyboard)
         if !upcomingGamesCard.subviews.contains(upcomingTable) {
             upcomingGamesCard.addSubview(upcomingTable)
         }
         
-        // Match SportsDashboard constraints exactly
         NSLayoutConstraint.activate([
-            // Scroll view constraints
             scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             scrollView.bottomAnchor.constraint(equalTo: bottomTabBar.topAnchor),
             
-            // Tab bar constraints
             bottomTabBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             bottomTabBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             bottomTabBar.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
             
-            // Content view constraints
             contentView.topAnchor.constraint(equalTo: scrollView.topAnchor),
             contentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
             contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
             contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
             contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
             
-            // Header container constraints
             headerContainer.topAnchor.constraint(equalTo: contentView.topAnchor),
             headerContainer.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             headerContainer.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             headerContainer.heightAnchor.constraint(equalToConstant: 120),
             
-            // Greeting label constraints
             greetingLabel.centerXAnchor.constraint(equalTo: headerContainer.centerXAnchor),
             greetingLabel.centerYAnchor.constraint(equalTo: headerContainer.centerYAnchor),
             
-            // Notification button constraints (top left)
             notificationButton.leadingAnchor.constraint(equalTo: headerContainer.leadingAnchor, constant: 16),
             notificationButton.centerYAnchor.constraint(equalTo: headerContainer.centerYAnchor),
             notificationButton.widthAnchor.constraint(equalToConstant: 28),
             notificationButton.heightAnchor.constraint(equalToConstant: 28),
             
-            // Logo constraints (top right - longhorn icon)
             logoImageView.trailingAnchor.constraint(equalTo: headerContainer.trailingAnchor, constant: -14),
             logoImageView.topAnchor.constraint(equalTo: headerContainer.topAnchor, constant: 10.5),
             logoImageView.widthAnchor.constraint(equalToConstant: 82),
             logoImageView.heightAnchor.constraint(equalToConstant: 79),
             
-            // Upcoming games title constraints
             upcomingGamesTitle.topAnchor.constraint(equalTo: headerContainer.bottomAnchor, constant: 20),
             upcomingGamesTitle.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
             upcomingGamesTitle.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
             
-            // Upcoming games card constraints
             upcomingGamesCard.topAnchor.constraint(equalTo: upcomingGamesTitle.bottomAnchor, constant: 10),
             upcomingGamesCard.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
             upcomingGamesCard.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
             upcomingGamesCard.heightAnchor.constraint(equalToConstant: 200),
             
-            // Table view constraints (inside card)
             upcomingTable.topAnchor.constraint(equalTo: upcomingGamesCard.topAnchor, constant: 10),
             upcomingTable.leadingAnchor.constraint(equalTo: upcomingGamesCard.leadingAnchor, constant: 10),
             upcomingTable.trailingAnchor.constraint(equalTo: upcomingGamesCard.trailingAnchor, constant: -10),
             upcomingTable.bottomAnchor.constraint(equalTo: upcomingGamesCard.bottomAnchor, constant: -10),
             
-            // My teams title constraints
             myTeamsTitle.topAnchor.constraint(equalTo: upcomingGamesCard.bottomAnchor, constant: 20),
             myTeamsTitle.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
             myTeamsTitle.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
             
-            // Teams collection constraints
             teamsCollection.topAnchor.constraint(equalTo: myTeamsTitle.bottomAnchor, constant: 10),
             teamsCollection.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             teamsCollection.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             teamsCollection.heightAnchor.constraint(equalToConstant: 180),
             
-            // Recent activity title constraints
             recentActivityTitle.topAnchor.constraint(equalTo: teamsCollection.bottomAnchor, constant: 20),
             recentActivityTitle.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
             recentActivityTitle.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
             
-            // Activity label constraints
             activityLabel.topAnchor.constraint(equalTo: recentActivityTitle.bottomAnchor, constant: 10),
             activityLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
             activityLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
@@ -375,23 +510,16 @@ class DashboardViewController: UIViewController, UITabBarDelegate {
     private func populateData() {
         greetingLabel.text = "Hi, \(user.firstName)!"
         
-        // Debug: Check data
-        print("upcomingGames count: \(upcomingGames.count)")
-        print("myTeams count: \(myTeams.count)")
-        print("recentActivity: \(recentActivity?.text ?? "nil")")
         
-        // Reload table view and collection view
         upcomingTable.reloadData()
         teamsCollection.reloadData()
         
-        // Update activity label
+       
         activityLabel.text = recentActivity?.text ?? "No recent activity"
-        
-        print("Activity label text set to: \(activityLabel.text ?? "nil")")
     }
     
     private func instantiateFromMainStoryboard(withIdentifier id: String) -> UIViewController {
-        // Assumes your storyboard file is named "Main.storyboard"
+        
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         return storyboard.instantiateViewController(withIdentifier: id)
     }
@@ -401,22 +529,20 @@ class DashboardViewController: UIViewController, UITabBarDelegate {
     func tabBar(_ tabBar: UITabBar, didSelect item: UITabBarItem) {
         guard let items = tabBar.items, let selectedIndex = items.firstIndex(of: item) else { return }
         
-        // Handle tab selection based on index
         switch selectedIndex {
-        case 0: // Home
-            // Already on home, do nothing or scroll to top
+        case 0:
             return
             
-        case 1: // Teams
+        case 1:
             performSegue(withIdentifier: "showTeamsSegue", sender: self)
             
-        case 2: // Schedule
+        case 2:
             performSegue(withIdentifier: "showScheduleSegue", sender: self)
             
-        case 3: // Standings
+        case 3:
             performSegue(withIdentifier: "showStandingsSegue", sender: self)
             
-        case 4: // Profile
+        case 4:
             performSegue(withIdentifier: "showProfileSegue", sender: self)
             
         default:
@@ -458,8 +584,7 @@ extension DashboardViewController: UICollectionViewDataSource {
         let team = myTeams[indexPath.item]
         cell.configure(with: team, dateFormatter: formatDateWithOrdinal)
         cell.onViewTeamTapped = { [weak self] team in
-            print("View Team tapped for: \(team.name)")
-            // TODO: Navigate to team detail
+            self?.performSegue(withIdentifier: "showTeamsSegue", sender: self)
         }
         return cell
     }
@@ -467,6 +592,6 @@ extension DashboardViewController: UICollectionViewDataSource {
 
 // MARK: - UICollectionViewDelegate
 extension DashboardViewController: UICollectionViewDelegate {
-    // Add delegate methods if needed (selection, highlighting, etc.)
+   
 }
 
