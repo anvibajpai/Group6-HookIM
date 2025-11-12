@@ -7,6 +7,7 @@
 
 import UIKit
 import FirebaseFirestore
+import FirebaseAuth
 
 class FreeAgentBoardViewController: UIViewController {
     
@@ -20,6 +21,7 @@ class FreeAgentBoardViewController: UIViewController {
     // Firestore + data backing the table
     private let db = Firestore.firestore()
     private var candidates: [UserLite] = []
+    private var memberIds: Set<String> = []
     
     struct UserLite {
            let id: String
@@ -37,31 +39,48 @@ class FreeAgentBoardViewController: UIViewController {
             super.viewWillAppear(animated)
             if let s = sportText, !s.isEmpty {
                 sportCategroy.setTitle(s, for: .normal)
-                fetchInterestedUsers(for: s)
+                loadMembersThenCandidates(for: s)
             } else {
                 candidates = []
                 tableView.reloadData()
             }
         }
+    
+    private func loadMembersThenCandidates(for sport: String) {
+        guard let teamId = teamId else {
+            memberIds = []
+            fetchInterestedUsers(for: sport, excluding: [])
+            return
+        }
+        db.collection("teams").document(teamId).getDocument { [weak self] snap, _ in
+            guard let self = self else { return }
+            let ids = (snap?.data()?["memberUids"] as? [String]) ?? []
+            self.memberIds = Set(ids)
+            self.fetchInterestedUsers(for: sport, excluding: self.memberIds)
+        }
+    }
 
-        private func fetchInterestedUsers(for sport: String) {
+        private func fetchInterestedUsers(for sport: String, excluding: Set<String> = []) {
             db.collection("users")
                 .whereField("interestedSports", arrayContains: sport)
                 .getDocuments { [weak self] snap, err in
                     guard let self = self else { return }
                     if let err = err {
-                        print("🔥 fetchInterestedUsers error:", err)
+                        print("fetchInterestedUsers error:", err)
                         self.candidates = []
                         self.tableView.reloadData()
                         return
                     }
                     let docs = snap?.documents ?? []
-                    self.candidates = docs.map { d in
-                        let data = d.data()
+                    self.candidates = docs.compactMap { d -> UserLite? in
+                        let id = d.documentID
+                        if excluding.contains(id) { return nil }
+                        let data  = d.data()
                         let first = data["firstName"] as? String ?? ""
                         let last  = data["lastName"]  as? String ?? ""
-                        let name = [first, last].joined(separator: " ").trimmingCharacters(in: .whitespaces)
-                        return UserLite(id: d.documentID, name: name.isEmpty ? "Unnamed" : name)
+                        let name  = [first, last].joined(separator: " ").trimmingCharacters(in: .whitespaces)
+
+                        return UserLite(id: id, name: name.isEmpty ? "Unnamed" : name)
                     }
                     self.tableView.reloadData()
                 }
