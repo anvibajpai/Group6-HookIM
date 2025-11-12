@@ -167,8 +167,12 @@ class DashboardViewController: UIViewController, UITabBarDelegate {
     // MARK: - Actions
     @IBAction func notificationButtonTapped(_ sender: UIButton) {
         print("Notification button tapped")
-        // TODO: Implement notification functionality
-    }
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        
+        if let invitesVC = storyboard.instantiateViewController(withIdentifier: "InvitesViewController") as? InvitesViewController {
+            self.navigationController?.pushViewController(invitesVC, animated: true)
+        }
+}
     
     private func loadMockData() {
         let mockData = MockDataGenerator.generateMockData()

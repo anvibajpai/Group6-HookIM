@@ -60,6 +60,51 @@ struct Game {
     }
 }
 
+struct Invite {
+    let id: String
+    
+    let senderID: String
+    let senderName: String
+    let recipientID: String
+    let recipientName: String
+    
+    let teamID: String
+    let teamName: String
+    let sport: String
+    let division: String
+    
+    let status: String
+    let createdAt: Date
+    
+    init?(dictionary: [String: Any], id: String) {
+        guard let senderID = dictionary["sender_id"] as? String,
+              let senderName = dictionary["sender_name"] as? String,
+              let recipientID = dictionary["recipient_id"] as? String,
+              let recipientName = dictionary["recipient_name"] as? String,
+              let teamID = dictionary["team_id"] as? String,
+              let teamName = dictionary["team_name"] as? String,
+              let sport = dictionary["sport"] as? String,
+              let division = dictionary["division"] as? String,
+              let status = dictionary["status"] as? String,
+              let createdAt = (dictionary["created_at"] as? Timestamp)?.dateValue() else {
+            print("Error: Failed to parse invite document")
+            return nil
+        }
+        
+        self.id = id
+        self.senderID = senderID
+        self.senderName = senderName
+        self.recipientID = recipientID
+        self.recipientName = recipientName
+        self.teamID = teamID
+        self.teamName = teamName
+        self.sport = sport
+        self.division = division
+        self.status = status
+        self.createdAt = createdAt
+    }
+}
+
 struct Activity {
     let text: String
 }
