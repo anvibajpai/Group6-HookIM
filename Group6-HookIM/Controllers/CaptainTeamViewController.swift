@@ -28,6 +28,7 @@ class CaptainTeamViewController: UIViewController, UITabBarDelegate {
     @IBOutlet weak var teamNameSelector: UIButton!
     @IBOutlet weak var sportLabel: UILabel!
     
+    @IBOutlet weak var rosterTitleLabel: UILabel!
     @IBOutlet weak var rosterTableView: UITableView!
     
     
@@ -94,7 +95,31 @@ class CaptainTeamViewController: UIViewController, UITabBarDelegate {
 
        loadUserTeams()
        setupTabBar()
+        placeRosterTableExactly()
    }
+    
+    private var rosterConstraints: [NSLayoutConstraint] = []
+
+    private func placeRosterTableExactly() {
+        rosterTableView.translatesAutoresizingMaskIntoConstraints = false
+
+        let bottomRefs = view.constraints.filter { c in
+            (c.firstItem === rosterTableView && c.firstAttribute == .bottom) ||
+            (c.secondItem === rosterTableView && c.secondAttribute == .bottom)
+        }
+        NSLayoutConstraint.deactivate(bottomRefs + rosterConstraints)
+
+        rosterConstraints = [
+            rosterTableView.topAnchor.constraint(equalTo: rosterTitleLabel.bottomAnchor, constant: 12),
+            rosterTableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
+            rosterTableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
+            rosterTableView.heightAnchor.constraint(equalToConstant: 180)
+        ]
+        NSLayoutConstraint.activate(rosterConstraints)
+
+        view.bringSubviewToFront(rosterTableView)
+        view.layoutIfNeeded()
+    }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
