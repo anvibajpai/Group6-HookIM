@@ -21,6 +21,11 @@
 - Made dashboard header and added icons 
 - Made the upcoming games card in Dashboard screen 
 - Made the navbar at the bottom with segues to relevant parts
+- Made the navbar present on the other pages as well for easier navigation and connected necessary segues
+- Made the notification settings page 
+- Implemented upcoming games and teams card to show all games and teams even if the viewer isn't in a team 
+- Made dashboard pull from firebase database so it can update whenever there is a new user and new game that is put into the schedule
+- Connected the teams cards to connect to the specific teams page whenever the "view teams" button is clicked
 
 **Arnav Chopra (25% alpha)**
 - created schedule page with all upcoming games. 
