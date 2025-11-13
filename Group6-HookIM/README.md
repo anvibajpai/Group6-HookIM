@@ -17,7 +17,7 @@
 - Created a Firebase Storage database to handle user profile image uploads.
 - Linked profile updates so that changes made on the User Profile page automatically update the corresponding user data in Firebase.
 
-**Ismael Ahmed (25% alpha)**
+**Ismael Ahmed (25% alpha, 25% beta)**
 - Made dashboard header and added icons 
 - Made the upcoming games card in Dashboard screen 
 - Made the navbar at the bottom with segues to relevant parts
