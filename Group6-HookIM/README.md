@@ -37,11 +37,14 @@
 - Created 'games' and 'invites' struct in Firebase to support these functionalities.
 - Added in-app team invite page to display incoming/outgoing invites as well as history. Also linked this with the 'teams' database to update a team when an invite is accepted.
 
-**Shriya Danam (25% alpha)**
-- Implemented teams tab with captain view 
-- Implemented free agent board. When a player gets clicked on an alert pops up 
-- Implemented edit record to edit a teams wins and losses 
-- Implemented add team 
+**Shriya Danam (25% alpha, 25% beta)**
+- Implemented teams tab with a team selector for all teams 
+- Implemented dual functionality. If a user is a part of a team, then they will be able to see all add functionality. If they are not, they will not and all segues will be blocked. 
+- Implemented free agent board. When a player gets clicked on an alert pops up and they get added to the roster. 
+- Implemented viewable roster on teams tab for any team 
+- Implemented edit record to edit a teams wins and losses and add games 
+- Implemented add team on front and backend 
+- Created and implemented 'teams' collection in Firebase to support the above 
 
 ## Deviations
 - Decided not to have an "Already have an account? Login in" button since the back button allows users to navigate back to login screen
