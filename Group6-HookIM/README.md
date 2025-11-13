@@ -27,10 +27,15 @@
 - Made dashboard pull from firebase database so it can update whenever there is a new user and new game that is put into the schedule
 - Connected the teams cards to connect to the specific teams page whenever the "view teams" button is clicked
 
-**Arnav Chopra (25% alpha)**
-- created schedule page with all upcoming games. 
-- included ability to filter by game
-- created requests page to see incoming and outgoing join requests, as well as request history
+**Arnav Chopra (25% alpha, 25% beta)**
+- Created schedule page with all upcoming games. 
+- Included ability to filter by league and sport type.
+- Created calendar page to visualize all upcoming games using iOS 16+ UICalendarView.
+- Implemented native iOS notifications for upcoming games.
+- Implemented dark/light mode throughout the app.
+- Implemented toggling ability for notifications and dark mode using UserDefaults.
+- Created 'games' and 'invites' struct in Firebase to support these functionalities.
+- Added in-app team invite page to display incoming/outgoing invites as well as history. Also linked this with the 'teams' database to update a team when an invite is accepted.
 
 **Shriya Danam (25% alpha)**
 - Implemented teams tab with captain view 
@@ -41,11 +46,10 @@
 ## Deviations
 - Decided not to have an "Already have an account? Login in" button since the back button allows users to navigate back to login screen
 - For a cleaner look and allowing for longer names, first and last name text fields on Create account screen are wider and on separate lines
-- Added alert messaages on each login and account creation screen for incorrect or incomplete inputs.
+- Added alert messages on each login and account creation screen for incorrect or incomplete inputs.
 - Only have team view for the captain right now, will add player and user view later because there were last minute conflicts that prevented us from adding those changes.
 - After looking at design comments, we will probably use iOS notifications instead of what we put in design to simplify screens a bit.
 - Changed appearance of the add team button to make it more intuitive 
-- Made schedule page a table view instead of calendar since had trouble with figuring out how to use the iOS calendar, will fix later
-- Dashboard does not yet segue to calendar due to merge issues last minute.
 - Sign out button on profile page is a deviation from our original design, since we initially forgot to include this feature.
+- We initially had 'Free Agent' status as a togglable feature, we decided to move this to User profile and add dark mode as a togglable feature.
 
