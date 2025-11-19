@@ -209,10 +209,17 @@ class CaptainTeamViewController: UIViewController, UITabBarDelegate {
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
             if segue.identifier == "editRecordSegue",
                    let vc = segue.destination as? EditRecordViewController {
+                    
+                    // Need a currently selected team
+                    guard let current = selectedTeam else { return }
 
                     // Pre-fill editor
                     vc.wins = wins
                     vc.losses = losses
+                    vc.sport = current.sport
+                    vc.division = current.division
+                    vc.currentTeamId = current.id
+                    vc.currentTeamName = current.name  
 
                     // Callback from editor when Save is tapped
                     vc.onSave = { [weak self] updatedWins, updatedLosses in

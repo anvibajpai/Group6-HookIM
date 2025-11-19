@@ -777,12 +777,6 @@
                                 <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="j47-Eh-az7">
-                                <rect key="frame" x="66" y="424" width="263" height="34"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                <textInputTraits key="textInputTraits"/>
-                            </textField>
                             <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="02s-T7-pjy">
                                 <rect key="frame" x="66" y="505" width="263" height="34"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
@@ -843,13 +837,26 @@
                                     <action selector="saveButtonTapped:" destination="FNL-TM-g9X" eventType="touchUpInside" id="i9e-uN-H6u"/>
                                 </connections>
                             </button>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="OVC-RV-qFZ">
+                                <rect key="frame" x="66" y="424" width="263" height="35"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="filled" title="Button"/>
+                                <connections>
+                                    <action selector="opponentButtonTapped:" destination="FNL-TM-g9X" eventType="touchUpInside" id="S1Y-zc-MLr"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="oWM-fX-Nd8"/>
                         <color key="backgroundColor" red="0.33333334329999997" green="0.33333334329999997" blue="0.33333334329999997" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                     </view>
                     <navigationItem key="navigationItem" title="Edit Record" id="0o6-ae-Fgw"/>
                     <connections>
+                        <outlet property="dateTextField" destination="oVo-o9-nN0" id="pXa-ud-p2M"/>
+                        <outlet property="locationTextField" destination="02s-T7-pjy" id="1JT-aa-NFE"/>
                         <outlet property="lossesTextField" destination="xpx-Jc-JEf" id="wAz-Qg-QaR"/>
+                        <outlet property="opponentButton" destination="OVC-RV-qFZ" id="YI1-J8-B4p"/>
+                        <outlet property="timeTextField" destination="hZh-L3-OE6" id="Hth-w5-a6e"/>
                         <outlet property="winsTextField" destination="yxD-FI-jxb" id="4fr-BR-hCd"/>
                     </connections>
                 </viewController>
