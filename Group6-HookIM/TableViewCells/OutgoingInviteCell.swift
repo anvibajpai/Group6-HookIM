@@ -30,4 +30,10 @@ class OutgoingInviteCell: UITableViewCell {
         
         cancelButton.setTitleColor(.systemRed, for: .normal)
     }
+    
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        self.backgroundColor = .clear
+        self.contentView.backgroundColor = .clear
+    }
 }

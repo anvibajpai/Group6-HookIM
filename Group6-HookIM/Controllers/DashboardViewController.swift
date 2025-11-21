@@ -145,7 +145,6 @@ class DashboardViewController: UIViewController, UITabBarDelegate {
     
     // MARK: - Actions
     @IBAction func notificationButtonTapped(_ sender: UIButton) {
-        print("Notification button tapped")
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         
         if let invitesVC = storyboard.instantiateViewController(withIdentifier: "InvitesViewController") as? InvitesViewController {

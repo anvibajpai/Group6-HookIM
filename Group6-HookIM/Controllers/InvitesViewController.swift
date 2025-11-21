@@ -45,6 +45,11 @@ class InvitesViewController: UIViewController {
         }
         self.currentUserID = uid
         
+        view.backgroundColor = UIColor(named: "AppBackground")
+        incomingTableView.backgroundColor = .clear
+        outgoingTableView.backgroundColor = .clear
+        historyTableView.backgroundColor = .clear
+        
         incomingTableView.dataSource = self
         incomingTableView.delegate = self
         historyTableView.dataSource = self
@@ -52,8 +57,20 @@ class InvitesViewController: UIViewController {
         outgoingTableView.dataSource = self
         outgoingTableView.delegate = self
         
+        incomingTableView.rowHeight = UITableView.automaticDimension
+        incomingTableView.estimatedRowHeight = 80
+        historyTableView.rowHeight = UITableView.automaticDimension
+        historyTableView.estimatedRowHeight = 80
+        outgoingTableView.rowHeight = UITableView.automaticDimension
+        outgoingTableView.estimatedRowHeight = 80
+        
         segmentedControl.selectedSegmentIndex = 0
         handleSegmentChange()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.setNavigationBarHidden(false, animated: animated)
     }
     
     @IBAction func segmentedControlChanged(_ sender: UISegmentedControl) {

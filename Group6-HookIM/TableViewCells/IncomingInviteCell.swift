@@ -41,4 +41,10 @@ class IncomingInviteCell: UITableViewCell {
         guard let invite = invite else { return }
         delegate?.didTapDecline(for: invite)
     }
+    
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        self.backgroundColor = .clear
+        self.contentView.backgroundColor = .clear
+    }
 }
