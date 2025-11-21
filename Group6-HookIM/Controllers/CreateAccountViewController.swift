@@ -29,6 +29,8 @@ class CreateAccountViewController: UIViewController {
         navigationItem.title = "Hook 'IM"
         
         // Set up password visibility and toggle
+        passwordTextField.isSecureTextEntry = true
+        passwordTextField.delegate = self
         setupPasswordToggle(for: passwordTextField)
         
         // Set-up gender selection menu
@@ -44,10 +46,6 @@ class CreateAccountViewController: UIViewController {
        genderButton.showsMenuAsPrimaryAction = true
     }
     
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        passwordTextField.isSecureTextEntry = true
-    }
     
     /// Triggered when the "Next" button is tapped.
     /// Validates input, ensures email is UT-associated, and passes partial user to next screen.
@@ -118,5 +116,15 @@ class CreateAccountViewController: UIViewController {
         toggleButton.addTarget(self, action: #selector(togglePasswordVisibility(_:)), for: .touchUpInside)
         textField.rightView = toggleButton
         textField.rightViewMode = .always
+    }
+}
+
+extension CreateAccountViewController: UITextFieldDelegate {
+    func textFieldDidBeginEditing(_ textField: UITextField) {
+        if textField.isSecureTextEntry {
+            // iOS bug fix: reset secure entry mode so keyboard works
+            textField.isSecureTextEntry = false
+            textField.isSecureTextEntry = true
+        }
     }
 }
