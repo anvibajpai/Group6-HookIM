@@ -173,7 +173,7 @@
                                     <constraint firstAttribute="height" constant="40" id="oTB-e5-0GV"/>
                                 </constraints>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                <textInputTraits key="textInputTraits"/>
+                                <textInputTraits key="textInputTraits" autocorrectionType="no" textContentType="one-time-code"/>
                             </textField>
                             <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="249" verticalHuggingPriority="249" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Uvd-GU-Fz8">
                                 <rect key="frame" x="75" y="636" width="252" height="55"/>
@@ -2171,7 +2171,7 @@
                                 </constraints>
                             </scrollView>
                             <tabBar contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="7cD-Cz-bQO">
-                                <rect key="frame" x="0.0" y="757" width="402" height="49"/>
+                                <rect key="frame" x="0.0" y="689" width="402" height="117"/>
                                 <color key="backgroundColor" red="0.74901960779999999" green="0.3411764706" blue="0.0" alpha="0.69999999999999996" colorSpace="custom" customColorSpace="calibratedRGB"/>
                                 <items>
                                     <tabBarItem title="Home" image="house" catalog="system" id="TIT-N2-IVH"/>
