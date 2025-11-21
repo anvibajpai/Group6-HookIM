@@ -30,6 +30,7 @@ class CreateAccountViewController: UIViewController {
         
         // Set up password visibility and toggle
         passwordTextField.isSecureTextEntry = true
+        passwordTextField.delegate = self
         setupPasswordToggle(for: passwordTextField)
         
         // Set-up gender selection menu
@@ -115,5 +116,15 @@ class CreateAccountViewController: UIViewController {
         toggleButton.addTarget(self, action: #selector(togglePasswordVisibility(_:)), for: .touchUpInside)
         textField.rightView = toggleButton
         textField.rightViewMode = .always
+    }
+}
+
+extension CreateAccountViewController: UITextFieldDelegate {
+    func textFieldDidBeginEditing(_ textField: UITextField) {
+        if textField.isSecureTextEntry {
+            // iOS bug fix: reset secure entry mode so keyboard works
+            textField.isSecureTextEntry = false
+            textField.isSecureTextEntry = true
+        }
     }
 }
