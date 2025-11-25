@@ -38,9 +38,10 @@ class CreateTeamViewController: UIViewController {
                }
     }
     
+    /// Sets up the sports selection menu and the division button actions
     private func setupMenus() {
-            // SPORT menu
-            let sportActions = sports.map { sport in
+        // Sports menus
+        let sportActions = sports.map { sport in
                 UIAction(title: sport, state: (sport == selectedSport ? .on : .off)) { [weak self] _ in
                     self?.selectedSport = sport
                     self?.sportButton.setTitle(sport, for: .normal)
@@ -50,7 +51,7 @@ class CreateTeamViewController: UIViewController {
             sportButton.menu = UIMenu(title: "Select Sport", children: sportActions)
             sportButton.showsMenuAsPrimaryAction = true
 
-            // DIVISION menu
+            // Division buttons
             let divisionActions = divisions.map { div in
                 UIAction(title: div, state: (div == selectedDivision ? .on : .off)) { [weak self] _ in
                     self?.selectedDivision = div
@@ -62,8 +63,9 @@ class CreateTeamViewController: UIViewController {
             divisionButton.showsMenuAsPrimaryAction = true
         }
     
-    
+    /// When create profile button is pressed, conducts through data validation and saves data to user firestore
     @IBAction func createPressed(_ sender: Any) {
+        // Validate that all data is completely filled in
         let name = teamNameTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
                 guard !name.isEmpty else {
                     showAlert("Missing Info", "Please enter a team name.")
@@ -83,7 +85,7 @@ class CreateTeamViewController: UIViewController {
                 }
 
                 // Build doc
-                var data: [String: Any] = [
+                let data: [String: Any] = [
                     "name": name,
                     "sport": sport,
                     "division": division,
@@ -97,6 +99,7 @@ class CreateTeamViewController: UIViewController {
 
         createButton.isEnabled = false
 
+        // save the data to the firestore
         let db = Firestore.firestore()
         let docRef = db.collection("teams").document()
 
