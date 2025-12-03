@@ -62,8 +62,8 @@
 | **Sports Selection + Free Agent + Division Setup**                           | Alpha               | Alpha              | Added alerts for errors; more checks than originally planned    | Anvi (100%)                           |
 | **Dashboard (upcoming games, team cards, activity feed)**                    | Beta                | Beta               | None                                                            | Ismael (100%)                         |
 | **Bottom Navigation Bar on all core screens**                                | Alpha               | Alpha              | None                                                            | Ismael (100%)                         |
-| **Notification Settings**                                                    | Beta                | Beta               | Simplified UI vs original design                                | Arnav (100%)                         |
-| **Firebase Integration (users, games, invites, teams)**                      | Alpha–Final         | Alpha–Final        | Expanded schema from design doc                                 | Anvi (35%), Arnav (35%), Shriya (35%) |
+| **Settings Page**                                                    | Beta                | Beta               | Simplified UI vs original design                                | Arnav (95%, Anvi 5% UI)                         |
+| **Firebase Integration (users, games, invites, teams)**                      | Alpha–Final         | Alpha–Final        | Expanded schema from design doc                                 | Anvi (33%), Arnav (33%), Shriya (33%) |
 | **Team Pages (Captain, Player, Viewer modes)**                               | Beta                | Beta               | Player/User View finishes in Final                              | Shriya (100%)                         |
 | **Free Agent Board**                                                         | Beta                | Beta               | None                                                            | Shriya (100%)                         |
 | **Create Team Page + Backend Logic**                                         | Alpha               | Alpha              | Updated design of + button                                      | Shriya (100%)                         |
@@ -75,5 +75,5 @@
 | **Invites Page (incoming/outgoing + acceptance)**                            | Beta                | Beta               | None                                                            | Arnav (100%)                          |
 | **User Profile Page**    | Beta                | Beta               |  Edit all info, update Firebase, Free Agent toggle                                          | Anvi (100%)                           |
 | **Sign Out Functionality**                                                   | Beta                | Beta               | Added since missing from design doc                             | Anvi (100%)                           |
-| **Standings Page (W/L/Pts)**                                                 | Final               | Final              | Uses test data                                                  | Anvi (10%)                           |
+| **Standings Page (W/L/Pts)**                                                 | Final               | Final              | Uses test data                                                  | Shriya? (90%), Anvi (10% UI)                           |
 
