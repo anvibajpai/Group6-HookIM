@@ -86,11 +86,26 @@ class UserProfileViewController: UIViewController, UIImagePickerControllerDelega
     private func setupTabBar() {
         bottomTabBar = UITabBar()
         bottomTabBar.translatesAutoresizingMaskIntoConstraints = false
-        bottomTabBar.backgroundColor = UIColor(red: 0.749, green: 0.341, blue: 0.0, alpha: 0.7)
-
-        bottomTabBar.isTranslucent = true 
+        
         bottomTabBar.backgroundImage = UIImage()
         bottomTabBar.shadowImage = UIImage()
+        bottomTabBar.isTranslucent = true
+        bottomTabBar.backgroundColor = .clear
+        
+        bottomTabBar.tintColor = UIColor.systemOrange
+        bottomTabBar.unselectedItemTintColor = .secondaryLabel
+
+        let blurEffect = UIBlurEffect(style: .systemChromeMaterial)
+        let blurView = UIVisualEffectView(effect: blurEffect)
+        blurView.translatesAutoresizingMaskIntoConstraints = false
+        bottomTabBar.insertSubview(blurView, at: 0)
+        
+        NSLayoutConstraint.activate([
+            blurView.leadingAnchor.constraint(equalTo: bottomTabBar.leadingAnchor),
+            blurView.trailingAnchor.constraint(equalTo: bottomTabBar.trailingAnchor),
+            blurView.topAnchor.constraint(equalTo: bottomTabBar.topAnchor),
+            blurView.bottomAnchor.constraint(equalTo: bottomTabBar.bottomAnchor)
+        ])
 
         bottomTabBar.delegate = self
 
@@ -108,9 +123,8 @@ class UserProfileViewController: UIViewController, UIImagePickerControllerDelega
         NSLayoutConstraint.activate([
             bottomTabBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             bottomTabBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            bottomTabBar.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
-
-            bottomTabBar.heightAnchor.constraint(equalToConstant: 60)
+            bottomTabBar.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            bottomTabBar.heightAnchor.constraint(equalToConstant: 90)
         ])
     }
     
