@@ -222,13 +222,14 @@ extension StandingsViewController: UITableViewDataSource, UITableViewDelegate {
     // Header row
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         let header = UIView()
-        header.backgroundColor = .systemGray6
+        header.backgroundColor = .secondarySystemBackground
 
         let labels = ["Team", "W", "L", "Pts"].map { text -> UILabel in
             let label = UILabel()
             label.text = text
             label.font = .systemFont(ofSize: 14, weight: .semibold)
             label.textAlignment = .center
+            label.textColor = .label
             return label
         }
         labels[0].textAlignment = .left
@@ -276,12 +277,13 @@ extension StandingsViewController: UITableViewDataSource, UITableViewDelegate {
         cell.lossesLabel.text = "\(team.losses)"
         cell.pointsLabel.text = "\(team.points)"
         
-        // Alternate background colors
-       if indexPath.row % 2 == 0 {
-           cell.backgroundColor = UIColor.systemGray6
-       } else {
-           cell.backgroundColor = UIColor.white
-       }
+        
+        // Alternate background colors 
+        if indexPath.row % 2 == 0 {
+            cell.backgroundColor = .secondarySystemBackground
+        } else {
+            cell.backgroundColor = .tertiarySystemBackground
+        }
 
         return cell
     }
