@@ -43,7 +43,7 @@ class NotificationSettingsViewController: UIViewController {
         
         headerView.backgroundColor = UIColor(red: 156/255, green: 99/255, blue: 41/255, alpha: 1)
         headerView.translatesAutoresizingMaskIntoConstraints = false
-        headerView.heightAnchor.constraint(equalToConstant: 150).isActive = true
+        headerView.heightAnchor.constraint(equalToConstant: 130).isActive = true
         
         titleLabel.text = "Notification Settings"
         titleLabel.textColor = .label
