@@ -75,5 +75,5 @@
 | **Invites Page (incoming/outgoing + acceptance)**                            | Beta                | Beta               | None                                                            | Arnav (100%)                          |
 | **User Profile Page**    | Beta                | Beta               |  Edit all info, update Firebase, Free Agent toggle                                          | Anvi (100%)                           |
 | **Sign Out Functionality**                                                   | Beta                | Beta               | Added since missing from design doc                             | Anvi (100%)                           |
-| **Standings Page (W/L/Pts)**                                                 | Final               | Final              | Uses test data                                                  | Anvi (50%, design)                           |
+| **Standings Page (W/L/Pts)**                                                 | Final               | Final              | Uses test data                                                  | Anvi (10%)                           |
 
