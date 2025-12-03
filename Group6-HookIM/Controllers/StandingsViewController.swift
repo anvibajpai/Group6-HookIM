@@ -277,6 +277,9 @@ extension StandingsViewController: UITableViewDataSource, UITableViewDelegate {
         cell.lossesLabel.text = "\(team.losses)"
         cell.pointsLabel.text = "\(team.points)"
         
+        // wraps team names to not truncate
+        cell.teamLabel.numberOfLines = 0
+        cell.teamLabel.lineBreakMode = .byWordWrapping
         
         // Alternate background colors 
         if indexPath.row % 2 == 0 {
@@ -284,7 +287,7 @@ extension StandingsViewController: UITableViewDataSource, UITableViewDelegate {
         } else {
             cell.backgroundColor = .tertiarySystemBackground
         }
-
+      
         return cell
     }
 
