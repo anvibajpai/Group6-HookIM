@@ -13,7 +13,6 @@ import FirebaseStorage
 
 class UserProfileViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UITabBarDelegate {
     
-    // MARK: - Outlets
     @IBOutlet weak var profileImageView: UIImageView!
     @IBOutlet weak var nameTextField: UITextField!
     @IBOutlet weak var emaillabel: UILabel!
@@ -34,7 +33,7 @@ class UserProfileViewController: UIViewController, UIImagePickerControllerDelega
     private var selectedGender: String?
     private var newProfileImage: UIImage?
     
-    // MARK: - Properties
+    /// Retrieves current user and displays error if it occurs.
     var user: User!
     func fetchCurrentUser(completion: @escaping (User?) -> Void) {
         guard let uid = Auth.auth().currentUser?.uid else {
@@ -87,39 +86,46 @@ class UserProfileViewController: UIViewController, UIImagePickerControllerDelega
     private func setupTabBar() {
         bottomTabBar = UITabBar()
         bottomTabBar.translatesAutoresizingMaskIntoConstraints = false
-        bottomTabBar.backgroundColor = UIColor(red: 0.7490196078, green: 0.3411764706, blue: 0.0, alpha: 0.7)
-        bottomTabBar.delegate = self
         
+        bottomTabBar.backgroundImage = UIImage()
+        bottomTabBar.shadowImage = UIImage()
+        bottomTabBar.isTranslucent = true
+        bottomTabBar.backgroundColor = .clear
+        
+        bottomTabBar.tintColor = UIColor.systemOrange
+        bottomTabBar.unselectedItemTintColor = .secondaryLabel
+
+        let blurEffect = UIBlurEffect(style: .systemChromeMaterial)
+        let blurView = UIVisualEffectView(effect: blurEffect)
+        blurView.translatesAutoresizingMaskIntoConstraints = false
+        bottomTabBar.insertSubview(blurView, at: 0)
+        
+        NSLayoutConstraint.activate([
+            blurView.leadingAnchor.constraint(equalTo: bottomTabBar.leadingAnchor),
+            blurView.trailingAnchor.constraint(equalTo: bottomTabBar.trailingAnchor),
+            blurView.topAnchor.constraint(equalTo: bottomTabBar.topAnchor),
+            blurView.bottomAnchor.constraint(equalTo: bottomTabBar.bottomAnchor)
+        ])
+
+        bottomTabBar.delegate = self
+
         let homeItem = UITabBarItem(title: "Home", image: UIImage(systemName: "house"), tag: 0)
         let teamsItem = UITabBarItem(title: "Teams", image: UIImage(systemName: "person.3"), tag: 1)
         let scheduleItem = UITabBarItem(title: "Schedule", image: UIImage(systemName: "calendar"), tag: 2)
         let standingsItem = UITabBarItem(title: "Leaderboard", image: UIImage(systemName: "trophy"), tag: 3)
         let profileItem = UITabBarItem(title: "Profile", image: UIImage(systemName: "person"), tag: 4)
-        
+
         bottomTabBar.items = [homeItem, teamsItem, scheduleItem, standingsItem, profileItem]
         bottomTabBar.selectedItem = profileItem
-        
+
         view.addSubview(bottomTabBar)
-        
+
         NSLayoutConstraint.activate([
             bottomTabBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             bottomTabBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            bottomTabBar.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
+            bottomTabBar.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            bottomTabBar.heightAnchor.constraint(equalToConstant: 90)
         ])
-        
-        // Adjust main view's bottom constraint to account for tab bar
-        // Find the main content view (usually the first subview that's not the tab bar)
-        if let mainContentView = view.subviews.first(where: { !($0 is UITabBar) }) {
-            mainContentView.translatesAutoresizingMaskIntoConstraints = false
-            // Find and deactivate existing bottom constraints
-            let constraintsToDeactivate = view.constraints.filter { constraint in
-                (constraint.firstItem === mainContentView && constraint.firstAttribute == .bottom) ||
-                (constraint.secondItem === mainContentView && constraint.secondAttribute == .bottom)
-            }
-            NSLayoutConstraint.deactivate(constraintsToDeactivate)
-            // Add new constraint to tab bar
-            mainContentView.bottomAnchor.constraint(equalTo: bottomTabBar.topAnchor).isActive = true
-        }
     }
     
     func tabBar(_ tabBar: UITabBar, didSelect item: UITabBarItem) {
@@ -223,7 +229,7 @@ class UserProfileViewController: UIViewController, UIImagePickerControllerDelega
         updateDivisionButtons()
     }
 
-    // MARK: - Sports Dropdown Menu
+    /// Sets up the select sports Dropdown Menu
     private func setUpSportsMenu() {
         let actions = allSports.map { sport in
             UIAction(title: sport, state: selectedSports.contains(sport) ? .on : .off) { [weak self] action in
@@ -250,6 +256,7 @@ class UserProfileViewController: UIViewController, UIImagePickerControllerDelega
     }
 
 
+    /// Loads current users data to autofill the name, selected sports, gender, free agent , etc fields.
     private func loadUserData() {
         if let imageURL = user.profileImageURL,
            !imageURL.isEmpty,
@@ -287,7 +294,7 @@ class UserProfileViewController: UIViewController, UIImagePickerControllerDelega
         
     }
 
-    // MARK: - Division Buttons
+    // Division Buttons, called when tapped.
     @IBAction func menTapped(_ sender: Any) {
         selectedDivision = "Men's"
         updateDivisionButtons()
@@ -303,6 +310,7 @@ class UserProfileViewController: UIViewController, UIImagePickerControllerDelega
         updateDivisionButtons()
     }
     
+    /// Updates the UI of the division button that has been selected/unselected
     private func updateDivisionButtons() {
         let buttons: [(UIButton, String)] = [
             (mensButton, "Men's"),
@@ -321,7 +329,7 @@ class UserProfileViewController: UIViewController, UIImagePickerControllerDelega
         }
     }
     
-    // MARK: - Image Selection (Gallery Only)
+    /// When change photo button is tapped, opens Gallery Image Selection
     @IBAction func changePhotoTapped(_ sender: Any) {
         checkPhotoLibraryPermission { granted in
             if granted {
@@ -351,7 +359,7 @@ class UserProfileViewController: UIViewController, UIImagePickerControllerDelega
         newProfileImage = selectedImage
     }
     
-    // MARK: - Save Button
+    /// When saved, validates user data and calls helper to save data to firebase
     @IBAction func saveTapped(_ sender: Any) {
         guard let nameText = nameTextField.text, let gender = selectedGender else {
             showAlert(title: "Missing Info", message: "Please fill all required fields.")
@@ -389,7 +397,7 @@ class UserProfileViewController: UIViewController, UIImagePickerControllerDelega
         }
     }
     
-    // MARK: - Firestore Update
+    /// Helper function updates the user's data in firestore
     private func updateUserInFirestore() {
         guard let uid = Auth.auth().currentUser?.uid else { return }
 
@@ -403,7 +411,7 @@ class UserProfileViewController: UIViewController, UIImagePickerControllerDelega
         }
     }
     
-    // MARK: - Firebase Storage Upload, not implemented yet :(
+    /// Helper function updates profile image in firebase storage.
     private func uploadProfileImage(_ image: UIImage, completion: @escaping (String?) -> Void) {
         guard let uid = Auth.auth().currentUser?.uid,
               let imageData = image.jpegData(compressionQuality: 0.8) else {
@@ -425,7 +433,7 @@ class UserProfileViewController: UIViewController, UIImagePickerControllerDelega
         }
     }
     
-    // MARK: - Helpers
+    ///Helper functions for permissions
     private func checkPhotoLibraryPermission(completion: @escaping (Bool) -> Void) {
         let status = PHPhotoLibrary.authorizationStatus()
         switch status {
@@ -448,6 +456,7 @@ class UserProfileViewController: UIViewController, UIImagePickerControllerDelega
         showAlert(title: "Permission Denied", message: "Please allow photo access in Settings to change your profile picture.")
     }
     
+    /// When user signs out, sign out in firestore and direct user to login page.
     @IBAction func signOutTapped(_ sender: Any) {
         let alert = UIAlertController(title: "Sign Out", message: "Are you sure you want to sign out?", preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
@@ -474,7 +483,7 @@ class UserProfileViewController: UIViewController, UIImagePickerControllerDelega
         present(alert, animated: true)
     }
 
-    
+    /// Helper function to show alert messages
     private func showAlert(title: String, message: String) {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default))

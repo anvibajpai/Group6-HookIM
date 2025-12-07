@@ -36,42 +36,47 @@ class NotificationSettingsViewController: UIViewController {
         super.viewWillAppear(animated)
         checkNotificationPermissions()
     }
-    
+
     private func setupUI() {
-        view.backgroundColor = UIColor(named: "Charcoal")
+        view.backgroundColor = .systemGray5
+        contentView.backgroundColor = .systemGray5
         
-        headerView.backgroundColor = UIColor(red: 0.611764729, green: 0.3882353008, blue: 0.1607843041, alpha: 1)
+        headerView.backgroundColor = UIColor(red: 156/255, green: 99/255, blue: 41/255, alpha: 1)
+        headerView.translatesAutoresizingMaskIntoConstraints = false
+        headerView.heightAnchor.constraint(equalToConstant: 130).isActive = true
         
         titleLabel.text = "Notification Settings"
         titleLabel.textColor = .label
         titleLabel.font = .boldSystemFont(ofSize: 24)
-        
+
         backButton.setImage(UIImage(systemName: "chevron.left"), for: .normal)
-        backButton.tintColor = .white
+        backButton.tintColor = .label
         
         logoImageView.image = UIImage(systemName: "tortoise.fill")
-        logoImageView.tintColor = .white
+        logoImageView.tintColor = .label
         logoImageView.contentMode = .scaleAspectFit
         
-        contentView.backgroundColor = UIColor(named: "Charcoal")
+        // Save button
+        saveButton.setTitle("Save", for: .normal)
+        saveButton.setTitleColor(.white, for: .normal)
+        saveButton.backgroundColor = .systemOrange
+        saveButton.layer.cornerRadius = 8
         
         gameScheduleToggle.isOn = gameScheduleEnabled
         darkModeToggle.isOn = darkModeEnabled
-        
-        if let orangeColor = UIColor(named: "BurntOrange") {
-            gameScheduleToggle.onTintColor = orangeColor
-            darkModeToggle.onTintColor = orangeColor
-        }
+        gameScheduleToggle.onTintColor = .systemOrange
+        darkModeToggle.onTintColor = .systemOrange
         
         saveButton.setTitle("Save", for: .normal)
         saveButton.setTitleColor(.white, for: .normal)
-        if let orangeColor = UIColor(named: "BurntOrange") {
-            saveButton.backgroundColor = orangeColor
-        }
+        saveButton.backgroundColor = .systemOrange
         saveButton.layer.cornerRadius = 8
         saveButton.titleLabel?.font = .boldSystemFont(ofSize: 18)
         
-        bottomBanner.backgroundColor = UIColor(red: 0.7490196078, green: 0.3411764706, blue: 0.0, alpha: 0.7)
+        bottomBanner.backgroundColor = UIColor(red: 156/255, green: 99/255, blue: 41/255, alpha: 1)
+        bottomBanner.translatesAutoresizingMaskIntoConstraints = false
+        bottomBanner.heightAnchor.constraint(equalToConstant: 120).isActive = true
+        bottomBanner.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
     }
     
     private func loadSettings() {

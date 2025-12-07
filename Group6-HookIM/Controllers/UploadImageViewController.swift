@@ -123,11 +123,6 @@ class UploadImageViewController: UIViewController, UIImagePickerControllerDelega
                 }
             }
         }
-        
-//        var data = UserDefaults.standard.dictionary(forKey: "partialUserData") ?? [:]
-//        data["profileImageURL"] = "default_profile_image"
-//        UserDefaults.standard.set(data, forKey: "partialUserData")
-//        print("will upload image later")
     }
     
     // MARK: - Permissions + Alerts
