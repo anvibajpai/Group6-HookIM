@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import FirebaseFirestore
 
 // Data Model
 struct Team {
@@ -13,6 +14,13 @@ struct Team {
     let wins: Int
     let losses: Int
     var points: Int { wins * 2 }
+}
+
+//Model to manage sports and their categories
+struct SportDivision {
+    let sport: String
+    let division: String
+    let title: String
 }
 
 class StandingsCell: UITableViewCell {
@@ -28,37 +36,29 @@ class StandingsViewController: UIViewController, UITabBarDelegate {
     @IBOutlet weak var tableView: UITableView!
 
     private var bottomTabBar: UITabBar!
-    
-    // MARK: - Properties
-    let sports = ["Women's Basketball", "Men's Basketball", "Co-ed Basketball"]
-    
-    // Sample standings data
-    var standingsData: [String: [Team]] = [
-        "Women's Basketball": [
-            Team(name: "Hoopers", wins: 8, losses: 2),
-            Team(name: "Swish", wins: 6, losses: 4),
-            Team(name: "Slam Dunks", wins: 5, losses: 5)
-        ],
-        "Men's Basketball": [
-            Team(name: "Team1", wins: 10, losses: 1),
-            Team(name: "myTeam", wins: 7, losses: 4),
-            Team(name: "Team2", wins: 3, losses: 8)
-        ],
-        "Co-ed Basketball": [
-            Team(name: "Hoops", wins: 10, losses: 1),
-            Team(name: "Swishers", wins: 7, losses: 4),
-            Team(name: "Team4", wins: 3, losses: 8)
-        ]
-    ]
+    private let db = Firestore.firestore()
+        
 
-    var selectedSport: String? {
+    // All available sport+division combos from backend
+    private var sportDivisions: [SportDivision] = []
+
+    //Currently selected sport+division
+    private var selectedSportDivision: SportDivision? {
         didSet {
-            sportButton.setTitle(selectedSport ?? "Select Sport", for: .normal)
-            tableView.reloadData()
+            sportButton.setTitle(selectedSportDivision?.title ?? "Select League", for: .normal)
+            if let _ = selectedSportDivision {
+                fetchStandings()
+            } else {
+                teamsForSelectedDivision = []
+                tableView.reloadData()
+            }
         }
     }
 
-    // make nav bar appear
+    //Teams for selected sport+division
+    private var teamsForSelectedDivision: [Team] = []
+
+    //make nav bar appear
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.navigationBar.barTintColor = UIColor(named: "WarmOrange")
@@ -86,17 +86,109 @@ class StandingsViewController: UIViewController, UITabBarDelegate {
         
         sportButton.setTitleColor(.label, for: .normal)
         sportButton.backgroundColor = UIColor(named: "CardBackground")
-        
-        setupSportDropdown()
-        selectedSport = sports.first
-        
+                
         if let navController = navigationController {
             navController.navigationBar.backgroundColor = UIColor(named: "WarmOrange")
         }
         
         setupTabBar()
+        loadSportDivisions()
     }
     
+    //Loads all the possible divisions we have right now
+    private func loadSportDivisions() {
+        db.collection("teams").getDocuments { [weak self] snapshot, error in
+            guard let self = self else { return }
+            if let error = error {
+                print("Error loading sport/divisions: \(error)")
+                return
+            }
+
+            var map: [String: SportDivision] = [:]
+
+            for doc in snapshot?.documents ?? [] {
+                let data = doc.data()
+                guard
+                    let sport = data["sport"] as? String,
+                    let division = data["division"] as? String
+                else { continue }
+
+                let key = "\(sport)|\(division)"
+                if map[key] == nil {
+                    let title = "\(division) \(sport)"
+                    map[key] = SportDivision(sport: sport, division: division, title: title)
+                }
+            }
+
+            self.sportDivisions = Array(map.values).sorted { $0.title < $1.title }
+
+            DispatchQueue.main.async {
+                self.setupSportDropdown()
+                self.selectedSportDivision = self.sportDivisions.first
+            }
+        }
+    }
+    
+    //Gets the standings for each team
+    private func fetchStandings() {
+        guard let sd = selectedSportDivision else { return }
+
+        db.collection("teams")
+            .whereField("sport", isEqualTo: sd.sport)
+            .whereField("division", isEqualTo: sd.division)
+            .getDocuments { [weak self] snapshot, error in
+                guard let self = self else { return }
+                if let error = error {
+                    print("Error fetching standings: \(error)")
+                    self.teamsForSelectedDivision = []
+                    DispatchQueue.main.async { self.tableView.reloadData() }
+                    return
+                }
+
+                var teams: [Team] = []
+
+                for doc in snapshot?.documents ?? [] {
+                    let data = doc.data()
+                    let name  = data["name"] as? String ?? "Unnamed Team"
+                    let wins  = data["wins"] as? Int ?? 0
+                    let losses = data["losses"] as? Int ?? 0
+                    teams.append(Team(name: name, wins: wins, losses: losses))
+                }
+
+                //Sort by points desc, then wins desc
+                teams.sort {
+                    if $0.points == $1.points { return $0.wins > $1.wins }
+                    return $0.points > $1.points
+                }
+
+                self.teamsForSelectedDivision = teams
+
+                DispatchQueue.main.async {
+                    self.tableView.reloadData()
+                }
+            }
+    }
+    
+    //Setup sport and division dropdow menu
+    private func setupSportDropdown() {
+        guard !sportDivisions.isEmpty else {
+            sportButton.menu = nil
+            sportButton.setTitle("No leagues available", for: .normal)
+            sportButton.showsMenuAsPrimaryAction = false
+            return
+        }
+
+        let actions = sportDivisions.map { sd in
+            UIAction(title: sd.title) { [weak self] _ in
+                self?.selectedSportDivision = sd
+            }
+        }
+        sportButton.menu = UIMenu(title: "Select League", children: actions)
+        sportButton.showsMenuAsPrimaryAction = true
+    }
+    
+    
+    //Tab bar
     private func setupTabBar() {
         bottomTabBar = UITabBar()
         bottomTabBar.translatesAutoresizingMaskIntoConstraints = false
@@ -122,13 +214,11 @@ class StandingsViewController: UIViewController, UITabBarDelegate {
         
         // Adjust table view bottom constraint
         tableView.translatesAutoresizingMaskIntoConstraints = false
-        // Find and deactivate existing bottom constraints
         let constraintsToDeactivate = view.constraints.filter { constraint in
             (constraint.firstItem === tableView && constraint.firstAttribute == .bottom) ||
             (constraint.secondItem === tableView && constraint.secondAttribute == .bottom)
         }
         NSLayoutConstraint.deactivate(constraintsToDeactivate)
-        // Add new constraint to tab bar
         tableView.bottomAnchor.constraint(equalTo: bottomTabBar.topAnchor).isActive = true
     }
     
@@ -136,30 +226,21 @@ class StandingsViewController: UIViewController, UITabBarDelegate {
         guard let items = tabBar.items, let selectedIndex = items.firstIndex(of: item) else { return }
         
         switch selectedIndex {
-        case 0: // Home
-            navigateToDashboard()
-        case 1: // Teams
-            navigateToTeams()
-        case 2: // Schedule
-            navigateToSchedule()
-        case 3: // Standings
-            // Already on standings, do nothing
-            return
-        case 4: // Profile
-            navigateToProfile()
-        default:
-            break
+        case 0: navigateToDashboard()
+        case 1: navigateToTeams()
+        case 2: navigateToSchedule()
+        case 3: return // already here
+        case 4: navigateToProfile()
+        default: break
         }
     }
     
     private func navigateToTeams() {
         guard let navController = navigationController else { return }
         
-        // Check if CaptainTeamViewController is already in the stack
         if let teamsVC = navController.viewControllers.first(where: { $0 is CaptainTeamViewController }) {
             navController.popToViewController(teamsVC, animated: true)
         } else {
-            // Instantiate and push directly
             let storyboard = UIStoryboard(name: "Main", bundle: nil)
             if let teamsVC = storyboard.instantiateViewController(withIdentifier: "CaptainTeamViewController") as? CaptainTeamViewController {
                 navController.pushViewController(teamsVC, animated: true)
@@ -185,11 +266,9 @@ class StandingsViewController: UIViewController, UITabBarDelegate {
     private func navigateToProfile() {
         guard let navController = navigationController else { return }
         
-        // Check if UserProfileViewController is already in the stack
         if let profileVC = navController.viewControllers.first(where: { $0 is UserProfileViewController }) {
             navController.popToViewController(profileVC, animated: true)
         } else {
-            // Instantiate and push directly
             let storyboard = UIStoryboard(name: "Main", bundle: nil)
             if let profileVC = storyboard.instantiateViewController(withIdentifier: "UserProfileViewController") as? UserProfileViewController {
                 navController.pushViewController(profileVC, animated: true)
@@ -200,31 +279,18 @@ class StandingsViewController: UIViewController, UITabBarDelegate {
     private func navigateToDashboard() {
         guard let navController = navigationController else { return }
         
-        // Check if DashboardViewController is already in the stack (should be root)
         if let dashboardVC = navController.viewControllers.first(where: { $0 is DashboardViewController }) {
             navController.popToViewController(dashboardVC, animated: true)
         } else {
-            // If for some reason Dashboard is not in stack, instantiate and set as root
             let storyboard = UIStoryboard(name: "Main", bundle: nil)
             if let dashboardVC = storyboard.instantiateViewController(withIdentifier: "DashboardViewController") as? DashboardViewController {
                 navController.setViewControllers([dashboardVC], animated: true)
             }
         }
     }
-
-    /// Setup Sport Selection Dropdown
-    private func setupSportDropdown() {
-        let actions = sports.map { sport in
-            UIAction(title: sport) { _ in
-                self.selectedSport = sport
-            }
-        }
-        sportButton.menu = UIMenu(title: "Select Sport", children: actions)
-        sportButton.showsMenuAsPrimaryAction = true
-    }
 }
 
-/// UITableViewDataSource & UITableViewDelegate
+//For standings tabl e
 extension StandingsViewController: UITableViewDataSource, UITableViewDelegate {
 
     func numberOfSections(in tableView: UITableView) -> Int {
@@ -244,13 +310,12 @@ extension StandingsViewController: UITableViewDataSource, UITableViewDelegate {
             label.textColor = .label
             return label
         }
-        labels[0].textAlignment = .left
-
+        
         let stack = UIStackView(arrangedSubviews: labels)
         stack.axis = .horizontal
         stack.distribution = .fillEqually
         stack.alignment = .center
-        stack.spacing = 8
+        stack.spacing = 12
 
         header.addSubview(stack)
         stack.translatesAutoresizingMaskIntoConstraints = false
@@ -270,36 +335,30 @@ extension StandingsViewController: UITableViewDataSource, UITableViewDelegate {
     }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        guard let sport = selectedSport else { return 0 }
-        return standingsData[sport]?.count ?? 0
+        return teamsForSelectedDivision.count
     }
 
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    func tableView(_ tableView: UITableView,
+                   cellForRowAt indexPath: IndexPath) -> UITableViewCell {
 
-        guard let sport = selectedSport,
-              var teams = standingsData[sport] else { return UITableViewCell() }
+        let cell = tableView.dequeueReusableCell(withIdentifier: "StandingsCell",
+                                                 for: indexPath) as! StandingsCell
+        let team = teamsForSelectedDivision[indexPath.row]
 
-        // Sort by points descending
-        teams.sort { $0.points > $1.points }
-
-        let team = teams[indexPath.row]
-        let cell = tableView.dequeueReusableCell(withIdentifier: "StandingsCell", for: indexPath) as! StandingsCell
         cell.teamLabel.text = team.name
         cell.winsLabel.text = "\(team.wins)"
         cell.lossesLabel.text = "\(team.losses)"
         cell.pointsLabel.text = "\(team.points)"
-        
-        // wraps team names to not truncate
+
         cell.teamLabel.numberOfLines = 0
         cell.teamLabel.lineBreakMode = .byWordWrapping
-        
-        // Alternate background colors 
+
         if indexPath.row % 2 == 0 {
             cell.backgroundColor = UIColor(named: "CardBackground")
         } else {
             cell.backgroundColor = UIColor(named: "AppBackground")
         }
-      
+
         return cell
     }
 
