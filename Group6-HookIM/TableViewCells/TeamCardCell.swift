@@ -65,7 +65,7 @@ class TeamCardCell: UICollectionViewCell {
         let button = UIButton(type: .system)
         button.setTitle("View Team", for: .normal)
         button.setTitleColor(.white, for: .normal)
-        button.backgroundColor = .warmOrange
+        button.backgroundColor = UIColor(named: "WarmOrange")
         button.layer.cornerRadius = 8
         button.titleLabel?.font = UIFont.systemFont(ofSize: 14, weight: .medium)
         button.translatesAutoresizingMaskIntoConstraints = false

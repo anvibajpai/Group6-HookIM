@@ -61,10 +61,11 @@ class StandingsViewController: UIViewController, UITabBarDelegate {
     // make nav bar appear
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        navigationController?.navigationBar.barTintColor = UIColor(named: "WarmOrange")
+        navigationController?.navigationBar.tintColor = .white
         navigationController?.setNavigationBarHidden(false, animated: animated)
-        // Set Standings tab as selected
         if let items = bottomTabBar?.items, items.count > 3 {
-            bottomTabBar.selectedItem = items[3] // Standings item
+            bottomTabBar.selectedItem = items[3]
         }
     }
     
@@ -89,13 +90,17 @@ class StandingsViewController: UIViewController, UITabBarDelegate {
         setupSportDropdown()
         selectedSport = sports.first
         
+        if let navController = navigationController {
+            navController.navigationBar.backgroundColor = UIColor(named: "WarmOrange")
+        }
+        
         setupTabBar()
     }
     
     private func setupTabBar() {
         bottomTabBar = UITabBar()
         bottomTabBar.translatesAutoresizingMaskIntoConstraints = false
-        bottomTabBar.backgroundColor = UIColor(red: 0.7490196078, green: 0.3411764706, blue: 0.0, alpha: 0.7)
+        bottomTabBar.backgroundColor = UIColor(named: "WarmOrange")
         bottomTabBar.delegate = self
         
         let homeItem = UITabBarItem(title: "Home", image: UIImage(systemName: "house"), tag: 0)

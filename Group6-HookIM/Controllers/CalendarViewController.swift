@@ -70,7 +70,7 @@ class CalendarViewController: UIViewController, UICalendarViewDelegate, UICalend
         calendarView.calendar = .current
         calendarView.locale = .current
         calendarView.fontDesign = .rounded
-        calendarView.tintColor = .warmOrange
+        calendarView.tintColor = UIColor(named: "WarmOrange")
         
         calendarView.backgroundColor = UIColor(named: "AppBackground")
         
@@ -161,7 +161,7 @@ class CalendarViewController: UIViewController, UICalendarViewDelegate, UICalend
         let dateKey = "\(year)-\(month)-\(day)"
         
         if gameDates.contains(dateKey) {
-            return .default(color: .warmOrange, size: .large)
+            return .default(color: UIColor(named: "WarmOrange"), size: .large)
         } else {
             return nil
         }

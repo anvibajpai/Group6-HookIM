@@ -97,9 +97,7 @@ class ScheduleViewController: UIViewController, UITabBarDelegate {
         }
         
         // show loading spinner etc
-        
-        print("DEBUG: Querying for sport='\(sport)', division='\(division)'")
-        
+
         db.collection("games")
             .whereField("sport", isEqualTo: sport)
             .whereField("division", isEqualTo: division)

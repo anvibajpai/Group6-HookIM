@@ -234,10 +234,8 @@ class CaptainTeamViewController: UIViewController, UITabBarDelegate {
             if segue.identifier == "editRecordSegue",
                    let vc = segue.destination as? EditRecordViewController {
                     
-                    // Need a currently selected team
                     guard let current = selectedTeam else { return }
 
-                    // Pre-fill editor
                     vc.wins = wins
                     vc.losses = losses
                     vc.sport = current.sport
@@ -245,11 +243,9 @@ class CaptainTeamViewController: UIViewController, UITabBarDelegate {
                     vc.currentTeamId = current.id
                     vc.currentTeamName = current.name  
 
-                    // Callback from editor when Save is tapped
                     vc.onSave = { [weak self] updatedWins, updatedLosses in
                         guard let self = self else { return }
                         guard var current = self.selectedTeam else {
-                            // Optional: show an alert if no team is selected
                             let a = UIAlertController(title:  "No Team Selected",
                                                       message: "Please select a team first.",
                                                       preferredStyle: .alert)
@@ -258,12 +254,12 @@ class CaptainTeamViewController: UIViewController, UITabBarDelegate {
                             return
                         }
 
-                        // 1) Update local UI state
+                        // Update local UI state
                         self.wins = updatedWins
                         self.losses = updatedLosses
                         self.updateLabels()
 
-                        // 2) Update in-memory models
+                        // Update in-memory models
                         current.wins = updatedWins
                         current.losses = updatedLosses
                         self.selectedTeam = current
@@ -271,7 +267,7 @@ class CaptainTeamViewController: UIViewController, UITabBarDelegate {
                             self.myTeams[idx] = current
                         }
 
-                        // 3) Persist to Firestore for THIS team
+                        // Persist to Firestore for THIS team
                         self.db.collection("teams").document(current.id)
                             .updateData([
                                 "wins": updatedWins,
@@ -314,7 +310,7 @@ class CaptainTeamViewController: UIViewController, UITabBarDelegate {
         }
     }
     
-    private func loadUserTeams() {                            // NEW
+    private func loadUserTeams() {
                 guard let uid = Auth.auth().currentUser?.uid else { return }
                 db.collection("users").document(uid).getDocument { [weak self] snap, err in
                     guard let self = self else { return }
@@ -359,7 +355,7 @@ class CaptainTeamViewController: UIViewController, UITabBarDelegate {
     
     
     
-    private func buildTeamMenu() {                            // NEW
+    private func buildTeamMenu() {
                 let actions = myTeams.map { team in
                     UIAction(title: team.name,
                              state: (team.id == selectedTeam?.id ? .on : .off)) { [weak self] _ in

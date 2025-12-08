@@ -11,7 +11,6 @@ import FirebaseFirestore
 
 // MARK: - Color Helpers
 extension UIColor {
-    static let warmOrange = UIColor(red: 170/255, green: 82/255, blue: 30/255, alpha: 1)
     static let nearBlack   = UIColor(white: 0.06, alpha: 1)
     static let cardBG      = UIColor(white: 0.95, alpha: 1)
     static let softGray    = UIColor(white: 0.85, alpha: 1)
@@ -108,7 +107,9 @@ class DashboardViewController: UIViewController, UITabBarDelegate {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.setNavigationBarHidden(true, animated: animated)
-       
+        navigationController?.navigationBar.barTintColor = UIColor(named: "WarmOrange")
+        navigationController?.navigationBar.tintColor = .white
+        
         if let items = bottomTabBar.items, items.count > 0 {
             bottomTabBar.selectedItem = items[0] // Home item
         }
