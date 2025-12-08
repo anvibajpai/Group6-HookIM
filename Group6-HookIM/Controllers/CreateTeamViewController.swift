@@ -27,6 +27,19 @@ class CreateTeamViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        //for dark mode
+        view.backgroundColor = UIColor(named: "AppBackground")
+            
+        teamNameTextField.backgroundColor = UIColor(named: "CardBackground")
+        teamNameTextField.textColor = .label
+        
+        sportButton.backgroundColor = UIColor(named: "CardBackground")
+        sportButton.setTitleColor(.label, for: .normal)
+        
+        divisionButton.backgroundColor = UIColor(named: "CardBackground")
+        divisionButton.setTitleColor(.label, for: .normal)
+        
         setupMenus()
         sportButton.setTitleColor(.black, for: .normal)
         divisionButton.setTitleColor(.black, for: .normal)

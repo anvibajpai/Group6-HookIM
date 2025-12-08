@@ -15,6 +15,17 @@ final class RosterCell: UITableViewCell {
     @IBOutlet weak var addButton: UIButton!
     
     var onPlus: (() -> Void)?
+    
+    //for dark mode
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        self.contentView.backgroundColor = .clear
+        self.backgroundColor = .clear
+    }
+    
+    func updateTextColor() {
+        nameLabel.textColor = .label
+    }
 
     @IBAction func plusTapped(_ sender: UIButton) { onPlus?() }
 }
@@ -84,22 +95,35 @@ class CaptainTeamViewController: UIViewController, UITabBarDelegate {
     private var losses: Int = 0
     
     override func viewDidLoad() {
-       super.viewDidLoad()
-       rosterTableView.dataSource = self
-       rosterTableView.delegate   = self
-       rosterTableView.tableFooterView = UIView()
-       
-       // Basic styling so the menu shows as a dropdown
-       teamNameSelector.configuration = nil
-       teamNameSelector.backgroundColor = .white
-       teamNameSelector.setTitleColor(.black, for: .normal)
-       teamNameSelector.layer.cornerRadius = 8
-       teamNameSelector.layer.borderWidth = 1
-       teamNameSelector.layer.borderColor = UIColor.systemGray4.cgColor
-       teamNameSelector.setTitle("My Team", for: .normal)
+        super.viewDidLoad()
+        rosterTableView.dataSource = self
+        rosterTableView.delegate   = self
+        rosterTableView.tableFooterView = UIView()
+
+        // Basic styling so the menu shows as a dropdown
+        teamNameSelector.configuration = nil
+        teamNameSelector.backgroundColor = UIColor(named: "CardBackground")
+        teamNameSelector.setTitleColor(.label, for: .normal)
+        teamNameSelector.layer.cornerRadius = 8
+        teamNameSelector.layer.borderWidth = 1
+        teamNameSelector.layer.borderColor = UIColor.systemGray4.cgColor
+        teamNameSelector.setTitle("My Team", for: .normal)
+                
+        //for dark mode
+        view.backgroundColor = UIColor(named: "AppBackground")
+        rosterTableView.backgroundColor = .clear
+
+        rosterTitleLabel.backgroundColor = .clear
+
+
+        winsLabel.textColor = .label
+        lossLabel.textColor = .label
+        ptsLabel.textColor = .label
+        sportLabel.textColor = .label
+        categoryLabel.textColor = .label
 
         loadAllTeams()
-       setupTabBar()
+        setupTabBar()
         placeRosterTableExactly()
    }
     
@@ -518,6 +542,15 @@ extension CaptainTeamViewController: UITableViewDataSource, UITableViewDelegate 
             let cell = tableView.dequeueReusableCell(withIdentifier: "RosterCell", for: indexPath) as! RosterCell
                     let player = roster[indexPath.row]
                     cell.nameLabel.text = player.name
+        
+                    cell.updateTextColor()
+                        
+                    if indexPath.row % 2 == 0 {
+                        cell.backgroundColor = UIColor(named: "AppBackground")
+                    } else {
+                        cell.backgroundColor = UIColor(named: "CardBackground")
+                    }
+        
                     cell.onPlus = { [weak self] in
                         guard let self else { return }
                         let alert = UIAlertController(title: "Added",
@@ -526,6 +559,11 @@ extension CaptainTeamViewController: UITableViewDataSource, UITableViewDelegate 
                         alert.addAction(UIAlertAction(title: "OK", style: .default))
                         self.present(alert, animated: true)
                     }
+            
+            cell.nameLabel.textColor = .label
+            cell.backgroundColor = .clear
+            cell.contentView.backgroundColor = .clear
+        
             return cell
         }
         

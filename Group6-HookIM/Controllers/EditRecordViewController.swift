@@ -55,6 +55,21 @@ class EditRecordViewController: UIViewController {
         lossesTextField.text = "\(losses)"
         winsTextField.keyboardType = .numberPad
         lossesTextField.keyboardType = .numberPad
+        
+        // for dark mode
+        winsTextField.backgroundColor = UIColor(named: "CardBackground")
+        winsTextField.textColor = .label
+        
+        lossesTextField.backgroundColor = UIColor(named: "CardBackground")
+        lossesTextField.textColor = .label
+        
+        dateTextField.backgroundColor = UIColor(named: "CardBackground")
+        timeTextField.backgroundColor = UIColor(named: "CardBackground")
+        locationTextField.backgroundColor = UIColor(named: "CardBackground")
+
+        
+        view.backgroundColor = UIColor(named: "AppBackground")
+        
         styleOpponentButton()
         loadOpponentTeams()
         setupDateField()

@@ -79,6 +79,13 @@ class StandingsViewController: UIViewController, UITabBarDelegate {
         tableView.rowHeight = UITableView.automaticDimension
         tableView.tableFooterView = UIView()
 
+        //for dark mode
+        view.backgroundColor = UIColor(named: "AppBackground")
+        tableView.backgroundColor = .clear
+        
+        sportButton.setTitleColor(.label, for: .normal)
+        sportButton.backgroundColor = UIColor(named: "CardBackground")
+        
         setupSportDropdown()
         selectedSport = sports.first
         
@@ -283,9 +290,9 @@ extension StandingsViewController: UITableViewDataSource, UITableViewDelegate {
         
         // Alternate background colors 
         if indexPath.row % 2 == 0 {
-            cell.backgroundColor = .secondarySystemBackground
+            cell.backgroundColor = UIColor(named: "CardBackground")
         } else {
-            cell.backgroundColor = .tertiarySystemBackground
+            cell.backgroundColor = UIColor(named: "AppBackground")
         }
       
         return cell

@@ -69,6 +69,8 @@ class UserProfileViewController: UIViewController, UIImagePickerControllerDelega
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        view.backgroundColor = UIColor(named: "AppBackground")
+        
         fetchCurrentUser { user in
             guard let user = user else {
                 print("No logged in user found.")
@@ -213,6 +215,16 @@ class UserProfileViewController: UIViewController, UIImagePickerControllerDelega
         profileImageView.contentMode = .scaleAspectFill
         profileImageView.layer.borderWidth = 1
         
+        //for dark mode
+        nameTextField.backgroundColor = UIColor(named: "CardBackground")
+        nameTextField.textColor = .label
+        
+        genderButton.backgroundColor = UIColor(named: "CardBackground")
+        genderButton.setTitleColor(.label, for: .normal)
+        
+        sportsButton.backgroundColor = UIColor(named: "CardBackground")
+        sportsButton.setTitleColor(.label, for: .normal)
+        
         // Gender menu
         let genderActions = genderOptions.map { gender in
             UIAction(title: gender) { _ in
@@ -323,7 +335,7 @@ class UserProfileViewController: UIViewController, UIImagePickerControllerDelega
                 button.backgroundColor = .systemIndigo
                 button.setTitleColor(.white, for: .normal)
             } else {
-                button.backgroundColor = .white
+                button.backgroundColor = UIColor(named: "CardBackground")
                 button.setTitleColor(.black, for: .normal)
             }
         }
