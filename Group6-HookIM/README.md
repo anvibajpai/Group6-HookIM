@@ -67,7 +67,7 @@
 | **Team Pages (Captain, Player, Viewer modes)**                               | Beta                | Beta               | Player/User View finishes in Final                              | Shriya (100%)                         |
 | **Free Agent Board**                                                         | Beta                | Beta               | None                                                            | Shriya (100%)                         |
 | **Create Team Page + Backend Logic**                                         | Alpha               | Alpha              | Updated design of + button                                      | Shriya (100%)                         |
-| **Edit Team Page (wins/losses, add games)**                                  | Beta                | Beta               | None                                                            | Shriya (100%)                         |
+| **Edit Team Page (wins/losses, create new games)**                                  | Beta                | Beta               | None                                                            | Shriya (100%)                         |
 | **Schedule Page (all upcoming games, sport filter)**                         | Alpha               | Alpha              | None                                                            | Arnav (100%)                          |
 | **Calendar Page using UICalendarView**                                       | Beta                | Beta               | None                                                            | Arnav (100%)                          |
 | **Native iOS Notifications for games**                                       | Final               | Final              | Replaced planned custom designs with iOS notifications          | Arnav (100%)                          |
@@ -75,5 +75,5 @@
 | **Invites Page (incoming/outgoing + acceptance)**                            | Beta                | Beta               | None                                                            | Arnav (100%)                          |
 | **User Profile Page**    | Beta                | Beta               |  Edit all info, update Firebase, Free Agent toggle                                          | Anvi (100%)                           |
 | **Sign Out Functionality**                                                   | Beta                | Beta               | Added since missing from design doc                             | Anvi (100%)                           |
-| **Standings Page (W/L/Pts)**                                                 | Final               | Final              | Uses test data                                                  | Shriya? (90%), Anvi (10% UI)                           |
+| **Standings Page (W/L/Pts)**                                                 | Final               | Final              | Uses test data                                                  | Shriya (80%), Anvi (20% UI)                           |
 
