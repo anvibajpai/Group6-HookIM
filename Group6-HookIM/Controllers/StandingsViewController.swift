@@ -290,7 +290,7 @@ class StandingsViewController: UIViewController, UITabBarDelegate {
     }
 }
 
-//For standings tabl e
+//For standings table
 extension StandingsViewController: UITableViewDataSource, UITableViewDelegate {
 
     func numberOfSections(in tableView: UITableView) -> Int {

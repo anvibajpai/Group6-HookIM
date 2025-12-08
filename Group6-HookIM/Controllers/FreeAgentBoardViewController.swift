@@ -117,43 +117,61 @@ extension FreeAgentBoardViewController: UITableViewDelegate, UITableViewDataSour
     }
     
     func showPlayerInvitedPopup(for user: UserLite) {
-            let alert = UIAlertController(
-                title: "Player Invited!",
-                message: "\(user.name) has been added to your team.",
-                preferredStyle: .alert
-            )
-            
+        let alert = UIAlertController(
+            title: "Invite Sent!",
+            message: "\(user.name) has been invited to your team.",
+            preferredStyle: .alert
+        )
+
         alert.addAction(UIAlertAction(title: "OK", style: .default) { [weak self] _ in
-                guard let self = self, let teamId = self.teamId else { return }
+            guard
+                let self = self,
+                let teamId = self.teamId,
+                let senderId = Auth.auth().currentUser?.uid,
+                let selectedTeam = (self.teamId.flatMap { id in
+                    self.db.collection("teams").document(id)
+                })
+            else { return }
 
-                //Add the player to the team’s roster
-                let teamRef = self.db.collection("teams").document(teamId)
-                teamRef.updateData([
-                    "memberUids": FieldValue.arrayUnion([user.id])
-                ]) { err in
-                    if let err = err {
-                        print("Failed to add user to team: \(err)")
-                        return
-                    }
+            // Fetch team info to populate invite fields
+            self.db.collection("teams").document(teamId).getDocument { snap, _ in
+                guard let data = snap?.data() else { return }
+                let teamName = data["name"] as? String ?? "Unknown Team"
+                let sport = data["sport"] as? String ?? ""
+                let division = data["division"] as? String ?? ""
 
-                    //Add the team to the player’s 'teams' list
-                    let userRef = self.db.collection("users").document(user.id)
-                    userRef.updateData([
-                        "teams": FieldValue.arrayUnion([teamId])
-                    ]) { err in
-                        if let err = err {
-                            print("Failed to add team to user's list: \(err)")
+                // Fetch sender name from "users" collection
+                self.db.collection("users").document(senderId).getDocument { userSnap, _ in
+                    let senderFirst = userSnap?.data()?["firstName"] as? String ?? ""
+                    let senderLast  = userSnap?.data()?["lastName"] as? String ?? ""
+                    let senderName  = "\(senderFirst) \(senderLast)".trimmingCharacters(in: .whitespaces)
+
+                    let inviteData: [String: Any] = [
+                        "team_id": teamId,
+                        "team_name": teamName,
+                        "sport": sport,
+                        "division": division,
+                        "sender_id": senderId,
+                        "sender_name": senderName,
+                        "recipient_id": user.id,
+                        "recipient_name": user.name,
+                        "status": "pending",
+                        "created_at": FieldValue.serverTimestamp()
+                    ]
+
+                    self.db.collection("invites").addDocument(data: inviteData) { error in
+                        if let error = error {
+                            print("Error creating invite: \(error)")
                         } else {
-                            print("Added \(user.id) to team \(teamId) and vice versa")
+                            print("Invite created!")
+                            self.navigationController?.popViewController(animated: true)
                         }
-
-                        //Pop back to the team page
-                        self.navigationController?.popViewController(animated: true)
                     }
                 }
-            })
+            }
+        })
 
-            present(alert, animated: true)
-        
-        }
+        present(alert, animated: true)
+    }
+
 }
