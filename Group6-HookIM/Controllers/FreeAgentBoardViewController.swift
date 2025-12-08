@@ -18,7 +18,7 @@ class FreeAgentBoardViewController: UIViewController {
     var sportText: String?
     var teamId: String?
     
-    // Firestore + data backing the table
+    //Firestore + data backing the table
     private let db = Firestore.firestore()
     private var candidates: [UserLite] = []
     private var memberIds: Set<String> = []
@@ -60,6 +60,7 @@ class FreeAgentBoardViewController: UIViewController {
         }
     }
 
+        //Fetches only the people that are a part of the same sport/division
         private func fetchInterestedUsers(for sport: String, excluding: Set<String> = []) {
             db.collection("users")
                 .whereField("interestedSports", arrayContains: sport)
@@ -125,7 +126,7 @@ extension FreeAgentBoardViewController: UITableViewDelegate, UITableViewDataSour
         alert.addAction(UIAlertAction(title: "OK", style: .default) { [weak self] _ in
                 guard let self = self, let teamId = self.teamId else { return }
 
-                // --- 1. Add the player to the team’s roster ---
+                //Add the player to the team’s roster
                 let teamRef = self.db.collection("teams").document(teamId)
                 teamRef.updateData([
                     "memberUids": FieldValue.arrayUnion([user.id])
@@ -135,7 +136,7 @@ extension FreeAgentBoardViewController: UITableViewDelegate, UITableViewDataSour
                         return
                     }
 
-                    // --- 2. Add the team to the player’s 'teams' list ---
+                    //Add the team to the player’s 'teams' list
                     let userRef = self.db.collection("users").document(user.id)
                     userRef.updateData([
                         "teams": FieldValue.arrayUnion([teamId])
@@ -146,7 +147,7 @@ extension FreeAgentBoardViewController: UITableViewDelegate, UITableViewDataSour
                             print("Added \(user.id) to team \(teamId) and vice versa")
                         }
 
-                        // --- 3. Pop back to the team page ---
+                        //Pop back to the team page
                         self.navigationController?.popViewController(animated: true)
                     }
                 }

@@ -13,13 +13,13 @@ class EditRecordViewController: UIViewController {
     var wins: Int = 0
     var losses: Int = 0
     
-    // passed in from CaptainTeamViewController
+    //Passed in from CaptainTeamViewController
     var sport: String?
     var division: String?
     var currentTeamId: String?
     var currentTeamName: String?
 
-    // store opponent options
+    //Store opponent options
     private let db = Firestore.firestore()
     private var opponentTeams: [TeamLite] = []
     private var selectedOpponentId: String?
@@ -32,21 +32,23 @@ class EditRecordViewController: UIViewController {
     private let datePicker = UIDatePicker()
     private let timePicker = UIDatePicker()
 
+    //Picker for dates
     private let dateFormatter: DateFormatter = {
         let df = DateFormatter()
-        df.dateStyle = .medium      // e.g. Nov 17, 2025
+        df.dateStyle = .medium
         df.timeStyle = .none
         return df
     }()
 
+    //Picker for times
     private let timeFormatter: DateFormatter = {
         let df = DateFormatter()
         df.dateStyle = .none
-        df.timeStyle = .short       // e.g. 7:30 PM
+        df.timeStyle = .short
         return df
     }()
     
-    // Closure to send data back
+    //Closure to send data back
     var onSave: ((Int, Int) -> Void)?
 
     override func viewDidLoad() {
@@ -56,7 +58,7 @@ class EditRecordViewController: UIViewController {
         winsTextField.keyboardType = .numberPad
         lossesTextField.keyboardType = .numberPad
         
-        // for dark mode
+        //For dark mode
         winsTextField.backgroundColor = UIColor(named: "CardBackground")
         winsTextField.textColor = .label
         
@@ -76,10 +78,11 @@ class EditRecordViewController: UIViewController {
         setupTimeField()
     }
     
+    //Helper function for date picker
     private func setupDateField() {
         datePicker.datePickerMode = .date
         datePicker.preferredDatePickerStyle = .wheels
-        datePicker.minimumDate = Date()          // optional: no past games
+        datePicker.minimumDate = Date()
         datePicker.addTarget(self,
                              action: #selector(dateChanged),
                              for: .valueChanged)
@@ -88,6 +91,7 @@ class EditRecordViewController: UIViewController {
         dateTextField.inputAccessoryView = makeToolbar(doneSelector: #selector(doneWithDate))
     }
 
+    //Helper function for time picker
     private func setupTimeField() {
         timePicker.datePickerMode = .time
         timePicker.preferredDatePickerStyle = .wheels
@@ -119,7 +123,7 @@ class EditRecordViewController: UIViewController {
 
     @objc private func doneWithDate() {
         if dateTextField.text?.isEmpty ?? true {
-            dateChanged()   // fill if user never scrolled
+            dateChanged()
         }
         view.endEditing(true)
     }
@@ -131,6 +135,7 @@ class EditRecordViewController: UIViewController {
         view.endEditing(true)
     }
     
+    //Choosing opponents if they are in the same sport and division
     private func styleOpponentButton() {
         opponentButton.configuration = nil
         opponentButton.setTitle("Select Opponent", for: .normal)
@@ -157,7 +162,7 @@ class EditRecordViewController: UIViewController {
 
                 let docs = snap?.documents ?? []
                 self.opponentTeams = docs.compactMap { d in
-                    // skip current team so you don't play yourself
+                    //Skip current team so you don't play yourself
                     if d.documentID == self.currentTeamId { return nil }
                     let data = d.data()
                     guard let name = data["name"] as? String else { return nil }
@@ -167,6 +172,7 @@ class EditRecordViewController: UIViewController {
             }
     }
     
+    //Builds drop down
     private func buildOpponentMenu() {
         guard !opponentTeams.isEmpty else {
             opponentButton.menu = nil
@@ -187,6 +193,7 @@ class EditRecordViewController: UIViewController {
         opponentButton.showsMenuAsPrimaryAction = true
     }
     
+    //Alert for any missin data
     private func showSimpleAlert(title: String, message: String) {
         let a = UIAlertController(title: title, message: message, preferredStyle: .alert)
         a.addAction(UIAlertAction(title: "OK", style: .default))
@@ -216,15 +223,14 @@ class EditRecordViewController: UIViewController {
 
         return calendar.date(from: comps)
     }
-
     
     
     @IBAction func saveButtonTapped(_ sender: Any) {
-        // 1) Wins / losses: always allowed
+        //Save wins and losses
         let newWins = Int(winsTextField.text ?? "") ?? wins
         let newLosses = Int(lossesTextField.text ?? "") ?? losses
 
-        // 2) Next Game validation
+        //Create next game
         let opponentChosen = (selectedOpponentId != nil)
         let location = (locationTextField.text ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
         let dateStr  = (dateTextField.text ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
@@ -237,6 +243,7 @@ class EditRecordViewController: UIViewController {
         let hasAnyNextGameField  = opponentChosen || hasLocation || hasDate || hasTime
         let hasAllNextGameFields = opponentChosen && hasLocation && hasDate && hasTime
 
+        //If they don't fill in all fields then incomplete alert
         if hasAnyNextGameField && !hasAllNextGameFields {
             showSimpleAlert(
                 title: "Incomplete Game Info",
@@ -245,7 +252,7 @@ class EditRecordViewController: UIViewController {
             return
         }
 
-        // 3) If all Next Game fields are filled, create a game document
+        //If all Next Game fields are filled, create a game document
         if hasAllNextGameFields {
             guard
                 let gameDate = combinedGameDate(),
@@ -254,20 +261,20 @@ class EditRecordViewController: UIViewController {
                 let oppId = selectedOpponentId,
                 let opp = opponentTeams.first(where: { $0.id == oppId })
             else {
-                // Something is wrong with our data – bail safely
+                //Something is wrong with our data – bail safely
                 showSimpleAlert(title: "Error", message: "Could not build game info. Please try again.")
                 return
             }
 
             let gameData: [String: Any] = [
-                "ldate": Timestamp(date: gameDate),          // timestamp
+                "ldate": Timestamp(date: gameDate),
                 "division": division ?? "",
                 "location": location,
                 "sport": sport ?? "",
                 "status": "upcoming",
                 "teamA_id": teamAId,
                 "teamA_name": teamAName,
-                "teamA_score": "0",                          // match your schema
+                "teamA_score": "0",
                 "teamB_id": opp.id,
                 "teamB_name": opp.name,
                 "teamB_score": "0"
@@ -282,10 +289,10 @@ class EditRecordViewController: UIViewController {
             }
         }
 
-        // 4) Update wins/losses in the parent VC
+        //Update wins/losses in the parent VC
         onSave?(newWins, newLosses)
 
-        // 5) Pop back
+        //Pop back
         navigationController?.popViewController(animated: true)
     }
 

@@ -16,7 +16,7 @@ final class RosterCell: UITableViewCell {
     
     var onPlus: (() -> Void)?
     
-    //for dark mode
+    //For dark mode
     override func awakeFromNib() {
         super.awakeFromNib()
         self.contentView.backgroundColor = .clear
@@ -27,12 +27,14 @@ final class RosterCell: UITableViewCell {
         nameLabel.textColor = .label
     }
 
+    //Function to manage adding user to team for free agent board
     @IBAction func plusTapped(_ sender: UIButton) { onPlus?() }
 }
 
-
+//This class controls the main team view controller
 class CaptainTeamViewController: UIViewController, UITabBarDelegate {
     
+    //Labels for content of team VC
     @IBOutlet weak var winsLabel: UILabel!
     @IBOutlet weak var lossLabel: UILabel!
     @IBOutlet weak var ptsLabel: UILabel!
@@ -52,7 +54,8 @@ class CaptainTeamViewController: UIViewController, UITabBarDelegate {
     private var canManageTeam = false
     
     struct Player { let name: String }
-        
+    
+    //Struct defining characteristics of team
     struct TeamLite {
         let id: String
         let name: String
@@ -84,6 +87,7 @@ class CaptainTeamViewController: UIViewController, UITabBarDelegate {
         }
     }
     
+   //Varibales to load backend information
    private let db = Firestore.firestore()
    private var myTeams: [TeamLite] = []
    private var selectedTeam: TeamLite?
@@ -100,7 +104,7 @@ class CaptainTeamViewController: UIViewController, UITabBarDelegate {
         rosterTableView.delegate   = self
         rosterTableView.tableFooterView = UIView()
 
-        // Basic styling so the menu shows as a dropdown
+        //Basic styling so the menu shows as a dropdown
         teamNameSelector.configuration = nil
         teamNameSelector.backgroundColor = UIColor(named: "CardBackground")
         teamNameSelector.setTitleColor(.label, for: .normal)
@@ -109,26 +113,27 @@ class CaptainTeamViewController: UIViewController, UITabBarDelegate {
         teamNameSelector.layer.borderColor = UIColor.systemGray4.cgColor
         teamNameSelector.setTitle("My Team", for: .normal)
                 
-        //for dark mode
+        //For dark mode
         view.backgroundColor = UIColor(named: "AppBackground")
         rosterTableView.backgroundColor = .clear
 
         rosterTitleLabel.backgroundColor = .clear
-
 
         winsLabel.textColor = .label
         lossLabel.textColor = .label
         ptsLabel.textColor = .label
         sportLabel.textColor = .label
         categoryLabel.textColor = .label
-
+        
+        //Setup Functions
         loadAllTeams()
         setupTabBar()
         placeRosterTableExactly()
    }
     
     private var rosterConstraints: [NSLayoutConstraint] = []
-
+    
+    //Constaints of Roster table conflicted with the nav bar. This function palces the roster table so it wouldnt conflict.
     private func placeRosterTableExactly() {
         rosterTableView.translatesAutoresizingMaskIntoConstraints = false
 
@@ -155,7 +160,8 @@ class CaptainTeamViewController: UIViewController, UITabBarDelegate {
         refreshSelectedTeamAndRoster()
         loadAllTeams()
         navigationController?.setNavigationBarHidden(false, animated: animated)
-        // Set Teams tab as selected
+        
+        //Set Teams tab as selected team
         if let items = bottomTabBar?.items, items.count > 1 {
             bottomTabBar.selectedItem = items[1] // Teams item
         }
@@ -175,16 +181,15 @@ class CaptainTeamViewController: UIViewController, UITabBarDelegate {
         buildTeamMenu()
         applyTeam(team)
 
-        // compute permission
+        //Compute permission
         let uid = Auth.auth().currentUser?.uid
         canManageTeam = uid != nil && team.memberUids.contains(uid!)
 
-        // lock/unlock UI
+        //Lock/unlock UI
         addRosterButton.isHidden = !canManageTeam
         
         let title = canManageTeam ? "Edit Game Stats" : "Not part of team"
         editStatsButton.setTitle(title, for: .normal)
-//        editStatsButton.isEnabled = canManageTeam
         editStatsButton.alpha = canManageTeam ? 1.0 : 0.5
 
         roster.removeAll()
@@ -192,6 +197,7 @@ class CaptainTeamViewController: UIViewController, UITabBarDelegate {
         fetchRoster(for: team)
     }
     
+    //If new team created, we want that team to be able to be navigated from
     private func refreshSelectedTeamAndRoster() {
         guard let id = selectedTeam?.id else { return }
             db.collection("teams").document(id).getDocument { [weak self] doc, _ in
@@ -205,7 +211,6 @@ class CaptainTeamViewController: UIViewController, UITabBarDelegate {
                 
                 let title = canManageTeam ? "Edit Game Stats" : "Not part of team"
                 editStatsButton.setTitle(title, for: .normal)
-//                editStatsButton.isEnabled = canManageTeam
                 editStatsButton.alpha = canManageTeam ? 1.0 : 0.5
                 self.fetchRoster(for: fresh)
         }
@@ -217,6 +222,7 @@ class CaptainTeamViewController: UIViewController, UITabBarDelegate {
     }
     
     override func shouldPerformSegue(withIdentifier identifier: String, sender: Any?) -> Bool {
+        //If team does not have perms then they cannot view
         if identifier == "editRecordSegue", !canManageTeam {
             let a = UIAlertController(
                 title: "View Only",
@@ -254,12 +260,12 @@ class CaptainTeamViewController: UIViewController, UITabBarDelegate {
                             return
                         }
 
-                        // Update local UI state
+                        //Update local UI state
                         self.wins = updatedWins
                         self.losses = updatedLosses
                         self.updateLabels()
 
-                        // Update in-memory models
+                        //Update in-memory models
                         current.wins = updatedWins
                         current.losses = updatedLosses
                         self.selectedTeam = current
@@ -267,7 +273,7 @@ class CaptainTeamViewController: UIViewController, UITabBarDelegate {
                             self.myTeams[idx] = current
                         }
 
-                        // Persist to Firestore for THIS team
+                        //Persist to Firestore for THIS team
                         self.db.collection("teams").document(current.id)
                             .updateData([
                                 "wins": updatedWins,
@@ -287,6 +293,7 @@ class CaptainTeamViewController: UIViewController, UITabBarDelegate {
                 }
             }
     
+    //Fucntion to load all teams so they can all be accessible from drop down
     private func loadAllTeams() {
         db.collection("teams").getDocuments { [weak self] qs, err in
             guard let self = self else { return }
@@ -322,7 +329,7 @@ class CaptainTeamViewController: UIViewController, UITabBarDelegate {
                         return
                     }
 
-                    // Fetch teams by id in chunks of <= 10
+                    //Fetch teams by id in chunks of <= 10
                     var fetched: [TeamLite] = []
                     let chunks = stride(from: 0, to: teamIDs.count, by: 10).map {
                         Array(teamIDs[$0 ..< min($0+10, teamIDs.count)])
@@ -342,7 +349,7 @@ class CaptainTeamViewController: UIViewController, UITabBarDelegate {
                             }
                     }
                     group.notify(queue: .main) {
-                        // Preserve order from user.teams
+                        //Preserve order from user.teams
                         self.myTeams = teamIDs.compactMap { id in fetched.first { $0.id == id } }
                         self.buildTeamMenu()
                         if self.selectedTeam == nil, let first = self.myTeams.first {
@@ -354,7 +361,7 @@ class CaptainTeamViewController: UIViewController, UITabBarDelegate {
 
     
     
-    
+    //Builds the actual drop down
     private func buildTeamMenu() {
                 let actions = myTeams.map { team in
                     UIAction(title: team.name,
@@ -412,6 +419,7 @@ class CaptainTeamViewController: UIViewController, UITabBarDelegate {
                 }
             }
     
+    //Controls nav bar and associated navigation
     private func setupTabBar() {
         bottomTabBar = UITabBar()
         bottomTabBar.translatesAutoresizingMaskIntoConstraints = false
@@ -530,6 +538,7 @@ class CaptainTeamViewController: UIViewController, UITabBarDelegate {
 
 extension CaptainTeamViewController: UITableViewDataSource, UITableViewDelegate {
     
+    //Table view for roster 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         roster.count
     }
