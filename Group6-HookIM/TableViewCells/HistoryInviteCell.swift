@@ -24,6 +24,11 @@ class HistoryInviteCell: UITableViewCell {
                 
         infoLabel.text = "Sent invite for \(invite.teamName) to \(invite.recipientName) on \(dateString). Invite was \(statusString)"
         
-
+    }
+    
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        self.backgroundColor = .clear
+        self.contentView.backgroundColor = .clear
     }
 }

@@ -37,7 +37,7 @@ class InvitesViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-       
+    
         guard let uid = Auth.auth().currentUser?.uid else {
             print("Error: No user logged in.")
             navigationController?.popViewController(animated: true)
@@ -46,9 +46,13 @@ class InvitesViewController: UIViewController {
         self.currentUserID = uid
         
         view.backgroundColor = UIColor(named: "AppBackground")
-        incomingTableView.backgroundColor = .clear
-        outgoingTableView.backgroundColor = .clear
-        historyTableView.backgroundColor = .clear
+        incomingTableView.backgroundColor = UIColor(named: "AppBackground")
+        outgoingTableView.backgroundColor = UIColor(named: "AppBackground")
+        historyTableView.backgroundColor = UIColor(named: "AppBackground")
+        
+        incomingTableView.separatorStyle = .none
+        outgoingTableView.separatorStyle = .none
+        historyTableView.separatorStyle = .none
         
         incomingTableView.dataSource = self
         incomingTableView.delegate = self
@@ -70,7 +74,7 @@ class InvitesViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        navigationController?.setNavigationBarHidden(false, animated: animated)
+        navigationController?.setNavigationBarHidden(false, animated: false)
     }
     
     @IBAction func segmentedControlChanged(_ sender: UISegmentedControl) {
