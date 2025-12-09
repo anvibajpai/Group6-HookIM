@@ -27,15 +27,15 @@
   * UIKit
   * UICalendarView (iOS 16+)
 
-### **Special Instructions**
+### **Instructions**
 
 * After cloning, run the project normally — **no pods needed**.
-* You must enable Firebase for the following:
+* Enable Firebase for the following:
 
   * Authentication
   * Firestore Database
   * Firebase Storage
-* Ensure your Firebase project contains:
+* Firebase project contains:
 
   * `/users`
   * `/teams`
@@ -44,11 +44,15 @@
   * `/images` (Storage)
 * For image upload:
 
-  * Ensure your **Info.plist** contains:
+  * Ensure **Info.plist** contains:
 
     * `NSCameraUsageDescription`
     * `NSPhotoLibraryUsageDescription`
 * Works best on **iPhone 16 / 16 Pro** for constraints/UI purposes.
+* To view an account with a fully populated Dashboard (upcoming games, etc.), log in using:
+    * Email: 123@utexas.edu
+    * Password: 123456
+
 
 ---
 
